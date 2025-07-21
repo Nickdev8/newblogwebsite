@@ -10,6 +10,11 @@
 		}[];
 		event: string;
 		leftoverImages: { src: string; alt: string }[];
+		title: string;
+		description: string;
+		coverImage: string;
+		content: string;
+		images: string[];
 	};
 	import { onMount, tick } from 'svelte';
 	import { slide } from 'svelte/transition';

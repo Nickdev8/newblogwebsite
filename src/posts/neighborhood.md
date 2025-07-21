@@ -1,7 +1,7 @@
 ---
-title: "Hackclub: Neighborhood"
-description: "My month-long adventure in San Francisco, filled with new friends, coding, and a lot of personal growth."
-coverImage: "/blogimages/neighborhood/panorama.png"
+title: Neighborhood
+description: A diary of my month-long journey in San Francisco with Hack Club. A story of coding, new friends, personal growth, and navigating the chaotic, beautiful, and unexpected moments of building and living in a community of makers.
+coverImage: http://localhost:5173/blogimages/neighborhood/populated.mp4
 ---
 ---
 title: "The Days Leading Up to SF"

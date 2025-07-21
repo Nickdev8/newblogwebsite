@@ -1,5 +1,5 @@
 ---
-title: "Hackclub: Undercity"
+title: "Undercity"
 description: "A multi-day hardware hackathon at GitHub HQ, where I built cool stuff and made unforgettable memories."
 coverImage: "/blogimages/undercity/group.png"
 ---

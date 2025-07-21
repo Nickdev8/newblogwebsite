@@ -46,11 +46,22 @@
 				class="overflow-hidden rounded-lg bg-white shadow-lg transition-transform duration-300 hover:scale-105"
 			>
 				<a href="/{event.slug}" class="block">
-					<img
-						src={event.coverImage}
-						alt="Cover image for {event.title}"
-						class="h-48 w-full object-cover"
-					/>
+					{#if event.coverImage.endsWith('.mp4')}
+						<video
+							src={event.coverImage}
+							class="h-48 w-full object-cover"
+							autoplay
+							loop
+							muted
+							playsinline
+						>Your browser does not support the video tag.</video>
+					{:else}
+						<img
+							src={event.coverImage}
+							alt="Cover image for {event.title}"
+							class="h-48 w-full object-cover"
+						/>
+					{/if}
 					<div class="p-6">
 						<h2 class="text-2xl font-bold capitalize text-gray-800">{event.title}</h2>
 						<p class="mt-2 text-gray-600">{event.description}</p>
