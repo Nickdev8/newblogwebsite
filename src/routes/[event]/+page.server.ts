@@ -3,6 +3,16 @@ import path from 'path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import { error } from '@sveltejs/kit';
+import type { PageServerLoad, EntryGenerator } from './$types';
+
+export const entries: EntryGenerator = () => {
+	const postsDir = 'src/posts';
+	const files = fs.readdirSync(postsDir).filter((file) => file.endsWith('.md'));
+
+	return files.map((file) => ({
+		event: file.replace(/\.md$/, '')
+	}));
+};
 
 function getLayoutClasses(image: { layout: string[] }) {
 	const classes: string[] = [];
@@ -29,7 +39,7 @@ function getLayoutClasses(image: { layout: string[] }) {
 	return classes.join(' ');
 }
 
-export async function load({ params }) {
+export const load: PageServerLoad = async ({ params }) => {
 	const { event } = params;
 	const filePath = path.join('src/posts', `${event}.md`);
 
@@ -87,4 +97,4 @@ export async function load({ params }) {
 		: [];
 
 	return { posts, event, leftoverImages };
-} 
+}; 
