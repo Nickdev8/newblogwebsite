@@ -1,6 +1,14 @@
 <script lang="ts">
-	export let data: { events: string[] } = { events: [] };
+	export let data: {
+		events: {
+			slug: string;
+			title: string;
+			description: string;
+			coverImage: string;
+		}[];
+	} = { events: [] };
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 
 	onMount(() => {
 		const savedScrollY = localStorage.getItem('scrollY_main');
@@ -29,20 +37,29 @@
 	});
 </script>
 
-<div class="m-16">
-	<h1 class="mb-6 text-3xl font-bold">Journal</h1>
-	<ul class="space-y-4">
-		{#each data.events as event}
-			<li class="rounded bg-white p-4 shadow transition hover:bg-gray-50">
-				<a href="/{event}" class="block w-full text-left">
-					<div class="text-xl font-semibold capitalize text-blue-600 underline hover:text-blue-800">
-						{event}
+<div class="m-8">
+	<h1 class="mb-8 text-center text-4xl font-bold">My Adventures</h1>
+	<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+		{#each data.events as event, i}
+			<div
+				in:fly={{ y: 50, duration: 500, delay: i * 150 }}
+				class="overflow-hidden rounded-lg bg-white shadow-lg transition-transform duration-300 hover:scale-105"
+			>
+				<a href="/{event.slug}" class="block">
+					<img
+						src={event.coverImage}
+						alt="Cover image for {event.title}"
+						class="h-48 w-full object-cover"
+					/>
+					<div class="p-6">
+						<h2 class="text-2xl font-bold capitalize text-gray-800">{event.title}</h2>
+						<p class="mt-2 text-gray-600">{event.description}</p>
 					</div>
 				</a>
-			</li>
+			</div>
 		{/each}
-	</ul>
+	</div>
 	{#if data.events.length === 0}
-		<p class="text-center text-gray-500">No events found.</p>
+		<p class="mt-8 text-center text-gray-500">No events found.</p>
 	{/if}
 </div>

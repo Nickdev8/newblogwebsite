@@ -19,6 +19,8 @@
 	let expandedSlugs: string[] = [];
 	let openedSlugs: Set<string> = new Set();
 	const allPostSlugs = data.posts.map((p) => p.slug);
+	let initialLoad = true;
+	let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
 
 	onMount(async () => {
 		const visitedKey = `hasVisited_${data.event}`;
@@ -45,20 +47,25 @@
 		localStorage.setItem('openedSlugs', JSON.stringify(Array.from(openedSlugs)));
 
 		await tick();
+		initialLoad = false;
 
 		const scrollKey = `currentPostSlug_${data.event}`;
 
 		// Restore scroll position
 		const savedSlug = localStorage.getItem(scrollKey);
 		if (savedSlug) {
-			const element = document.getElementById(savedSlug);
-			if (element) {
-				element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-			}
+			// Use a timeout to allow for content to render, especially expanded items and their animations
+			setTimeout(() => {
+				const element = document.getElementById(savedSlug);
+				if (element) {
+					element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}
+			}, 400); // Slightly longer than slide duration of 350ms
 		}
 
 		// Save scroll position
 		let scrollTimeout: number;
+		let lastLoggedSlug = '';
 		const handleScroll = () => {
 			if (scrollTimeout) {
 				clearTimeout(scrollTimeout);
@@ -80,8 +87,9 @@
 					}
 				});
 
-				if (currentPostSlug) {
+				if (currentPostSlug && currentPostSlug !== lastLoggedSlug) {
 					localStorage.setItem(scrollKey, currentPostSlug);
+					lastLoggedSlug = currentPostSlug;
 				}
 			}, 100);
 		};
@@ -126,7 +134,7 @@
 	}
 
 	function getLayoutClasses(image: { layout: string[] }) {
-		const classes: string[] = [];
+		const classes: string[] = ['cursor-pointer'];
 		if (hasLayout(image, 'right')) {
 			classes.push('float-right', 'ml-4', 'mb-2');
 		} else if (hasLayout(image, 'left')) {
@@ -134,22 +142,50 @@
 		}
 
 		if (hasLayout(image, 'hole')) {
-			classes.push('w-full', 'max-w-3xl', 'mr-auto');
+			classes.push('w-full', 'max-w-2xl', 'mx-auto');
 		} else if (hasLayout(image, 'left') || hasLayout(image, 'right')) {
 			if (hasLayout(image, 'vertical')) {
-				classes.push('w-1/4');
+				classes.push('w-1/5');
 			} else if (hasLayout(image, 'horizantal')) {
-				classes.push('w-1/2');
+				classes.push('w-2/5');
 			} else {
-				classes.push('w-1/3');
+				classes.push('w-1/4');
 			}
 		} else {
-			// Default case for images without float or hole hints
-			classes.push('w-full', 'max-w-md', 'mx-auto');
+			classes.push('w-full', 'max-w-sm', 'mx-auto');
 		}
 		return classes.join(' ');
 	}
+
+	function openFullscreen(src: string, alt: string) {
+		fullscreenMedia = { src, alt, isVideo: isVideo(src) };
+	}
 </script>
+
+{#if fullscreenMedia}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+		on:click={() => (fullscreenMedia = null)}
+	>
+		<div class="relative max-h-full max-w-full" on:click|stopPropagation>
+			{#if fullscreenMedia.isVideo}
+				<video src={fullscreenMedia.src} class="h-auto max-h-[90vh] w-auto" controls autoplay />
+			{:else}
+				<img
+					src={fullscreenMedia.src}
+					alt={fullscreenMedia.alt}
+					class="h-auto max-h-[90vh] w-auto"
+				/>
+			{/if}
+			<button
+				class="absolute right-2 top-2 rounded-full bg-black bg-opacity-50 p-2 text-white"
+				on:click={() => (fullscreenMedia = null)}
+			>
+				&times;
+			</button>
+		</div>
+	</div>
+{/if}
 
 <div class="m-16">
 	<h1 class="mb-6 text-3xl font-bold capitalize">{data.event}</h1>
@@ -187,7 +223,7 @@
 				{#if expandedSlugs.includes(post.slug)}
 					<div
 						class="prose mt-4 max-w-none overflow-hidden rounded border border-gray-200 bg-gray-50 p-6 shadow-inner"
-						transition:slide={{ duration: 350, easing: (t) => t * t }}
+						transition:slide={!initialLoad ? { duration: 350, easing: (t) => t * t } : undefined}
 					>
 						{#each post.holeImages as image}
 							{#if isVideo(image.src)}
@@ -199,12 +235,14 @@
 									muted={!hasLayout(image, 'dontautostart')}
 									playsinline={!hasLayout(image, 'dontautostart')}
 									controls={hasLayout(image, 'dontautostart')}
+									on:click={() => openFullscreen(image.src, image.alt)}
 								/>
 							{:else}
 								<img
 									src={image.src}
 									alt={image.alt}
 									class="my-4 rounded-lg object-contain shadow-md {getLayoutClasses(image)}"
+									on:click={() => openFullscreen(image.src, image.alt)}
 								/>
 							{/if}
 						{/each}
@@ -244,14 +282,16 @@
 						{#if isVideo(image.src)}
 							<video
 								src={image.src}
-								class="mx-auto my-4 h-64 w-full rounded-lg object-contain"
+								class="mx-auto my-4 h-64 w-full cursor-pointer rounded-lg object-contain"
 								controls
+								on:click={() => openFullscreen(image.src, image.alt)}
 							/>
 						{:else}
 							<img
 								src={image.src}
 								alt={image.alt}
-								class="mx-auto my-4 h-64 w-full rounded-lg object-contain"
+								class="mx-auto my-4 h-64 w-full cursor-pointer rounded-lg object-contain"
+								on:click={() => openFullscreen(image.src, image.alt)}
 							/>
 						{/if}
 					</SplideSlide>

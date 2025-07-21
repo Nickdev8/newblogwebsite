@@ -43,7 +43,8 @@ export async function load({ params }) {
 	const sections = fileContent.split('---').filter((s) => s.trim());
 	const posts = [];
 
-	for (let i = 0; i < sections.length; i += 2) {
+	// Start from the second frontmatter section, skipping the main one
+	for (let i = 1; i < sections.length; i += 2) {
 		const frontmatter = sections[i];
 		const content = sections[i + 1] || '';
 		const fullPostString = `---\n${frontmatter}\n---\n${content}`;
@@ -54,30 +55,8 @@ export async function load({ params }) {
 			/!\[([^\]]*)\]\(([^)]*)\)(?:\{([^}]*)\})?/g,
 			(match, alt, src, layout) => {
 				const layoutArr = layout ? layout.trim().split(/\s+/) : [];
-				if (layoutArr.includes('hole')) {
-					holeImages.push({ src, alt, layout: layoutArr });
-					return '';
-				}
-				return match;
-			}
-		);
-
-		textContent = textContent.replace(
-			/!\[([^\]]*)\]\(([^)]*)\)(?:\{([^}]*)\})?/g,
-			(match, alt, src, layout) => {
-				const layoutArr = layout ? layout.trim().split(/\s+/) : [];
-				const image = { src, alt, layout: layoutArr };
-				const classes = getLayoutClasses(image);
-				const isVideo = src.endsWith('.mp4');
-
-				if (isVideo) {
-					const controls = layoutArr.includes('dontautostart')
-						? 'controls'
-						: 'autoplay loop muted playsinline';
-					return `<video src="${src}" class="my-4 rounded-lg object-contain shadow-md ${classes}" ${controls}></video>`;
-				} else {
-					return `<img src="${src}" alt="${alt}" class="my-4 rounded-lg object-contain shadow-md ${classes}">`;
-				}
+				holeImages.push({ src, alt, layout: layoutArr });
+				return '';
 			}
 		);
 
@@ -93,7 +72,11 @@ export async function load({ params }) {
 		}
 	}
 
-	posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+	if (event === 'undercity') {
+		posts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+	} else {
+		posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+	}
 
 	const extraImagesDir = path.join('static', 'blogimages', eventName, 'extra');
 	const leftoverImages = fs.existsSync(extraImagesDir)
