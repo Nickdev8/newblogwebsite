@@ -276,11 +276,15 @@
 			<h3 class="mb-4 text-xl font-semibold">Leftover Media</h3>
 			<Splide
 				options={{
-					rewind: true,
+					type: 'loop',
+					drag: 'free',
+					snap: true,
+					perPage: 3,
+					perMove: 1,
+					wheel: true,
 					gap: '1rem',
 					autoplay: true,
-					interval: 5000,
-					perPage: 3,
+					interval: 3000,
 					breakpoints: {
 						640: {
 							perPage: 1
