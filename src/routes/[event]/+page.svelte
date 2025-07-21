@@ -192,7 +192,11 @@
 	</div>
 {/if}
 
-<div class="m-16">
+<div
+	class="m-16"
+	on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
+	role="document"
+>
 	<div class="mb-8 flex items-center justify-between">
 		<h1 class="text-3xl font-bold capitalize">{data.event}</h1>
 		<div class="flex space-x-4">
@@ -256,6 +260,7 @@
 									class="my-4 rounded-lg object-contain shadow-md {getLayoutClasses(image)}"
 									on:click={() => openFullscreen(image.src, image.alt)}
 									on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
+									role="button"
 									tabindex="0"
 								/>
 							{/if}
@@ -316,6 +321,7 @@
 								class="mx-auto my-4 h-64 w-full cursor-pointer rounded-lg object-contain"
 								on:click={() => openFullscreen(image.src, image.alt)}
 								on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
+								role="button"
 								tabindex="0"
 							/>
 						{/if}
