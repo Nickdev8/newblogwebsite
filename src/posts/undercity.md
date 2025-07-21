@@ -2,7 +2,7 @@
 title: "Day 1 of Undercity"
 date: "2024-07-11"
 ---
-![alt text](/blogimages/startpressetasion.png){right}
+![alt text](/blogimages/undercity/startpressetasion.png){right}
 
 ## Good Morning
 
@@ -23,7 +23,7 @@ Undercity is intense, inspiring, and packed with projects. Think:
 * And more unforgettable moments than you can count
 
 ## I Met Paperclip
-![alt text](/blogimages/paperclipissmall.png){right vertical}
+![alt text](/blogimages/undercity/paperclipissmall.png){right vertical}
 
 At the start of the event, **Paperclip** announced:
 
@@ -34,7 +34,7 @@ Naturally, I came prepared. with **two boxes** of paperclips, over 300 total. I 
 Meeting Paperclip for the first time was awesome. She’s small, full of energy, and incredibly welcoming. She ran around saying hi to everyone, instantly lifting the vibe of the entire room.
 
 ## Starting Presentation
-![alt text](/blogimages/paperclippy.png){left horizantal}
+![alt text](/blogimages/undercity/paperclippy.png){left horizantal}
 
 The opening presentation set the tone for everything to come:
 
@@ -46,21 +46,21 @@ The opening presentation set the tone for everything to come:
 I didn’t officially join a team. I just wanted to enjoy the experience and get away from what Neighborhood had become. I loosely teamed with **SPC**, but mostly I floated and had fun. And honestly? That worked out really well.
 
 # The Rest of Day 1
-![alt text](/blogimages/picwithpaoankei.png){right}
+![alt text](/blogimages/undercity/picwithpaoankei.png){right}
 
 The rest of the day I mostly spent with Paperclip. helping with badges, talking with people, just having a great time.
 ---
 title: "Day 2 of Undercity"
 date: "2024-07-12"
 ---
-![alt text](/blogimages/morningdemo.png){right}
+![alt text](/blogimages/undercity/morningdemo.png){right}
 
 ## Morning Vibes
 Despite sleeping on the floor, I had a surprisingly great night's sleep. My hip hurt a bit from laying on my side, but it was still a good night.
 Right after waking up, the demos started. Paperclip’s team (Evan & Samith) built a working **chocolate 3D printer**. Yes, really. Chocolate. It was incredible to see it working.
 
 ## Refresh and Reset
-![alt text](/blogimages/dogersvssanfransico.png){left}
+![alt text](/blogimages/undercity/dogersvssanfransico.png){left}
 
 I quickly went back home to shower, shave, and generally not feel like a mess. On my way back to GitHub HQ, I walked past a Dodgers vs. San Francisco Giants game.
 
@@ -82,11 +82,11 @@ John is the kind of person everyone deserves to meet at least once. Sadly, he wa
 
 
 ## Rooftop Views
-![alt text](/blogimages/githubroof.png){hole}
+![alt text](/blogimages/undercity/githubroof.png){hole}
 After lunch, we headed to the rooftop of GitHub HQ. Beautiful views, deep conversations, and that surreal feeling of being somewhere really special.
 
 ## Zach
-![alt text](/blogimages/zackpig.png){right}
+![alt text](/blogimages/undercity/zackpig.png){right}
 [Zach Latta](https://zachlatta.com/) is the founder of Hack Club. and easily one of the most inspiring people I’ve met.
 
 He started Hack Club because he wanted teenagers to feel like they could build real things. Not school projects. Not assignments. But things that *matter*.
@@ -100,7 +100,7 @@ This week has been chaotic, emotional, beautiful. and somehow, it all still feel
 title: "Last Day of Undercity. Day 4"
 date: "2024-07-14"
 ---
-![alt text](/blogimages/group.png){hole}
+![alt text](/blogimages/undercity/group.png){hole}
 ## Final Demos
 Today was the big one. The final demos.
 

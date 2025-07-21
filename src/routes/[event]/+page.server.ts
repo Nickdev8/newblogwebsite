@@ -4,6 +4,31 @@ import matter from 'gray-matter';
 import { marked } from 'marked';
 import { error } from '@sveltejs/kit';
 
+function getLayoutClasses(image: { layout: string[] }) {
+	const classes: string[] = [];
+	if (image.layout.includes('right')) {
+		classes.push('float-right', 'ml-4', 'mb-2');
+	} else if (image.layout.includes('left')) {
+		classes.push('float-left', 'mr-4', 'mb-2');
+	}
+
+	if (image.layout.includes('hole')) {
+		classes.push('w-full', 'max-w-3xl', 'mr-auto');
+	} else if (image.layout.includes('left') || image.layout.includes('right')) {
+		if (image.layout.includes('vertical')) {
+			classes.push('w-1/4');
+		} else if (image.layout.includes('horizantal')) {
+			classes.push('w-1/2');
+		} else {
+			classes.push('w-1/3');
+		}
+	} else {
+		// Default case for images without float or hole hints
+		classes.push('w-full', 'max-w-md', 'mx-auto');
+	}
+	return classes.join(' ');
+}
+
 export async function load({ params }) {
 	const { event } = params;
 	const filePath = path.join('src/posts', `${event}.md`);
@@ -24,11 +49,37 @@ export async function load({ params }) {
 		const fullPostString = `---\n${frontmatter}\n---\n${content}`;
 		const { data, content: parsedContent } = matter(fullPostString);
 
-		const images: { src: string; alt: string }[] = [];
-		const textContent = parsedContent.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
-			images.push({ src, alt });
-			return '';
-		});
+		const holeImages: { src: string; alt: string; layout: string[] }[] = [];
+		let textContent = parsedContent.replace(
+			/!\[([^\]]*)\]\(([^)]*)\)(?:\{([^}]*)\})?/g,
+			(match, alt, src, layout) => {
+				const layoutArr = layout ? layout.trim().split(/\s+/) : [];
+				if (layoutArr.includes('hole')) {
+					holeImages.push({ src, alt, layout: layoutArr });
+					return '';
+				}
+				return match;
+			}
+		);
+
+		textContent = textContent.replace(
+			/!\[([^\]]*)\]\(([^)]*)\)(?:\{([^}]*)\})?/g,
+			(match, alt, src, layout) => {
+				const layoutArr = layout ? layout.trim().split(/\s+/) : [];
+				const image = { src, alt, layout: layoutArr };
+				const classes = getLayoutClasses(image);
+				const isVideo = src.endsWith('.mp4');
+
+				if (isVideo) {
+					const controls = layoutArr.includes('dontautostart')
+						? 'controls'
+						: 'autoplay loop muted playsinline';
+					return `<video src="${src}" class="my-4 rounded-lg object-contain shadow-md ${classes}" ${controls}></video>`;
+				} else {
+					return `<img src="${src}" alt="${alt}" class="my-4 rounded-lg object-contain shadow-md ${classes}">`;
+				}
+			}
+		);
 
 		if (data.date && data.title) {
 			posts.push({
@@ -36,7 +87,7 @@ export async function load({ params }) {
 				date: data.date,
 				slug: `${eventName}-${i / 2}`,
 				content: marked(textContent.trim()),
-				images,
+				holeImages,
 				event: eventName
 			});
 		}
@@ -44,5 +95,13 @@ export async function load({ params }) {
 
 	posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-	return { posts, event };
+	const extraImagesDir = path.join('static', 'blogimages', eventName, 'extra');
+	const leftoverImages = fs.existsSync(extraImagesDir)
+		? fs.readdirSync(extraImagesDir).map((file) => ({
+				src: `/blogimages/${eventName}/extra/${file}`,
+				alt: 'Extra image'
+		  }))
+		: [];
+
+	return { posts, event, leftoverImages };
 } 

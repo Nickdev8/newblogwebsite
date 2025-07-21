@@ -5,7 +5,10 @@
 	onMount(() => {
 		const savedScrollY = localStorage.getItem('scrollY_main');
 		if (savedScrollY) {
-			window.scrollTo(0, parseInt(savedScrollY, 10));
+			window.scrollTo({
+				top: parseInt(savedScrollY, 10),
+				behavior: 'smooth'
+			});
 		}
 
 		let scrollTimeout: number;

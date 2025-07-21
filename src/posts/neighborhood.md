@@ -2,7 +2,7 @@
 title: "The Days Leading Up to SF"
 date: "2024-06-10"
 ---
-![alt text](/blogimages/panorama.png){hole}
+![alt text](/blogimages/neighborhood/panorama.png){hole}
 ## Almost There!
 
 I’m typing this while racing to hit 100 hours of work on my website project-only 20 minutes to go! Once I cross that finish line, I’ll have exactly 16 days until my big trip to San Francisco.
@@ -13,7 +13,7 @@ When the trains went on strike today, everyone switched to online classes. Norma
 title: "Day 1: Arrival and Pizza"
 date: "2024-06-12"
 ---
-![alt text](/blogimages/planeride.png){left}
+![alt text](/blogimages/neighborhood/planeride.png){left}
 ## Before the flight
 I arrived at Schiphol with my brother, mom, and dad. After a few hugs and a very real “this is it” moment at the gate, I waved goodbye and stepped into solo travel mode. Next stop: San Francisco. Alone. For real.
 
@@ -37,7 +37,7 @@ Everyone else had their bed setups ready with pillows and cozy blankets. Me? I h
 title: "Day 2: Doubts and Adventures"
 date: "2024-06-13"
 ---
-![alt text](/blogimages/laptopinopenroom.png){right}
+![alt text](/blogimages/neighborhood/laptopinopenroom.png){right}
 ## Morning After the Storm
 After that awful night of tossing and turning, I gave up trying to sleep by 6am. My body thought it was 3pm anyway. I got up, hit the toilet, and had a chill early-morning chat with one of my roommates. I ate an apple, walked to a local café, and called my mom.
 
@@ -60,7 +60,7 @@ Paolo dipped early with a headache, and Abby went out for food… and just *neve
 Cue: spontaneous side quest.
 
 ## The Random Adventure
-![alt text](/blogimages/linkedin.png){right vertical}
+![alt text](/blogimages/neighborhood/linkedin.png){right vertical}
 Feeling restless, I called my brother just to check in, and my dad jumped on the call too. With my family on the line and no destination in mind, I just started walking. somewhere. Anywhere.
 
 That “anywhere” turned out to be… **LinkedIn HQ.**
@@ -78,7 +78,7 @@ So I went on a heroic quest to Target, hunting for something softer, warmer, and
 It wasn’t exactly a luxury hotel haul, but it was a major upgrade. Mission: *mostly* successful.
 
 ## Grocery Chaos
-![alt text](/blogimages/morningwalkv2.png){left horizantal}
+![alt text](/blogimages/neighborhood/morningwalkv2.png){left horizantal}
 Later in the day, the five of us decided to stock up on breakfast and other essentials. Easy, right?
 Turns out, not so much. With five people from different cultures, everyone had totally different ideas of what to buy. After aimlessly wandering for ten minutes, we finally made a list and split up.
 
@@ -96,7 +96,7 @@ Right as I finished, new roommates showed up. We're now 7 people in the house. I
 title: "Day 3: Feeling Better"
 date: "2024-06-14"
 ---
-![alt text](/blogimages/morningwalk.png){hole}
+![alt text](/blogimages/neighborhood/morningwalk.png){hole}
 
 ## Morning Reset
 Woke up at 6am again. jet lag still doing its thing. I didn’t want to wake anyone, so I grabbed some fruit and went for a quiet walk.
@@ -108,7 +108,7 @@ Yesterday was rough, but I realized I can’t wait for things to be fun. I have 
 Paolo mentioned that attending events could count as programming time if we show proof. 2 hours per event. That sounded perfect. I was in.
 
 ## Target Trip, Part II
-![alt text](/blogimages/target.png){right horizantal}
+![alt text](/blogimages/neighborhood/target.png){right horizantal}
 Realized I still didn’t have a towel. So, back to Target! This time with four of us, picking up towels, dish soap, plates. everything we forgot the first time.
 
 After a much-needed shower, I wrote down yesterday’s and today’s notes. Then we went to the Hack Club workspace downtown, where I worked on my own operating system. **NickOS**. and finally got it running on my laptop.
@@ -124,11 +124,11 @@ It was chaos, but so much fun. And the curry? Surprisingly great.
 
 
 # Game Night
-![alt text](/blogimages/mariocard.png){hole}
+![alt text](/blogimages/neighborhood/mariocard.png){hole}
 Later, Paolo pulled out his Nintendo Switch, and we played Mario Kart and some wild tower-stacking game. Laughter, yelling, and close finishes everywhere.
 
 # Cards from Home
-![alt text](/blogimages/gamesonfloor.png){hole}
+![alt text](/blogimages/neighborhood/gamesonfloor.png){hole}
 I brought out a special deck of playing cards from my grandparents.
 We played some chill games on the floor with music in the background. A small moment, but it felt really nice.
 Here’s a polished, more readable version of your **Day 4 6/19** entry, keeping it casual and fun for your family:
@@ -136,7 +136,7 @@ Here’s a polished, more readable version of your **Day 4 6/19** entry, keeping
 title: "Day 4: Golden Gate Bridge Adventure"
 date: "2024-06-19"
 ---
-![alt text](/blogimages/pier.png){right}
+![alt text](/blogimages/neighborhood/pier.png){right}
 ## Golden Gate Bridge Adventure
 For most of the day, not much really happened. But around 6pm, things picked up, we all headed out to visit the Golden Gate Bridge.
 
@@ -149,7 +149,7 @@ We joked that it felt like we were in a *Lemmings* game, everyone just blindly f
 Along the way, I talked with a few people and ended up having a blast hanging out with **Elliott** and **Om**. super chill and hilarious guys. Definitely a highlight of the day.
 
 # frozen pizza
-![alt text](/blogimages/frozenpizza.png){right}
+![alt text](/blogimages/neighborhood/frozenpizza.png){right}
 All of us did not feel like cooking and wanded something simple before going to the bridge. So, WE GOT **PIZZAS**! 6 of them actualy. but only some of the group wanted pizzas and so we had like half a pizza left and did not use 2 other pizzas. 
 So we have more leftovers for another day!
 ---
@@ -161,7 +161,7 @@ date: "2024-06-20"
 title: "Day 6: City Adventure & Apple Vision Pro"
 date: "2024-06-21"
 ---
-![alt text](/blogimages/salesforcepark.png){right}
+![alt text](/blogimages/neighborhood/salesforcepark.png){right}
 
 ## City Adventure!
 The day started with my usual morning walk, and then we decided to head to Market Street to find a good spot to work on our 40 programming hours.
@@ -169,10 +169,10 @@ The day started with my usual morning walk, and then we decided to head to Marke
 We tried multiple locations, but since it was Saturday, most places were closed. except **Salesforce Park**. It's this elevated park surrounded by Salesforce buildings, with a cable car leading up and even a small band playing country music. We hung out there for a bit and enjoyed the vibe before continuing our search.
 
 ## .
-![alt text](/blogimages/uno.png){left nobottommargin disapearat500px}
+![alt text](/blogimages/neighborhood/uno.png){left nobottommargin disapearat500px}
 
 ## Apple Vision Pro Experience
-![alt text](/blogimages/applevision.png){right bigasmain}
+![alt text](/blogimages/neighborhood/applevision.png){right bigasmain}
 
 On our walk, we stumbled across a couple of cool stores. one of the only Nintendo locations in the area, and of course, an Apple Store.
 
@@ -189,7 +189,7 @@ Will I go back to play with it again? Absolutely. You can book as many sessions 
 
 
 ## Midnight Programming
-![alt text](/blogimages/midnightprogramming.png){left vertical}
+![alt text](/blogimages/neighborhood/midnightprogramming.png){left vertical}
 
 Since most of us were *nowhere near* the 40-hour mark, we all ended up staying up way past midnight trying to catch up. Around 2am, I finally called it quits.
 
@@ -203,7 +203,7 @@ But I guess we’ll find out soon. **(• - •)ゝ**
 title: "Day 7: Sunday Vibes & Burritos"
 date: "2024-06-22"
 ---
-![alt text](/blogimages/paolokikflip.mp4){right}
+![alt text](/blogimages/neighborhood/paolokikflip.mp4){right}
 
 ## Sunday Vibes & Burritos
 We woke up around 9am and went on our usual mini morning walk (ᵔ◡ᵔ)
@@ -218,7 +218,7 @@ When we arrived at Dolores Park, all the Hack Club houses had gathered. about **
 Eventually, about half of us decided to head to the open workspace downtown to get some hours in.
 
 ## Battery Crisis
-![alt text](/blogimages/paolosleeping.mp4){left}
+![alt text](/blogimages/neighborhood/paolosleeping.mp4){left}
 Once we got there… we realized something.
 **None of the Europeans brought their power adapters.**
 So while we all set up our laptops, they started dying. One by one. Slowly. Tragically.
@@ -238,7 +238,7 @@ We chatted for a bit… about nothing particularly important, but it was still a
 title: "Day 8: Time Flies"
 date: "2024-06-23"
 ---
-![alt text](/blogimages/somecarsonthestreet.mp4){left}
+![alt text](/blogimages/neighborhood/somecarsonthestreet.mp4){left}
 ## Wait… it’s already Day 8?!
 
 Today it hit me. **I’ve already been here for 8 days**. Time is flying way too fast!
@@ -250,7 +250,7 @@ We decided to start planning a few things since it’s the **last week for Om** 
 which I’m super excited for! (≧◡≦)/
 
 ## Back to LinkedIn HQ
-![alt text](/blogimages/linkeditagain.png){right}
+![alt text](/blogimages/neighborhood/linkeditagain.png){right}
 In the morning, Om and I headed straight to **LinkedIn HQ** to get in some serious programming time. A bit later, **Elliott** joined us too.
 We ended up staying there for **5 full hours** of coding! That brings my total to...
 
@@ -266,7 +266,7 @@ Then. back out again to the open workspace to put in even more hours. Gotta keep
 title: "Day 10: GITHUB HQ!!!"
 date: "2024-06-25"
 ---
-![alt text](/blogimages/githubhq.png){hole githubhq}
+![alt text](/blogimages/neighborhood/githubhqpanorrama1.png){hole githubhq}
 
 ## HOW?!
 Today we got to attend an event hosted by **ComfyUI**. and it just so happened to take place at **GitHub HQ**.
@@ -276,7 +276,7 @@ Still can’t believe that sentence is real.
 ComfyUI, for context, is a visual node-based AI image tool. kind of like drag-and-drop Photoshop powered by AI. The event was part hackathon, part hangout, and part surreal tech dream.
 
 ## What Even Was It?
-![alt text](/blogimages/wedobeworking.png){right hole}
+![alt text](/blogimages/neighborhood/wedobeworking.png){right hole}
 It was a mini hackathon where we had to build a **workflow** using ComfyUI.
 Our group made a simple background blur effect, using depth mapping and image processing. Was it revolutionary? Not really. But did it work? *Yes.*
 
@@ -300,7 +300,7 @@ Think of it like a giant library of code that people from everywhere can access,
 title: "Day 12: Talk with Thomas!"
 date: "2024-06-27"
 ---
-![alt text](/blogimages/interviewqiththomas.png){right vertical}
+![alt text](/blogimages/neighborhood/interviewqiththomas.png){right vertical}
 
 ## A Chat with Thomas
 The day before, we noticed a few things that felt off. like how San Francisco is this city full of events and energy, but the **40-hour system** kind of discourages going out and exploring. Also, things like research or design work didn’t count toward the time tracker, which felt limiting.
@@ -326,7 +326,7 @@ We also talked about
 If you're a Juice person and curious about merch updates. DM me on Slack! but dont be hyped
 
 ## The Interview
-![alt text](/blogimages/ominterview.mp4){left}
+![alt text](/blogimages/neighborhood/ominterview.mp4){left}
 Later that day, we headed over to the **Atrium on 2nd Street**, and got a surprise call from **Paolo**.
 
 He wanted to film a quick interview with us before Om leaves Neighborhood. It went pretty well!
@@ -335,7 +335,7 @@ Another memory locked in.
 title: "Day 13: Poker & People"
 date: "2024-06-28"
 ---
-![Poker!](/blogimages/pokernight.png){right}
+![Poker!](/blogimages/neighborhood/pokernight.png){right}
 
 ## Poker Night!
 
@@ -346,7 +346,7 @@ I *loved* the strategy, the bluffing, the chaos.
 Aond… **I won a whole bunch!**
 
 ## New Faces, Temporary Chaos
-![New faces](/blogimages/temporairypeople.png){left}
+![New faces](/blogimages/neighborhood/temporairypeople.png){left}
 
 Some new people arrived in SF today, but they didn’t have a place to stay just yet. so they crashed at our house for one night.
 
@@ -386,17 +386,17 @@ here’s the TL;DR:
 title: "Day 15: Just Paolo Being Smart"
 date: "2024-06-30"
 ---
-![alt text](/blogimages/paolobeingsmart.mp4){hole}
+![alt text](/blogimages/neighborhood/paolobeingsmart.mp4){hole}
 A quiet day overall, but I caught Paolo doing something incredibly smart and totally in-the-zone.
 That’s it. That’s the post. (✿´‿`)
 ---
 title: "Day 16: Noicebridge Vibes"
 date: "2024-07-01"
 ---
-![alt text](/blogimages/noicebridgepanorama.png){hole}
+![alt text](/blogimages/neighborhood/noicebridgepanorama.png){hole}
 
 ## We Went to Noicebridge
-![alt text](/blogimages/paoloplayinggituar.mp4){dontautostart hole}
+![alt text](/blogimages/neighborhood/paoloplayinggituar.mp4){dontautostart hole}
 
 **Noicebridge** is one of San Francisco’s most iconic hackerspaces. It's a big, open community workshop where anyone can build, tinker, code, 3D print, paint, sew. you name it.
 
@@ -405,35 +405,35 @@ While there, Paolo even played a bit of guitar 🎸
 
 
 ## *Pao* Lives On
-![alt text](/blogimages/pao.mp4){dontautostart left}
+![alt text](/blogimages/neighborhood/pao.mp4){dontautostart left}
 We’re still working on **Pao**. testing it with friends, laughing a ton, and fine-tuning the chaos.
 So far: lots of eliminations, sneaky selfies, and betrayal. Perfect.
 ---
 title: "Day 17: Chair-Carrying Chaos"
 date: "2024-07-02"
 ---
-![alt text](/blogimages/firsttimeluandrymat.mp4){left}
+![alt text](/blogimages/neighborhood/firsttimeluandrymat.mp4){left}
 
 ## We Carried 5 Chairs + a Big Table… Through SF
-![alt text](/blogimages/tablecarrying.mp4){left}
+![alt text](/blogimages/neighborhood/tablecarrying.mp4){left}
 Yes. We really carried 5 chairs *and* a table across San Francisco. including on the metro.
 Why? Because Hack Club housing is DIY to the core.
 
 ## More Pao Testing
-![alt text](/blogimages/pao3.mp4){dontautostart left}
+![alt text](/blogimages/neighborhood/pao3.mp4){dontautostart left}
 More eliminations. More laughter. More paranoia.
 **Pao is life.**
 ---
 title: "Day 18: Fourth of July"
 date: "2024-07-04"
 ---
-![alt text](/blogimages/panorama4thofjuly.png){hole}
+![alt text](/blogimages/neighborhood/panorama4thofjuly.png){hole}
 
 ## So Many People
-![alt text](/blogimages/populated.mp4){hole}
+![alt text](/blogimages/neighborhood/populated.mp4){hole}
 
 ## Coolest Things We Saw
-![alt text](/blogimages/someonejumpingoverisac.mp4){hole}
+![alt text](/blogimages/neighborhood/someonejumpingoverisac.mp4){hole}
 There was a guy doing flips *over* another Hack Clubber.
 The fireworks, crowds, and chaos made for one unforgettable night.
 ---
@@ -441,20 +441,20 @@ title: "Day 19: Chill Mode"
 date: "2024-07-05"
 ---
 ## Walk in the Park
-![alt text](/blogimages/hackclubinpineconed.png){horizantal left}
+![alt text](/blogimages/neighborhood/hackclubinpineconed.png){horizantal left}
 
 ## Starbucks Stop
-![alt text](/blogimages/starbucks.png){horizantal left}
+![alt text](/blogimages/neighborhood/starbucks.png){horizantal left}
 Not every day is loud and crazy. This one was just nice, quiet, and full of coffee and trees. 
 (▰˘︹˘▰)
 ---
 title: "Day 20: Grinding & Cleaning"
 date: "2024-07-06"
 ---
-![alt text](/blogimages/train.png){horizantal left}
+![alt text](/blogimages/neighborhood/train.png){horizantal left}
 
 ## Late-Night Coding
-![alt text](/blogimages/programmig.png){horizantal left}
+![alt text](/blogimages/neighborhood/programming.png){horizantal left}
 Sorry for all the photo/video-only updates. I honestly didn’t feel like writing this week. But trust me. we’ve been coding, building, and shipping. Late nights, good snacks, and progress.
 ---
 title: "Day 20 (continued): Cleaning Day From Hell"
@@ -466,7 +466,7 @@ No one cleaned. No one even said sorry.
 So yeah. I cleaned both.
 
 ## 16 Minutes of Toilet Hell
-![alt text](/blogimages/plumming.mp4){horizantal left}
+![alt text](/blogimages/neighborhood/plumming.mp4){horizantal left}
 I woke up to **Alexander screaming at me** next to my bed:
 
 > “You’re the leader of the house. you clean the toilet.”
@@ -477,7 +477,7 @@ He loves arguing and never listens to others. I already disliked him, but now\..
 I wouldn’t mind doing the cleaning if people actually appreciated it. but with him? All the “thank you”s feel hollow.
 
 ## The Shower Saga
-![alt text](/blogimages/showerrusult.mp4){right}
+![alt text](/blogimages/neighborhood/showerrusult.mp4){right}
 The shower was clogged so badly that I had to call a plumber. Turns out: someone’s hair had blocked the whole thing.
 We paid up front (don’t worry. the landlord reimbursed us), but after the plumber left, the shower was *disgusting.*
 So I scrubbed it for nearly an hour to make it usable again.
@@ -491,7 +491,7 @@ title: "Day 21: Game Making"
 date: "2024-07-07"
 ---
 ## Game Dev with Kai Ling
-![alt text](/blogimages/openworkspace.png){right vertical}
+![alt text](/blogimages/neighborhood/openworkspace.png){right vertical}
 Yesterday, **Kai Ling** made an announcement:
 
 > "Come to 55 2nd Street to follow a Godot game-making course. 
@@ -506,7 +506,7 @@ And honestly? I love it so much.
 It feels like coming home.
 
 ## Dinner & Dancing
-![alt text](/blogimages/elliottDancing.mp4){left}
+![alt text](/blogimages/neighborhood/elliottDancing.mp4){left}
 After a solid **8 hours of straight programming**, we headed to a nearby park to wind down and enjoy some well-earned dinner.
 
 The weather was perfect, the food hit just right, and the vibe was pure chill. Then we noticed a group nearby dancing. and of course, **me, Elliott, and Johan** jumped in and joined them for one dance.
@@ -517,7 +517,7 @@ title: "Day 22: Paolo and Game Progress"
 date: "2024-07-08"
 ---
 ## Paolo
-![alt text](/blogimages/paolobeinggoated.mp4){right}
+![alt text](/blogimages/neighborhood/paolobeinggoated.mp4){right}
 I went back to the Atrium today to keep working on my game, but I didn’t get far before getting completely distracted by the new ping pong table. Classic.
 
 ## Game Progress
@@ -525,7 +525,7 @@ I still managed to put in some time on my project. You can check it out [here](h
 It’s a "simple" tower defense game where you play as an old man living on an island, defending your home from waves of bats and birds with the help of programmable bots.
 
 ## Gameplay
-![alt text](/blogimages/gameplayofmygame.mp4){left dontautostart}
+![alt text](/blogimages/neighborhood/gameplayofmygame.mp4){left dontautostart}
 The prototype is shaping up nicely, and it’s already fun to play.
 ---
 title: "Day 23: The End of Neighborhood"
@@ -547,7 +547,7 @@ Just like that, the program was over. People felt confused, heartbroken, even an
 Everyone was asked to book their return flights by July 18. Thomas said he would help with bookings starting the next day.
 
 ## Thomas
-![alt text](/blogimages/theEnd.mp4){left dontautostart}
+![alt text](/blogimages/neighborhood/theEnd.mp4){left dontautostart}
 Watching him deliver the message in person felt surreal. This community changed a lot of people’s lives. including mine.
 ---
 title: "Day 24: A Small Comeback"
@@ -573,7 +573,7 @@ It hurt more than I expected.
 I didn’t want to say something rash to Thomas in the moment, but I did write him a message. Just to be honest.
 
 # Dear Thomas
-![alt text](/blogimages/goldengatepark.mp4){right}
+![alt text](/blogimages/neighborhood/goldengatepark.mp4){right}
 *Sent at 1:22 AM, July 11, 2025*
 
 I'm in kind of a pickle.
@@ -609,7 +609,7 @@ It feels like the right place to end this chapter.
 title: "Het Einde"
 date: "2024-07-17"
 ---
-![alt text](/blogimages/lastpic.png){right}
+![alt text](/blogimages/neighborhood/lastpic.png){right}
 ## And just like that, it’s over
 Thomas announced that **Post-Neighborhood** is being canceled too. The landlord decided to evict us, and we all had to leave the house just two days after hearing the news.
 
