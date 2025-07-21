@@ -1,5 +1,5 @@
 ---
-title: "The Neighborhood"
+title: "Hackclub: Neighborhood"
 description: "My month-long adventure in San Francisco, filled with new friends, coding, and a lot of personal growth."
 coverImage: "/blogimages/neighborhood/panorama.png"
 ---
@@ -470,9 +470,6 @@ That’s it. That’s the post. (✿´‿`)
 title: "Day 16: Noicebridge Vibes"
 date: "2024-07-01"
 ---
-![alt text](/blogimages/neighborhood/noicebridgepanorama.png){hole}
-
-## We Went to Noicebridge
 ![alt text](/blogimages/neighborhood/paoloplayinggituar.mp4){dontautostart hole}
 
 **Noicebridge** is one of San Francisco’s most iconic hackerspaces. It's a big, open community workshop where anyone can build, tinker, code, 3D print, paint, sew. you name it.
@@ -506,13 +503,12 @@ More eliminations. More laughter. More paranoia.
 title: "Day 18: Fourth of July"
 date: "2024-07-04"
 ---
-![alt text](/blogimages/neighborhood/panorama4thofjuly.png){hole}
+![alt text](/blogimages/neighborhood/someonejumpingoverisac.mp4){right}
 
 ## So Many People
-![alt text](/blogimages/neighborhood/populated.mp4){hole}
+![alt text](/blogimages/neighborhood/populated.mp4){left}
 
 ## Coolest Things We Saw
-![alt text](/blogimages/neighborhood/someonejumpingoverisac.mp4){hole}
 There was a guy doing flips *over* another Hack Clubber.
 The fireworks, crowds, and chaos made for one unforgettable night.
 

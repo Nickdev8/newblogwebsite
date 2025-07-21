@@ -188,20 +188,22 @@
 {/if}
 
 <div class="m-16">
-	<h1 class="mb-6 text-3xl font-bold capitalize">{data.event}</h1>
-	<div class="mb-4 flex space-x-2">
-		<button
-			on:click={openAll}
-			class="rounded bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
-		>
-			Open All
-		</button>
-		<button
-			on:click={collapseAll}
-			class="rounded bg-gray-500 px-4 py-2 text-white transition hover:bg-gray-600"
-		>
-			Collapse All
-		</button>
+	<div class="mb-8 flex items-center justify-between">
+		<h1 class="text-3xl font-bold capitalize">{data.event}</h1>
+		<div class="flex space-x-4">
+			<button
+				on:click={openAll}
+				class="text-sm text-gray-500 transition hover:text-gray-700 hover:underline cursor-pointer"
+			>
+				Open All
+			</button>
+			<button
+				on:click={collapseAll}
+				class="text-sm text-gray-500 transition hover:text-gray-700 hover:underline cursor-pointer"
+			>
+				Collapse All
+			</button>
+		</div>
 	</div>
 	<ul class="mb-8 space-y-4">
 		{#each data.posts as post}
@@ -210,7 +212,7 @@
 				data-slug={post.slug}
 				class="rounded bg-white p-4 shadow transition hover:bg-gray-50"
 			>
-				<button class="block w-full text-left" on:click={() => toggleExpand(post.slug)}>
+				<button class="block w-full text-left cursor-pointer" on:click={() => toggleExpand(post.slug)}>
 					<div class="text-sm text-gray-500">{post.date}</div>
 					<div
 						class="text-xl font-semibold {openedSlugs.has(post.slug)

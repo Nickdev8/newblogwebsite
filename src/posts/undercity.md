@@ -1,5 +1,5 @@
 ---
-title: "Undercity"
+title: "Hackclub: Undercity"
 description: "A multi-day hardware hackathon at GitHub HQ, where I built cool stuff and made unforgettable memories."
 coverImage: "/blogimages/undercity/group.png"
 ---
@@ -95,7 +95,7 @@ John is the kind of person everyone deserves to meet at least once. Sadly, he wa
 
 ## Rooftop Views
 
-![alt text](/blogimages/undercity/githubroof.png){hole}
+![alt text](/blogimages/undercity/githubroof.png){left hole}
 After lunch, we headed to the rooftop of GitHub HQ. Beautiful views, deep conversations, and that surreal feeling of being somewhere really special.
 
 ## Zach
@@ -115,7 +115,7 @@ This week has been chaotic, emotional, beautiful. and somehow, it all still feel
 title: "Last Day of Undercity. Day 4"
 date: "2024-07-14"
 ---
-![alt text](/blogimages/undercity/group.png){hole}
+![alt text](/blogimages/undercity/group.png){hole right}
 
 ## Final Demos
 
