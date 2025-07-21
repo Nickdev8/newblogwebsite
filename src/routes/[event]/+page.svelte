@@ -243,13 +243,20 @@
 									playsinline={!hasLayout(image, 'dontautostart')}
 									controls={hasLayout(image, 'dontautostart')}
 									on:click={() => openFullscreen(image.src, image.alt)}
-								/>
+									on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
+									role="button"
+									tabindex="0"
+								>
+									<track kind="captions" />
+								</video>
 							{:else}
 								<img
 									src={image.src}
 									alt={image.alt}
 									class="my-4 rounded-lg object-contain shadow-md {getLayoutClasses(image)}"
 									on:click={() => openFullscreen(image.src, image.alt)}
+									on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
+									tabindex="0"
 								/>
 							{/if}
 						{/each}
@@ -292,13 +299,20 @@
 								class="mx-auto my-4 h-64 w-full cursor-pointer rounded-lg object-contain"
 								controls
 								on:click={() => openFullscreen(image.src, image.alt)}
-							/>
+								on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
+								role="button"
+								tabindex="0"
+							>
+								<track kind="captions" />
+							</video>
 						{:else}
 							<img
 								src={image.src}
 								alt={image.alt}
 								class="mx-auto my-4 h-64 w-full cursor-pointer rounded-lg object-contain"
 								on:click={() => openFullscreen(image.src, image.alt)}
+								on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
+								tabindex="0"
 							/>
 						{/if}
 					</SplideSlide>

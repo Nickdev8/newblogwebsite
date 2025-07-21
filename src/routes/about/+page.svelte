@@ -2,14 +2,11 @@
 	import { Splide, SplideSlide } from '@splidejs/svelte-splide';
 	import '@splidejs/svelte-splide/css';
 
-	export let data: { carouselImages: { src: string; isVideo: boolean }[] } = {
-		carouselImages: []
+	export let data: {
+		carouselImages: { src: string; isVideo: boolean }[];
+		aboutMeImage: string;
 	};
 
-	const images = ['/aboutme2.png', '/aboutme3.png', '/aboutme4.png', '/aboutme5.png'];
-	const image = images[Math.floor(Math.random() * images.length)];
-
-	// This action ensures the video is muted before it plays.
 	function playMuted(node: HTMLVideoElement) {
 		node.muted = true;
 		node.play().catch(() => {
@@ -23,7 +20,7 @@
 	<div class="mb-16 overflow-hidden rounded-lg bg-white p-8 shadow-lg">
 		<div class="flex flex-col items-center gap-8 md:flex-row md:items-center">
 			<img
-				src={image}
+				src={data.aboutMeImage}
 				alt="About Me"
 				class="h-64 w-64 flex-shrink-0 rounded-full border-4 border-gray-500 object-cover"
 			/>
@@ -65,9 +62,11 @@
 								loop
 								playsinline
 								use:playMuted
-							/>
+							>
+								<track kind="captions" />
+							</video>
 						{:else}
-							<img src={media.src} alt="Gallery image" class="h-64 w-full rounded-lg object-cover" />
+							<img src={media.src} alt="Gallery" class="h-64 w-full rounded-lg object-cover" />
 						{/if}
 					</SplideSlide>
 				{/each}
