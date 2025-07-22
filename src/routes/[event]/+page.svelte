@@ -1,355 +1,366 @@
 <script lang="ts">
-	// @ts-nocheck
-	import { onMount, tick } from 'svelte';
-	import { slide } from 'svelte/transition';
-	import ReactionBar from '$lib/ReactionBar.svelte';
+// @ts-nocheck
+import { onMount, tick } from 'svelte';
+import { slide } from 'svelte/transition';
+import { browser } from '$app/environment';
+import ReactionBar from '$lib/ReactionBar.svelte';
 
-	export let data: {
-		posts: {
-			date: string;
-			title: string;
-			slug: string;
-			content: string;
-			holeImages: { src: string; alt: string; layout: string[] }[];
-		}[];
-		event: string;
-		leftoverImages: { src: string; alt: string }[];
-		banner?: {
-			message: string;
-			type?: 'info' | 'warning' | 'danger' | 'success';
-			dismissible?: boolean;
-		} | null;
+export let data: {
+	posts: {
+		date: string;
 		title: string;
-		description: string;
-		coverImage: string;
+		slug: string;
 		content: string;
-		images: string[];
-	};
+		holeImages: { src: string; alt: string; layout: string[] }[];
+	}[];
+	event: string;
+	leftoverImages: { src: string; alt: string }[];
+	banner?: {
+		message: string;
+		type?: 'info' | 'warning' | 'danger' | 'success';
+		dismissible?: boolean;
+	} | null;
+	title: string;
+	description: string;
+	coverImage: string;
+	content: string;
+	images: string[];
+};
 
-	/* ------------------------------------------------------------------ */
-	/*  PERSISTENCE LAYER (single key, debounced save)                     */
-	/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/*  PERSISTENCE LAYER (single key, debounced save)                     */
+/* ------------------------------------------------------------------ */
 
-	const STORAGE_KEY = `eventState:${data.event}`;
-	type Persisted = {
-		read: string[];
-		expanded: string[];
-		opened: string[];
-		struck: string[];
-		bannerDismissed: boolean;
-	};
+const STORAGE_KEY = `eventState:${data.event}`;
+type Persisted = {
+	read: string[];
+	expanded: string[];
+	opened: string[];
+	struck: string[];
+	bannerDismissed: boolean;
+};
 
-	function loadState(): Persisted {
-		if (typeof localStorage === 'undefined') return fallback();
+function loadState(): Persisted {
+	if (typeof localStorage === 'undefined') return fallback();
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		if (!raw) return fallback();
+		const parsed = JSON.parse(raw);
+		return { ...fallback(), ...parsed };
+	} catch {
+		return fallback();
+	}
+	function fallback(): Persisted {
+		return { read: [], expanded: [], opened: [], struck: [], bannerDismissed: false };
+	}
+}
+
+let state: Persisted = loadState();
+
+// Derived runtime structures (what the UI actually uses)
+let readSlugs = new Set<string>(state.read);
+let expandedSlugs: string[] = state.expanded;
+let openedSlugs = new Set<string>(state.opened);
+let struckSlugs = new Set<string>(state.struck);
+let bannerDismissed = state.bannerDismissed;
+
+// Cheap debounce with rAF
+let saveRaf: number | null = null;
+function queueSave() {
+	if (typeof localStorage === 'undefined') return;
+	if (saveRaf) cancelAnimationFrame(saveRaf);
+	saveRaf = requestAnimationFrame(() => {
+		state = {
+			read: Array.from(readSlugs),
+			expanded: expandedSlugs,
+			opened: Array.from(openedSlugs),
+			struck: Array.from(struckSlugs),
+			bannerDismissed
+		};
 		try {
-			const raw = localStorage.getItem(STORAGE_KEY);
-			if (!raw) return fallback();
-			const parsed = JSON.parse(raw);
-			return { ...fallback(), ...parsed };
-		} catch {
-			return fallback();
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		} catch {}
+		saveRaf = null;
+	});
+}
+
+// Save before leaving the page as a last resort
+if (typeof window !== 'undefined') {
+	window.addEventListener('beforeunload', queueSave);
+}
+
+/* ------------------------------------------------------------------ */
+/*  UI STATE                                                          */
+/* ------------------------------------------------------------------ */
+
+const allPostSlugs = data.posts.map((p) => p.slug);
+let initialLoad = true;
+let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
+
+let hoveredSlug: string | null = null;
+let strikeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const bannerTypeClasses: Record<string, string> = {
+	warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
+	danger: 'bg-red-100 text-red-900 border-red-300',
+	info: 'bg-blue-100 text-blue-900 border-blue-300',
+	success: 'bg-green-100 text-green-900 border-green-300'
+};
+
+let bannerKey = '';
+$: if (data.banner) {
+	bannerKey = `bannerDismissed_${data.event}_${encodeURIComponent(data.banner.message)}`;
+}
+
+// Lock background scroll when fullscreen modal is open
+$: typeof document !== 'undefined' &&
+	(document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
+
+/* ------------------------------------------------------------------ */
+/*  REACTIONS                                                          */
+/* ------------------------------------------------------------------ */
+
+const ANON_KEY = 'anon_id_v1';
+function getAnonId() {
+	if (typeof localStorage === 'undefined') return 'no-localstorage';
+	let id = localStorage.getItem(ANON_KEY);
+	if (!id) {
+		id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+		localStorage.setItem(ANON_KEY, id);
+	}
+	return id;
+}
+const anon_id = getAnonId();
+
+const REACT_KEY = (slug: string) => `reacted:${data.event}:${slug}`;
+
+type ReactionState = {
+	counts: Record<string, number>;
+	views: number;
+	mine: boolean;
+	loading: boolean;
+};
+
+let reactions: Record<string, ReactionState> = {};
+
+async function loadReaction(slug: string) {
+	const res = await fetch(`/api/reactions/${data.event}/${slug}`);
+	const { counts, views } = await res.json();
+	reactions = {
+		...reactions,
+		[slug]: {
+			counts,
+			views,
+			mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
+			loading: false
 		}
-		function fallback(): Persisted {
-			return { read: [], expanded: [], opened: [], struck: [], bannerDismissed: false };
-		}
-	}
-
-	let state: Persisted = loadState();
-
-	// Derived runtime structures (what the UI actually uses)
-	let readSlugs = new Set<string>(state.read);
-	let expandedSlugs: string[] = state.expanded;
-	let openedSlugs = new Set<string>(state.opened);
-	let struckSlugs = new Set<string>(state.struck);
-	let bannerDismissed = state.bannerDismissed;
-
-	// Cheap debounce with rAF
-	let saveRaf: number | null = null;
-	function queueSave() {
-		if (typeof localStorage === 'undefined') return;
-		if (saveRaf) cancelAnimationFrame(saveRaf);
-		saveRaf = requestAnimationFrame(() => {
-			state = {
-				read: Array.from(readSlugs),
-				expanded: expandedSlugs,
-				opened: Array.from(openedSlugs),
-				struck: Array.from(struckSlugs),
-				bannerDismissed
-			};
-			try {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-			} catch {}
-			saveRaf = null;
-		});
-	}
-
-	// Save before leaving the page as a last resort
-	if (typeof window !== 'undefined') {
-		window.addEventListener('beforeunload', queueSave);
-	}
-
-	/* ------------------------------------------------------------------ */
-	/*  UI STATE                                                          */
-	/* ------------------------------------------------------------------ */
-
-	const allPostSlugs = data.posts.map((p) => p.slug);
-	let initialLoad = true;
-	let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
-
-	let hoveredSlug: string | null = null;
-	let strikeTimeout: ReturnType<typeof setTimeout> | null = null;
-
-	const bannerTypeClasses: Record<string, string> = {
-		warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
-		danger: 'bg-red-100 text-red-900 border-red-300',
-		info: 'bg-blue-100 text-blue-900 border-blue-300',
-		success: 'bg-green-100 text-green-900 border-green-300'
 	};
+}
 
-	let bannerKey = '';
-	$: if (data.banner) {
-		bannerKey = `bannerDismissed_${data.event}_${encodeURIComponent(data.banner.message)}`;
-	}
+async function toggleReaction(slug: string, type: string) {
+	const current = reactions[slug] || { counts: {}, views: 0, mine: false, loading: false };
+	const add = !current.mine;
 
-	// Lock background scroll when fullscreen modal is open
-	$: typeof document !== 'undefined' &&
-		(document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
+	reactions = { ...reactions, [slug]: { ...current, loading: true } };
 
-	onMount(async () => {
-		// Ensure bannerDismissed mirrors previous local key if you still want that older behavior
-		if (data.banner && typeof localStorage !== 'undefined') {
-			const stored = localStorage.getItem(bannerKey);
-			if (stored === 'true') {
-				bannerDismissed = true;
-			}
-		}
-
-		// Always start collapsed, but we keep the saved line-through/read state
-		expandedSlugs = [];
-		queueSave();
-
-		await tick();
-		initialLoad = false;
-		await Promise.all(data.posts.map((p) => loadReaction(p.slug)));
-
-		if (!browser) return;
-		const seedKey = `seeded:${data.event}`;
-		if (sessionStorage.getItem(seedKey)) return;
-		sessionStorage.setItem(seedKey, '1');
-
-		const id = anonId();
-		for (const slug of allPostSlugs) {
-			fetch(`/api/reactions/${data.event}/${slug}`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ mode: 'seed', anon_id: id })
-			});
-		}
+	const res = await fetch(`/api/reactions/${data.event}/${slug}`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ mode: 'toggle', type, anon_id })
 	});
 
-	const ANON_KEY = 'anon_id_v1';
-	function getAnonId() {
-		if (typeof localStorage === 'undefined') return 'no-localstorage';
-		let id = localStorage.getItem(ANON_KEY);
-		if (!id) {
-			// Browser support is fine in modern environments
-			id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-			localStorage.setItem(ANON_KEY, id);
-		}
-		return id;
-	}
-	const anon_id = getAnonId();
-
-	const REACT_KEY = (slug: string) => `reacted:${data.event}:${slug}`;
-
-	type ReactionState = { count: number; mine: boolean; loading: boolean };
-	let reactions: Record<string, ReactionState> = {};
-
-	function anonId() {
-		if (!browser) return '';
-		let id = localStorage.getItem('anon_id');
-		if (!id) {
-			id = crypto.randomUUID();
-			localStorage.setItem('anon_id', id);
-		}
-		return id;
+	const { counts, views, error } = await res.json();
+	if (error) {
+		console.error(error);
+		reactions = { ...reactions, [slug]: { ...current, loading: false } };
+		return;
 	}
 
-	/* ------------------------------------------------------------------ */
-	/*  Handlers                                                          */
-	/* ------------------------------------------------------------------ */
+	if (typeof localStorage !== 'undefined') {
+		if (add) localStorage.setItem(REACT_KEY(slug), '1');
+		else localStorage.removeItem(REACT_KEY(slug));
+	}
 
-	async function loadReaction(slug: string) {
-		const res = await fetch(`/api/reactions/${data.event}/${slug}`);
-		const { count } = await res.json();
-		reactions = {
-			...reactions,
-			[slug]: {
-				count,
-				mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
-				loading: false
+	reactions = {
+		...reactions,
+		[slug]: { counts, views, mine: add, loading: false }
+	};
+}
+
+/* ------------------------------------------------------------------ */
+/*  MISC HELPERS                                                       */
+/* ------------------------------------------------------------------ */
+
+function markAsRead(slug: string) {
+	if (readSlugs.has(slug)) return;
+	const next = new Set(readSlugs);
+	next.add(slug);
+	readSlugs = next;
+	queueSave();
+}
+
+function toggleExpand(slug: string) {
+	if (expandedSlugs.includes(slug)) {
+		expandedSlugs = expandedSlugs.filter((s) => s !== slug);
+	} else {
+		expandedSlugs = [...expandedSlugs, slug];
+		openedSlugs.add(slug);
+		markAsRead(slug);
+	}
+	queueSave();
+}
+
+function openAll() {
+	expandedSlugs = [...allPostSlugs];
+	allPostSlugs.forEach((s) => {
+		openedSlugs.add(s);
+		readSlugs.add(s);
+	});
+	queueSave();
+}
+
+function collapseAll() {
+	expandedSlugs = [];
+	queueSave();
+}
+
+function dismissBanner() {
+	bannerDismissed = true;
+	if (typeof localStorage !== 'undefined') {
+		localStorage.setItem(bannerKey, 'true');
+	}
+	queueSave();
+}
+
+function isVideo(src: string) {
+	return src.endsWith('.mp4');
+}
+
+function hasLayout(image: { layout: string[] }, layout: string) {
+	return image.layout.includes(layout);
+}
+
+function getLayoutClasses(image: { layout: string[] }) {
+	const base = 'cursor-pointer my-2 sm:my-3 rounded-lg object-contain shadow-md';
+
+	const side = hasLayout(image, 'right')
+		? 'md:float-right md:ml-4 md:mb-2'
+		: hasLayout(image, 'left')
+			? 'md:float-left md:mr-4 md:mb-2'
+			: 'mx-auto';
+
+	const width = hasLayout(image, 'hole')
+		? 'w-full max-w-2xl mx-auto'
+		: hasLayout(image, 'vertical')
+			? 'w-full sm:w-1/2 md:w-1/5'
+			: hasLayout(image, 'horizantal') || hasLayout(image, 'horizontal')
+				? 'w-full sm:w-3/4 md:w-2/5'
+				: hasLayout(image, 'left') || hasLayout(image, 'right')
+					? 'w-full sm:w-2/3 md:w-1/4'
+					: 'w-full max-w-sm mx-auto';
+
+	return [base, side, width].join(' ');
+}
+
+function openFullscreen(src: string, alt: string) {
+	fullscreenMedia = { src, alt, isVideo: isVideo(src) };
+}
+
+function tryStartStrikeTimer(slug: string) {
+	if (expandedSlugs.includes(slug) && hoveredSlug === slug && !struckSlugs.has(slug)) {
+		if (strikeTimeout) clearTimeout(strikeTimeout);
+		strikeTimeout = setTimeout(() => {
+			struckSlugs.add(slug);
+			queueSave();
+		}, 1000);
+	}
+}
+
+function clearStrikeTimer() {
+	if (strikeTimeout) clearTimeout(strikeTimeout);
+	strikeTimeout = null;
+}
+
+function unmarkRead(slug: string) {
+	if (!readSlugs.has(slug)) return;
+	const next = new Set(readSlugs);
+	next.delete(slug);
+	readSlugs = next;
+	queueSave();
+}
+function markAllUnread() {
+	readSlugs = new Set();
+	queueSave();
+}
+
+const VIEW_THRESHOLD = 0.35; // ~35% visible
+const VIEW_MS = 2500;        // 2.5 seconds
+
+function readOnView(node: HTMLElement, slug: string) {
+	if (typeof IntersectionObserver === 'undefined') {
+		markAsRead(slug);
+		return { destroy() {} };
+	}
+	let timer: number | null = null;
+	const observer = new IntersectionObserver(
+		([entry]) => {
+			if (entry.isIntersecting && entry.intersectionRatio >= VIEW_THRESHOLD) {
+				if (timer) clearTimeout(timer);
+				timer = window.setTimeout(() => {
+					markAsRead(slug);
+					observer.disconnect();
+				}, VIEW_MS);
+			} else if (timer) {
+				clearTimeout(timer);
+				timer = null;
 			}
-		};
+		},
+		{ threshold: [0, VIEW_THRESHOLD, 1] }
+	);
+	observer.observe(node);
+	return {
+		destroy() {
+			observer.disconnect();
+			if (timer) clearTimeout(timer);
+		}
+	};
+}
+
+/* ------------------------------------------------------------------ */
+/*  MOUNT                                                              */
+/* ------------------------------------------------------------------ */
+
+onMount(async () => {
+	// Ensure bannerDismissed mirrors previous local key if you still want that older behavior
+	if (data.banner && typeof localStorage !== 'undefined') {
+		const stored = localStorage.getItem(bannerKey);
+		if (stored === 'true') {
+			bannerDismissed = true;
+		}
 	}
 
-	async function toggleReaction(slug: string) {
-		const current = reactions[slug] || { count: 0, mine: false, loading: false };
-		const add = !current.mine;
+	// Always start collapsed, but we keep the saved line-through/read state
+	expandedSlugs = [];
+	queueSave();
 
-		reactions = { ...reactions, [slug]: { ...current, loading: true } };
+	await tick();
+	initialLoad = false;
+	await Promise.all(data.posts.map((p) => loadReaction(p.slug)));
 
-		const res = await fetch(`/api/reactions/${data.event}/${slug}`, {
+	if (!browser) return;
+	const seedKey = `seeded:${data.event}`;
+	if (sessionStorage.getItem(seedKey)) return;
+	sessionStorage.setItem(seedKey, '1');
+
+	const id = anon_id;
+	for (const slug of allPostSlugs) {
+		fetch(`/api/reactions/${data.event}/${slug}`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ add, anon_id })
+			body: JSON.stringify({ mode: 'seed', anon_id: id })
 		});
-		const { count } = await res.json();
-
-		if (typeof localStorage !== 'undefined') {
-			if (add) localStorage.setItem(REACT_KEY(slug), '1');
-			else localStorage.removeItem(REACT_KEY(slug));
-		}
-
-		reactions = {
-			...reactions,
-			[slug]: { count, mine: add, loading: false }
-		};
 	}
-
-	function markAsRead(slug: string) {
-		if (readSlugs.has(slug)) return;
-		const next = new Set(readSlugs);
-		next.add(slug);
-		readSlugs = next;
-		queueSave();
-	}
-
-	function toggleExpand(slug: string) {
-		if (expandedSlugs.includes(slug)) {
-			expandedSlugs = expandedSlugs.filter((s) => s !== slug);
-		} else {
-			expandedSlugs = [...expandedSlugs, slug];
-			openedSlugs.add(slug);
-			markAsRead(slug);
-		}
-		queueSave();
-	}
-
-	function openAll() {
-		expandedSlugs = [...allPostSlugs];
-		allPostSlugs.forEach((s) => {
-			openedSlugs.add(s);
-			readSlugs.add(s);
-		});
-		queueSave();
-	}
-
-	function collapseAll() {
-		expandedSlugs = [];
-		queueSave();
-	}
-
-	function dismissBanner() {
-		bannerDismissed = true;
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem(bannerKey, 'true');
-		}
-		queueSave();
-	}
-
-	function isVideo(src: string) {
-		return src.endsWith('.mp4');
-	}
-
-	function hasLayout(image: { layout: string[] }, layout: string) {
-		return image.layout.includes(layout);
-	}
-
-	function getLayoutClasses(image: { layout: string[] }) {
-		const base = 'cursor-pointer my-2 sm:my-3 rounded-lg object-contain shadow-md';
-
-		const side = hasLayout(image, 'right')
-			? 'md:float-right md:ml-4 md:mb-2'
-			: hasLayout(image, 'left')
-				? 'md:float-left md:mr-4 md:mb-2'
-				: 'mx-auto';
-
-		const width = hasLayout(image, 'hole')
-			? 'w-full max-w-2xl mx-auto'
-			: hasLayout(image, 'vertical')
-				? 'w-full sm:w-1/2 md:w-1/5'
-				: hasLayout(image, 'horizantal') || hasLayout(image, 'horizontal')
-					? 'w-full sm:w-3/4 md:w-2/5'
-					: hasLayout(image, 'left') || hasLayout(image, 'right')
-						? 'w-full sm:w-2/3 md:w-1/4'
-						: 'w-full max-w-sm mx-auto';
-
-		return [base, side, width].join(' ');
-	}
-
-	function openFullscreen(src: string, alt: string) {
-		fullscreenMedia = { src, alt, isVideo: isVideo(src) };
-	}
-
-	function tryStartStrikeTimer(slug: string) {
-		if (expandedSlugs.includes(slug) && hoveredSlug === slug && !struckSlugs.has(slug)) {
-			if (strikeTimeout) clearTimeout(strikeTimeout);
-			strikeTimeout = setTimeout(() => {
-				struckSlugs.add(slug);
-				queueSave();
-			}, 1000); // change duration if you want
-		}
-	}
-
-	function clearStrikeTimer() {
-		if (strikeTimeout) clearTimeout(strikeTimeout);
-		strikeTimeout = null;
-	}
-
-	function unmarkRead(slug: string) {
-		if (!readSlugs.has(slug)) return;
-		const next = new Set(readSlugs);
-		next.delete(slug);
-		readSlugs = next;
-		queueSave();
-	}
-	function markAllUnread() {
-		readSlugs = new Set();
-		queueSave();
-	}
-
-	const VIEW_THRESHOLD = 0.35; // ~35% visible
-	const VIEW_MS = 2500; // 2.5 seconds
-
-	function readOnView(node: HTMLElement, slug: string) {
-		if (typeof IntersectionObserver === 'undefined') {
-			markAsRead(slug);
-			return { destroy() {} };
-		}
-		let timer: number | null = null;
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry.isIntersecting && entry.intersectionRatio >= VIEW_THRESHOLD) {
-					if (timer) clearTimeout(timer);
-					timer = window.setTimeout(() => {
-						markAsRead(slug);
-						observer.disconnect();
-					}, VIEW_MS);
-				} else if (timer) {
-					clearTimeout(timer);
-					timer = null;
-				}
-			},
-			{ threshold: [0, VIEW_THRESHOLD, 1] }
-		);
-		observer.observe(node);
-		return {
-			destroy() {
-				observer.disconnect();
-				if (timer) clearTimeout(timer);
-			}
-		};
-	}
+});
 </script>
 
 {#if data.banner && !bannerDismissed}
@@ -424,7 +435,7 @@
 					clearStrikeTimer();
 				}}
 			>
-				{#if readSlugs.has(post.slug)}
+				<!-- {#if readSlugs.has(post.slug)}
 					<button
 						on:click|stopPropagation={() => unmarkRead(post.slug)}
 						title="Mark as unread"
@@ -433,7 +444,7 @@
 					>
 						✕
 					</button>
-				{/if}
+				{/if} -->
 
 				<!-- HEADER ROW -->
 				<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
@@ -459,13 +470,14 @@
 						</div>
 					</button>
 
-					<!-- wrap ReactionBar so it can stay on the right on desktop -->
 					<div class="mt-1 sm:ml-3 sm:mt-0">
 						<!-- RIGHT SIDE REACTIONS -->
 						<ReactionBar
 							event={data.event}
 							slug={post.slug}
 							expanded={expandedSlugs.includes(post.slug)}
+							on:toggle={(e) => toggleReaction(post.slug, e.detail.type)}
+							on:loaded={() => loadReaction(post.slug)}
 						/>
 					</div>
 				</div>
@@ -479,7 +491,6 @@
 					>
 						{#each post.holeImages as image}
 							{#if isVideo(image.src)}
-								<!-- Wrap video in a button for accessibility -->
 								<button
 									type="button"
 									class={getLayoutClasses(image)}
@@ -500,7 +511,6 @@
 									</video>
 								</button>
 							{:else}
-								<!-- Wrap img in a button for accessibility -->
 								<button
 									type="button"
 									class={getLayoutClasses(image)}
@@ -527,8 +537,6 @@
 	{#if data.leftoverImages.length > 0}
 		<div class="mt-8">
 			<h3 class="mb-4 text-xl font-semibold">Bonus Pictures</h3>
-
-			<!-- Masonry-ish using CSS columns (keeps variable heights nicely) -->
 			<div class="columns-1 gap-4 [column-fill:balance] sm:columns-2 lg:columns-4">
 				{#each data.leftoverImages as image}
 					<button

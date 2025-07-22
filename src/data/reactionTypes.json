@@ -1,7 +1,7 @@
 [
-  { "key": "🤣", "emoji": "🤣", "label": "Laugh" },
-  { "key": "😢", "emoji": "😢", "label": "Cry" },
-  { "key": "😮", "emoji": "😮", "label": "Wow" },
-  { "key": "❤️", "emoji": "❤️", "label": "Love" },
-  { "key": "👍", "emoji": "👍", "label": "Like" }
+  { "key": "laugh", "emoji": "🤣" },
+  { "key": "cry",   "emoji": "😢" },
+  { "key": "wow",   "emoji": "😮" },
+  { "key": "heart", "emoji": "❤️" },
+  { "key": "up",    "emoji": "👍" }
 ]
