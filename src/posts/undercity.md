@@ -2,6 +2,9 @@
 title: "Undercity"
 description: "A multi-day hardware hackathon at GitHub HQ, where I built cool stuff and made unforgettable memories."
 coverImage: /blogimages/undercity/group.webp
+warning: "This post is Done"
+warning_type: success
+warning_dismissible: false
 ---
 ---
 title: "Day 1 of Undercity"

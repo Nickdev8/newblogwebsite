@@ -1,5 +1,9 @@
 <script lang="ts">
 	// @ts-nocheck
+	import { onMount, tick } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import ReactionBar from '$lib/ReactionBar.svelte';
+
 	export let data: {
 		posts: {
 			date: string;
@@ -10,7 +14,11 @@
 		}[];
 		event: string;
 		leftoverImages: { src: string; alt: string }[];
-		banner?: { message: string; type?: 'info' | 'warning' | 'danger' | 'success'; dismissible?: boolean } | null;
+		banner?: {
+			message: string;
+			type?: 'info' | 'warning' | 'danger' | 'success';
+			dismissible?: boolean;
+		} | null;
 		title: string;
 		description: string;
 		coverImage: string;
@@ -18,20 +26,79 @@
 		images: string[];
 	};
 
-	import { onMount, tick } from 'svelte';
-	import { slide } from 'svelte/transition';
-	import { Splide, SplideSlide } from '@splidejs/svelte-splide';
-	import '@splidejs/svelte-splide/css';
+	/* ------------------------------------------------------------------ */
+	/*  PERSISTENCE LAYER (single key, debounced save)                     */
+	/* ------------------------------------------------------------------ */
 
-	let expandedSlugs: string[] = [];
-	let openedSlugs: Set<string> = new Set();
+	const STORAGE_KEY = `eventState:${data.event}`;
+	type Persisted = {
+		read: string[];
+		expanded: string[];
+		opened: string[];
+		struck: string[];
+		bannerDismissed: boolean;
+	};
+
+	function loadState(): Persisted {
+		if (typeof localStorage === 'undefined') return fallback();
+		try {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (!raw) return fallback();
+			const parsed = JSON.parse(raw);
+			return { ...fallback(), ...parsed };
+		} catch {
+			return fallback();
+		}
+		function fallback(): Persisted {
+			return { read: [], expanded: [], opened: [], struck: [], bannerDismissed: false };
+		}
+	}
+
+	let state: Persisted = loadState();
+
+	// Derived runtime structures (what the UI actually uses)
+	let readSlugs = new Set<string>(state.read);
+	let expandedSlugs: string[] = state.expanded;
+	let openedSlugs = new Set<string>(state.opened);
+	let struckSlugs = new Set<string>(state.struck);
+	let bannerDismissed = state.bannerDismissed;
+
+	// Cheap debounce with rAF
+	let saveRaf: number | null = null;
+	function queueSave() {
+		if (typeof localStorage === 'undefined') return;
+		if (saveRaf) cancelAnimationFrame(saveRaf);
+		saveRaf = requestAnimationFrame(() => {
+			state = {
+				read: Array.from(readSlugs),
+				expanded: expandedSlugs,
+				opened: Array.from(openedSlugs),
+				struck: Array.from(struckSlugs),
+				bannerDismissed
+			};
+			try {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			} catch {}
+			saveRaf = null;
+		});
+	}
+
+	// Save before leaving the page as a last resort
+	if (typeof window !== 'undefined') {
+		window.addEventListener('beforeunload', queueSave);
+	}
+
+	/* ------------------------------------------------------------------ */
+	/*  UI STATE                                                          */
+	/* ------------------------------------------------------------------ */
+
 	const allPostSlugs = data.posts.map((p) => p.slug);
 	let initialLoad = true;
 	let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
 
-	// --- Banner (warning popup) state ---
-	let bannerDismissed = false;
-	let bannerKey = '';
+	let hoveredSlug: string | null = null;
+	let strikeTimeout: ReturnType<typeof setTimeout> | null = null;
+
 	const bannerTypeClasses: Record<string, string> = {
 		warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
 		danger: 'bg-red-100 text-red-900 border-red-300',
@@ -39,116 +106,147 @@
 		success: 'bg-green-100 text-green-900 border-green-300'
 	};
 
+	let bannerKey = '';
 	$: if (data.banner) {
 		bannerKey = `bannerDismissed_${data.event}_${encodeURIComponent(data.banner.message)}`;
 	}
 
 	// Lock background scroll when fullscreen modal is open
-	$: typeof document !== 'undefined' && (document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
+	$: typeof document !== 'undefined' &&
+		(document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
 
 	onMount(async () => {
-		// init banner dismissed state
+		// Ensure bannerDismissed mirrors previous local key if you still want that older behavior
 		if (data.banner && typeof localStorage !== 'undefined') {
-			bannerDismissed = localStorage.getItem(bannerKey) === 'true';
-		}
-
-		const visitedKey = `hasVisited_${data.event}`;
-		const hasVisited = typeof localStorage !== 'undefined' && localStorage.getItem(visitedKey);
-
-		const savedOpened = typeof localStorage !== 'undefined' && localStorage.getItem('openedSlugs');
-		if (savedOpened) {
-			openedSlugs = new Set(JSON.parse(savedOpened));
-		}
-
-		if (!hasVisited) {
-			// First visit, open all posts
-			expandedSlugs = [...allPostSlugs];
-			openedSlugs = new Set([...openedSlugs, ...allPostSlugs]);
-			localStorage.setItem(visitedKey, 'true');
-		} else {
-			// Subsequent visits, load saved state
-			const savedExpanded = localStorage.getItem('expandedSlugs');
-			if (savedExpanded) {
-				expandedSlugs = JSON.parse(savedExpanded);
+			const stored = localStorage.getItem(bannerKey);
+			if (stored === 'true') {
+				bannerDismissed = true;
 			}
 		}
 
-		localStorage.setItem('expandedSlugs', JSON.stringify(expandedSlugs));
-		localStorage.setItem('openedSlugs', JSON.stringify(Array.from(openedSlugs)));
+		// Always start collapsed, but we keep the saved line-through/read state
+		expandedSlugs = [];
+		queueSave();
 
 		await tick();
 		initialLoad = false;
+		await Promise.all(data.posts.map((p) => loadReaction(p.slug)));
 
-		const scrollKey = `currentPostSlug_${data.event}`;
+		if (!browser) return;
+		const seedKey = `seeded:${data.event}`;
+		if (sessionStorage.getItem(seedKey)) return;
+		sessionStorage.setItem(seedKey, '1');
 
-		// Restore scroll position
-		const savedSlug = localStorage.getItem(scrollKey);
-		if (savedSlug) {
-			setTimeout(() => {
-				const element = document.getElementById(savedSlug);
-				if (element) {
-					element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-				}
-			}, 400); // Slightly longer than slide duration of 350ms
+		const id = anonId();
+		for (const slug of allPostSlugs) {
+			fetch(`/api/reactions/${data.event}/${slug}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ mode: 'seed', anon_id: id })
+			});
+		}
+	});
+
+	const ANON_KEY = 'anon_id_v1';
+	function getAnonId() {
+		if (typeof localStorage === 'undefined') return 'no-localstorage';
+		let id = localStorage.getItem(ANON_KEY);
+		if (!id) {
+			// Browser support is fine in modern environments
+			id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+			localStorage.setItem(ANON_KEY, id);
+		}
+		return id;
+	}
+	const anon_id = getAnonId();
+
+	const REACT_KEY = (slug: string) => `reacted:${data.event}:${slug}`;
+
+	type ReactionState = { count: number; mine: boolean; loading: boolean };
+	let reactions: Record<string, ReactionState> = {};
+
+	function anonId() {
+		if (!browser) return '';
+		let id = localStorage.getItem('anon_id');
+		if (!id) {
+			id = crypto.randomUUID();
+			localStorage.setItem('anon_id', id);
+		}
+		return id;
+	}
+
+	/* ------------------------------------------------------------------ */
+	/*  Handlers                                                          */
+	/* ------------------------------------------------------------------ */
+
+	async function loadReaction(slug: string) {
+		const res = await fetch(`/api/reactions/${data.event}/${slug}`);
+		const { count } = await res.json();
+		reactions = {
+			...reactions,
+			[slug]: {
+				count,
+				mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
+				loading: false
+			}
+		};
+	}
+
+	async function toggleReaction(slug: string) {
+		const current = reactions[slug] || { count: 0, mine: false, loading: false };
+		const add = !current.mine;
+
+		reactions = { ...reactions, [slug]: { ...current, loading: true } };
+
+		const res = await fetch(`/api/reactions/${data.event}/${slug}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ add, anon_id })
+		});
+		const { count } = await res.json();
+
+		if (typeof localStorage !== 'undefined') {
+			if (add) localStorage.setItem(REACT_KEY(slug), '1');
+			else localStorage.removeItem(REACT_KEY(slug));
 		}
 
-		// Save scroll position efficiently
-		let lastLoggedSlug = '';
-		let rafId: number | null = null;
-		const handleScroll = () => {
-			if (rafId) cancelAnimationFrame(rafId);
-			rafId = requestAnimationFrame(() => {
-				let currentPostSlug = '';
-				let closestTop = Infinity;
-
-				const postElements = document.querySelectorAll('li[data-slug]');
-				if (postElements.length === 0) return;
-
-				postElements.forEach((el) => {
-					const rect = el.getBoundingClientRect();
-					const absTop = Math.abs(rect.top);
-					if (absTop < closestTop) {
-						closestTop = absTop;
-						currentPostSlug = el.getAttribute('data-slug') || '';
-					}
-				});
-
-				if (currentPostSlug && currentPostSlug !== lastLoggedSlug) {
-					localStorage.setItem(scrollKey, currentPostSlug);
-					lastLoggedSlug = currentPostSlug;
-				}
-			});
+		reactions = {
+			...reactions,
+			[slug]: { count, mine: add, loading: false }
 		};
+	}
 
-		window.addEventListener('scroll', handleScroll, { passive: true });
-
-		return () => {
-			window.removeEventListener('scroll', handleScroll);
-			if (rafId) cancelAnimationFrame(rafId);
-		};
-	});
+	function markAsRead(slug: string) {
+		if (readSlugs.has(slug)) return;
+		const next = new Set(readSlugs);
+		next.add(slug);
+		readSlugs = next;
+		queueSave();
+	}
 
 	function toggleExpand(slug: string) {
 		if (expandedSlugs.includes(slug)) {
 			expandedSlugs = expandedSlugs.filter((s) => s !== slug);
 		} else {
 			expandedSlugs = [...expandedSlugs, slug];
-			openedSlugs = new Set([...openedSlugs, slug]); // trigger reactivity for color change
-			localStorage.setItem('openedSlugs', JSON.stringify(Array.from(openedSlugs)));
+			openedSlugs.add(slug);
+			markAsRead(slug);
 		}
-		localStorage.setItem('expandedSlugs', JSON.stringify(expandedSlugs));
+		queueSave();
 	}
 
 	function openAll() {
 		expandedSlugs = [...allPostSlugs];
-		openedSlugs = new Set([...openedSlugs, ...allPostSlugs]);
-		localStorage.setItem('expandedSlugs', JSON.stringify(expandedSlugs));
-		localStorage.setItem('openedSlugs', JSON.stringify(Array.from(openedSlugs)));
+		allPostSlugs.forEach((s) => {
+			openedSlugs.add(s);
+			readSlugs.add(s);
+		});
+		queueSave();
 	}
 
 	function collapseAll() {
 		expandedSlugs = [];
-		localStorage.setItem('expandedSlugs', JSON.stringify(expandedSlugs));
+		queueSave();
 	}
 
 	function dismissBanner() {
@@ -156,6 +254,7 @@
 		if (typeof localStorage !== 'undefined') {
 			localStorage.setItem(bannerKey, 'true');
 		}
+		queueSave();
 	}
 
 	function isVideo(src: string) {
@@ -169,23 +268,21 @@
 	function getLayoutClasses(image: { layout: string[] }) {
 		const base = 'cursor-pointer my-2 sm:my-3 rounded-lg object-contain shadow-md';
 
-		// Side positioning only on medium+ screens
 		const side = hasLayout(image, 'right')
 			? 'md:float-right md:ml-4 md:mb-2'
 			: hasLayout(image, 'left')
-			? 'md:float-left md:mr-4 md:mb-2'
-			: 'mx-auto';
+				? 'md:float-left md:mr-4 md:mb-2'
+				: 'mx-auto';
 
-		// Width logic
 		const width = hasLayout(image, 'hole')
 			? 'w-full max-w-2xl mx-auto'
 			: hasLayout(image, 'vertical')
-			? 'w-full sm:w-1/2 md:w-1/5'
-			: hasLayout(image, 'horizantal') || hasLayout(image, 'horizontal')
-			? 'w-full sm:w-3/4 md:w-2/5'
-			: hasLayout(image, 'left') || hasLayout(image, 'right')
-			? 'w-full sm:w-2/3 md:w-1/4'
-			: 'w-full max-w-sm mx-auto';
+				? 'w-full sm:w-1/2 md:w-1/5'
+				: hasLayout(image, 'horizantal') || hasLayout(image, 'horizontal')
+					? 'w-full sm:w-3/4 md:w-2/5'
+					: hasLayout(image, 'left') || hasLayout(image, 'right')
+						? 'w-full sm:w-2/3 md:w-1/4'
+						: 'w-full max-w-sm mx-auto';
 
 		return [base, side, width].join(' ');
 	}
@@ -193,25 +290,86 @@
 	function openFullscreen(src: string, alt: string) {
 		fullscreenMedia = { src, alt, isVideo: isVideo(src) };
 	}
+
+	function tryStartStrikeTimer(slug: string) {
+		if (expandedSlugs.includes(slug) && hoveredSlug === slug && !struckSlugs.has(slug)) {
+			if (strikeTimeout) clearTimeout(strikeTimeout);
+			strikeTimeout = setTimeout(() => {
+				struckSlugs.add(slug);
+				queueSave();
+			}, 1000); // change duration if you want
+		}
+	}
+
+	function clearStrikeTimer() {
+		if (strikeTimeout) clearTimeout(strikeTimeout);
+		strikeTimeout = null;
+	}
+
+	function unmarkRead(slug: string) {
+		if (!readSlugs.has(slug)) return;
+		const next = new Set(readSlugs);
+		next.delete(slug);
+		readSlugs = next;
+		queueSave();
+	}
+	function markAllUnread() {
+		readSlugs = new Set();
+		queueSave();
+	}
+
+	const VIEW_THRESHOLD = 0.35; // ~35% visible
+	const VIEW_MS = 2500; // 2.5 seconds
+
+	function readOnView(node: HTMLElement, slug: string) {
+		if (typeof IntersectionObserver === 'undefined') {
+			markAsRead(slug);
+			return { destroy() {} };
+		}
+		let timer: number | null = null;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && entry.intersectionRatio >= VIEW_THRESHOLD) {
+					if (timer) clearTimeout(timer);
+					timer = window.setTimeout(() => {
+						markAsRead(slug);
+						observer.disconnect();
+					}, VIEW_MS);
+				} else if (timer) {
+					clearTimeout(timer);
+					timer = null;
+				}
+			},
+			{ threshold: [0, VIEW_THRESHOLD, 1] }
+		);
+		observer.observe(node);
+		return {
+			destroy() {
+				observer.disconnect();
+				if (timer) clearTimeout(timer);
+			}
+		};
+	}
 </script>
 
 {#if data.banner && !bannerDismissed}
 	<!-- Top warning banner -->
-	<div class={`w-full border-b px-3 py-2 sm:px-4 sm:py-2.5 text-sm flex items-start sm:items-center gap-2 ${bannerTypeClasses[data.banner.type || 'warning']}`}
+	<div
+		class={`flex w-full items-start gap-2 border-b px-3 py-2 text-sm sm:items-center sm:px-4 sm:py-2.5 ${bannerTypeClasses[data.banner.type || 'warning']}`}
 		role="alert"
 	>
 		<span class="flex-1">{@html data.banner.message}</span>
 		{#if data.banner.dismissible !== false}
 			<div class="flex gap-2">
 				<button
-					class="shrink-0 rounded px-2 py-0.5 text-xs font-medium/none opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+					class="font-medium/none shrink-0 rounded px-2 py-0.5 text-xs opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
 					on:click={() => (bannerDismissed = true)}
 					aria-label="Okay"
 				>
 					Okay
 				</button>
 				<button
-					class="shrink-0 rounded px-2 py-0.5 text-xs font-medium/none opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+					class="font-medium/none shrink-0 rounded px-2 py-0.5 text-xs opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
 					on:click={dismissBanner}
 					aria-label="Don't show again"
 				>
@@ -223,24 +381,30 @@
 {/if}
 
 <div
-	class="mx-auto max-w-none md:max-w-[1100px] lg:max-w-[1280px] px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6"
+	class="mx-auto max-w-none px-3 py-4 sm:px-4 sm:py-6 md:max-w-[1100px] md:px-6 lg:max-w-[1280px] lg:px-8"
 	on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
 	role="document"
 >
-	<div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-		<h1 class="text-2xl sm:text-3xl font-bold capitalize">{data.event}</h1>
+	<div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+		<h1 class="text-2xl font-bold capitalize sm:text-3xl">{data.event}</h1>
 		<div class="flex flex-wrap gap-2 sm:gap-3">
 			<button
 				on:click={openAll}
-				class="text-[11px] sm:text-xs text-gray-500 transition hover:text-gray-700 hover:underline cursor-pointer"
+				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
 			>
 				Open All
 			</button>
 			<button
 				on:click={collapseAll}
-				class="text-[11px] sm:text-xs text-gray-500 transition hover:text-gray-700 hover:underline cursor-pointer"
+				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
 			>
 				Collapse All
+			</button>
+			<button
+				on:click={markAllUnread}
+				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
+			>
+				Mark All as Unread
 			</button>
 		</div>
 	</div>
@@ -250,58 +414,102 @@
 			<li
 				id={post.slug}
 				data-slug={post.slug}
-				class="rounded bg-white p-2.5 sm:p-3 shadow transition hover:bg-gray-50"
+				class="relative rounded bg-white p-2.5 shadow transition hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 sm:p-3"
+				on:mouseenter={() => {
+					hoveredSlug = post.slug;
+					tryStartStrikeTimer(post.slug);
+				}}
+				on:mouseleave={() => {
+					if (hoveredSlug === post.slug) hoveredSlug = null;
+					clearStrikeTimer();
+				}}
 			>
-				<button
-					class="block w-full text-left cursor-pointer"
-					on:click={() => toggleExpand(post.slug)}
-					aria-expanded={expandedSlugs.includes(post.slug)}
-					aria-controls={`content-${post.slug}`}
-				>
-					<div class="text-[11px] sm:text-xs text-gray-500">{post.date}</div>
-					<div
-						class="text-lg sm:text-xl font-semibold {openedSlugs.has(post.slug)
-							? 'text-gray-700 underline hover:text-gray-900'
-							: 'text-blue-600 underline hover:text-blue-800'}"
+				{#if readSlugs.has(post.slug)}
+					<button
+						on:click|stopPropagation={() => unmarkRead(post.slug)}
+						title="Mark as unread"
+						aria-label="Mark as unread"
+						class="absolute right-2 top-2 text-[10px] text-gray-400 hover:text-gray-700 sm:text-xs"
 					>
-						{post.title}
+						✕
+					</button>
+				{/if}
+
+				<!-- HEADER ROW -->
+				<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+					<button
+						class="flex-1 cursor-pointer text-left"
+						on:click={() => {
+							const willOpen = !expandedSlugs.includes(post.slug);
+							toggleExpand(post.slug);
+							if (willOpen) markAsRead(post.slug);
+						}}
+						aria-expanded={expandedSlugs.includes(post.slug)}
+						aria-controls={`content-${post.slug}`}
+					>
+						<div class="text-[11px] text-gray-500 dark:text-gray-400 sm:text-xs">{post.date}</div>
+						<div class="font-semibold sm:text-xl">
+							<span
+								class={readSlugs.has(post.slug)
+									? 'text-blue-800 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-200'
+									: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200'}
+							>
+								{post.title}
+							</span>
+						</div>
+					</button>
+
+					<!-- wrap ReactionBar so it can stay on the right on desktop -->
+					<div class="mt-1 sm:ml-3 sm:mt-0">
+						<!-- RIGHT SIDE REACTIONS -->
+						<ReactionBar
+							event={data.event}
+							slug={post.slug}
+							expanded={expandedSlugs.includes(post.slug)}
+						/>
 					</div>
-				</button>
+				</div>
 
 				{#if expandedSlugs.includes(post.slug)}
 					<div
 						id={`content-${post.slug}`}
-						class="flow-root prose prose-sm sm:prose mt-3 max-w-none overflow-hidden rounded border border-gray-200 bg-gray-50 p-3 sm:p-4 shadow-inner"
+						use:readOnView={post.slug}
+						class="prose prose-sm sm:prose mt-3 flow-root max-w-none overflow-hidden rounded border border-gray-200 bg-gray-50 p-3 shadow-inner dark:border-gray-700 dark:bg-gray-900 sm:p-4"
 						transition:slide={!initialLoad ? { duration: 350, easing: (t) => t * t } : undefined}
 					>
 						{#each post.holeImages as image}
 							{#if isVideo(image.src)}
-								<video
-									src={image.src}
-									class={` ${getLayoutClasses(image)}`}
-									autoplay={!hasLayout(image, 'dontautostart')}
-									loop={!hasLayout(image, 'dontautostart')}
-									muted={!hasLayout(image, 'dontautostart')}
-									playsinline={!hasLayout(image, 'dontautostart')}
-									controls={hasLayout(image, 'dontautostart')}
+								<!-- Wrap video in a button for accessibility -->
+								<button
+									type="button"
+									class={getLayoutClasses(image)}
 									on:click={() => openFullscreen(image.src, image.alt)}
-									on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
-									role="button"
-									tabindex="0"
 									aria-label={image.alt || 'Open video fullscreen'}
+									style="padding:0;border:none;background:none;"
 								>
-									<track kind="captions" />
-								</video>
+									<video
+										src={image.src}
+										autoplay={!hasLayout(image, 'dontautostart')}
+										loop={!hasLayout(image, 'dontautostart')}
+										muted={!hasLayout(image, 'dontautostart')}
+										playsinline={!hasLayout(image, 'dontautostart')}
+										controls={hasLayout(image, 'dontautostart')}
+										tabindex="-1"
+									>
+										<track kind="captions" />
+									</video>
+								</button>
 							{:else}
-								<img
-									src={image.src}
-									alt={image.alt}
-									class={` ${getLayoutClasses(image)}`}
+								<!-- Wrap img in a button for accessibility -->
+								<button
+									type="button"
+									class={getLayoutClasses(image)}
 									on:click={() => openFullscreen(image.src, image.alt)}
-									on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
-									role="button"
-									tabindex="0"
-								/>
+									aria-label={image.alt || 'Open image fullscreen'}
+									style="padding:0;border:none;background:none;"
+								>
+									<img src={image.src} alt={image.alt} tabindex="-1" />
+								</button>
 							{/if}
 						{/each}
 
@@ -318,43 +526,30 @@
 
 	{#if data.leftoverImages.length > 0}
 		<div class="mt-8">
-			<h3 class="mb-4 text-xl font-semibold">Leftover Media</h3>
-			<Splide
-				options={{
-					type: 'loop',
-					drag: 'free',
-					snap: true,
-					perPage: 3,
-					perMove: 1,
-					wheel: true,
-					gap: '1rem',
-					autoplay: true,
-					interval: 3000,
-					breakpoints: {
-						480: {
-							perPage: 1,
-							gap: '0.5rem'
-						},
-						768: {
-							perPage: 2
-						},
-						1024: {
-							perPage: 3
-						}
-					}
-				}}
-			>
+			<h3 class="mb-4 text-xl font-semibold">Bonus Pictures</h3>
+
+			<!-- Masonry-ish using CSS columns (keeps variable heights nicely) -->
+			<div class="columns-1 gap-4 [column-fill:balance] sm:columns-2 lg:columns-4">
 				{#each data.leftoverImages as image}
-					<SplideSlide>
+					<button
+						type="button"
+						class="mb-4 w-full cursor-pointer break-inside-avoid overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						on:click={() => openFullscreen(image.src, image.alt)}
+						aria-label={image.alt || 'Open media fullscreen'}
+						style="padding:0;border:none;background:none;"
+					>
 						{#if isVideo(image.src)}
 							<video
 								src={image.src}
-								class="mx-auto my-2 sm:my-3 h-48 sm:h-60 w-full cursor-pointer rounded-lg object-contain"
-								controls
-								on:click={() => openFullscreen(image.src, image.alt)}
-								on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
-								role="button"
-								tabindex="0"
+								autoplay
+								muted
+								loop
+								playsinline
+								controls={false}
+								controlsList="nodownload noplaybackrate noremoteplayback"
+								disablePictureInPicture
+								tabindex="-1"
+								class="pointer-events-none block h-auto w-full"
 							>
 								<track kind="captions" />
 							</video>
@@ -362,37 +557,39 @@
 							<img
 								src={image.src}
 								alt={image.alt}
-								class="mx-auto my-2 sm:my-3 h-48 sm:h-60 w-full cursor-pointer rounded-lg object-contain"
-								on:click={() => openFullscreen(image.src, image.alt)}
-								on:keydown={(e) => e.key === 'Enter' && openFullscreen(image.src, image.alt)}
-								role="button"
-								tabindex="0"
+								loading="lazy"
+								class="block h-auto w-full"
+								tabindex="-1"
 							/>
 						{/if}
-					</SplideSlide>
+					</button>
 				{/each}
-			</Splide>
+			</div>
 		</div>
 	{/if}
 </div>
 
 {#if fullscreenMedia}
-	<div
+	<section
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
-		on:click={() => (fullscreenMedia = null)}
+		tabindex="0"
 		role="dialog"
 		aria-modal="true"
 		aria-label="Fullscreen media viewer"
+		on:click={() => (fullscreenMedia = null)}
+		on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
 	>
 		<div class="relative max-h-full max-w-full" on:click|stopPropagation>
 			{#if fullscreenMedia.isVideo}
 				<video
 					src={fullscreenMedia.src}
-					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
 					controls
 					autoplay
 					playsinline
-				/>
+					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
+				>
+					<track kind="captions" />
+				</video>
 			{:else}
 				<img
 					src={fullscreenMedia.src}
@@ -400,6 +597,7 @@
 					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
 				/>
 			{/if}
+
 			<button
 				class="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white"
 				on:click={() => (fullscreenMedia = null)}
@@ -408,18 +606,41 @@
 				&times;
 			</button>
 		</div>
-	</div>
+	</section>
 {/if}
 
 <style>
-/* Compact the typography plugin spacing */
-:global(.prose > :where(p, ul, ol, pre, table, img, video):not(:last-child)) {
-	margin-bottom: 0.5rem;
-}
-:global(.prose h1){ margin-top:1.25rem; margin-bottom:0.5rem; }
-:global(.prose h2){ margin-top:1rem;   margin-bottom:0.5rem; }
-:global(.prose h3){ margin-top:0.75rem; margin-bottom:0.4rem; }
-:global(.prose h4){ margin-top:0.5rem;  margin-bottom:0.3rem; }
-:global(.prose li){ margin-top:0.15rem; margin-bottom:0.15rem; }
-:global(.prose blockquote){ margin:0.75rem 0; padding-left:0.75rem; }
+	/* Compact the typography plugin spacing */
+	:global(.prose > :where(p, ul, ol, pre, table, img, video):not(:last-child)) {
+		margin-bottom: 0.5rem;
+	}
+	:global(.prose h1) {
+		margin-top: 1.25rem;
+		margin-bottom: 0.5rem;
+	}
+	:global(.prose h2) {
+		margin-top: 1rem;
+		margin-bottom: 0.5rem;
+	}
+	:global(.prose h3) {
+		margin-top: 0.75rem;
+		margin-bottom: 0.4rem;
+	}
+	:global(.prose h4) {
+		margin-top: 0.5rem;
+		margin-bottom: 0.3rem;
+	}
+	:global(.prose li) {
+		margin-top: 0.15rem;
+		margin-bottom: 0.15rem;
+	}
+	:global(.prose blockquote) {
+		margin: 0.75rem 0;
+		padding-left: 0.75rem;
+	}
+	:global(video:focus),
+	:global(button:focus) {
+		outline: none !important;
+		box-shadow: none !important;
+	}
 </style>

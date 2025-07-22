@@ -5,5 +5,6 @@ export default {
     extend: {},
   },
   plugins: [],
+  darkMode: 'class', // add this line
 }
 

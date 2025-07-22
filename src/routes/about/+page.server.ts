@@ -38,7 +38,7 @@ export async function load() {
 	const shuffledImages = allMedia.sort(() => 0.5 - Math.random());
 	const carouselImages = shuffledImages.slice(0, 10);
 
-	const aboutMeImages = ['/aboutme2.png', '/aboutme3.png', '/aboutme4.png', '/aboutme5.png'];
+	const aboutMeImages = ['/aboutme2.webp', '/aboutme3.webp', '/aboutme4.webp', '/aboutme5.webp'];
 	const aboutMeImage = aboutMeImages[Math.floor(Math.random() * aboutMeImages.length)];
 
 	return { carouselImages, aboutMeImage };

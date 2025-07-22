@@ -3,7 +3,7 @@ title: "Shipwrecked"
 description: "An upcoming adventure with Hack Club. Stay tuned for the full story of what happened at Shipwrecked!"
 coverImage: /blogimages/shipwrecked/placeholder.webp
 warning: "This post is starting 8th of august."
-warning_type: warning
+warning_type: info
 warning_dismissible: true
 ---
 ---
