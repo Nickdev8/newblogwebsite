@@ -11,7 +11,6 @@ const config = {
 			extensions: ['.md']
 		})
 	],
-
 	kit: {
 		adapter: adapter({
 			pages: 'build',
