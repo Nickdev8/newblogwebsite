@@ -1,11 +1,11 @@
 ---
 title: "Undercity"
 description: "A multi-day hardware hackathon at GitHub HQ, where I built cool stuff and made unforgettable memories."
-coverImage: /blogimages/undercity/group.png
+coverImage: /blogimages/undercity/group.webp
 ---
 ---
 title: "Day 1 of Undercity"
-date: "2024-07-11"
+date: "2025-07-11"
 discription: "Undercity is a 4 day hackathon in Github HQ"
 ---
 
@@ -30,7 +30,7 @@ Undercity is intense, inspiring, and packed with projects. Think:
 
 ## I Met Paperclip
 
-![alt text](/blogimages/undercity/paperclipissmall.png){right vertical}
+![alt text](/blogimages/undercity/paperclipissmall.webp){right vertical}
 
 At the start of the event, **Paperclip** announced:
 
@@ -42,7 +42,7 @@ Meeting Paperclip for the first time was awesome. She’s small, full of energy,
 
 ## Starting Presentation
 
-![alt text](/blogimages/undercity/paperclippy.png){left horizantal}
+![alt text](/blogimages/undercity/paperclippy.webp){left horizantal}
 
 The opening presentation set the tone for everything to come:
 
@@ -59,9 +59,9 @@ The rest of the day I mostly spent with Paperclip. helping with badges, talking 
 
 ---
 title: "Day 2 of Undercity"
-date: "2024-07-12"
+date: "2025-07-12"
 ---
-![alt text](/blogimages/undercity/morningdemo.png){right}
+![alt text](/blogimages/undercity/morningdemo.webp){right}
 
 ## Morning Vibes
 
@@ -70,7 +70,7 @@ Right after waking up, the demos started. Paperclip’s team (Evan & Samith) bui
 
 ## Refresh and Reset
 
-![alt text](/blogimages/undercity/dogersvssanfransico.png){left}
+![alt text](/blogimages/undercity/dogersvssanfransico.webp){left}
 
 I quickly went back home to shower, shave, and generally not feel like a mess. On my way back to GitHub HQ, I walked past a Dodgers vs. San Francisco Giants game.
 
@@ -79,7 +79,7 @@ Ik hou van je, opa.
 
 ---
 title: "Day 3 of Undercity"
-date: "2024-07-13"
+date: "2025-07-13"
 ---
 
 ## Time Flies
@@ -95,12 +95,12 @@ John is the kind of person everyone deserves to meet at least once. Sadly, he wa
 
 ## Rooftop Views
 
-![alt text](/blogimages/undercity/githubroof.png){left hole}
+![alt text](/blogimages/undercity/githubroof.webp){left hole}
 After lunch, we headed to the rooftop of GitHub HQ. Beautiful views, deep conversations, and that surreal feeling of being somewhere really special.
 
 ## Zach
 
-![alt text](/blogimages/undercity/zackpig.png){right}
+![alt text](/blogimages/undercity/zackpig.webp){right}
 [Zach Latta](https://zachlatta.com/) is the founder of Hack Club. and easily one of the most inspiring people I’ve met.
 
 He started Hack Club because he wanted teenagers to feel like they could build real things. Not school projects. Not assignments. But things that *matter*.
@@ -113,9 +113,9 @@ This week has been chaotic, emotional, beautiful. and somehow, it all still feel
 
 ---
 title: "Last Day of Undercity. Day 4"
-date: "2024-07-14"
+date: "2025-07-14"
 ---
-![alt text](/blogimages/undercity/group.png){hole right}
+![alt text](/blogimages/undercity/group.webp){hole right}
 
 ## Final Demos
 

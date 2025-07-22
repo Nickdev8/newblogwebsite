@@ -10,6 +10,7 @@
 		}[];
 		event: string;
 		leftoverImages: { src: string; alt: string }[];
+		banner?: { message: string; type?: 'info' | 'warning' | 'danger' | 'success'; dismissible?: boolean } | null;
 		title: string;
 		description: string;
 		coverImage: string;
@@ -28,10 +29,29 @@
 	let initialLoad = true;
 	let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
 
+	// --- Banner (warning popup) state ---
+	let bannerDismissed = false;
+	let bannerKey = '';
+	const bannerTypeClasses: Record<string, string> = {
+		warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
+		danger: 'bg-red-100 text-red-900 border-red-300',
+		info: 'bg-blue-100 text-blue-900 border-blue-300',
+		success: 'bg-green-100 text-green-900 border-green-300'
+	};
+
+	$: if (data.banner) {
+		bannerKey = `bannerDismissed_${data.event}_${encodeURIComponent(data.banner.message)}`;
+	}
+
 	// Lock background scroll when fullscreen modal is open
 	$: typeof document !== 'undefined' && (document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
 
 	onMount(async () => {
+		// init banner dismissed state
+		if (data.banner && typeof localStorage !== 'undefined') {
+			bannerDismissed = localStorage.getItem(bannerKey) === 'true';
+		}
+
 		const visitedKey = `hasVisited_${data.event}`;
 		const hasVisited = typeof localStorage !== 'undefined' && localStorage.getItem(visitedKey);
 
@@ -131,6 +151,13 @@
 		localStorage.setItem('expandedSlugs', JSON.stringify(expandedSlugs));
 	}
 
+	function dismissBanner() {
+		bannerDismissed = true;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem(bannerKey, 'true');
+		}
+	}
+
 	function isVideo(src: string) {
 		return src.endsWith('.mp4');
 	}
@@ -168,38 +195,30 @@
 	}
 </script>
 
-{#if fullscreenMedia}
-	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
-		on:click={() => (fullscreenMedia = null)}
-		role="dialog"
-		aria-modal="true"
-		aria-label="Fullscreen media viewer"
+{#if data.banner && !bannerDismissed}
+	<!-- Top warning banner -->
+	<div class={`w-full border-b px-3 py-2 sm:px-4 sm:py-2.5 text-sm flex items-start sm:items-center gap-2 ${bannerTypeClasses[data.banner.type || 'warning']}`}
+		role="alert"
 	>
-		<div class="relative max-h-full max-w-full" on:click|stopPropagation>
-			{#if fullscreenMedia.isVideo}
-				<video
-					src={fullscreenMedia.src}
-					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
-					controls
-					autoplay
-					playsinline
-				/>
-			{:else}
-				<img
-					src={fullscreenMedia.src}
-					alt={fullscreenMedia.alt}
-					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
-				/>
-			{/if}
-			<button
-				class="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white"
-				on:click={() => (fullscreenMedia = null)}
-				aria-label="Close fullscreen"
-			>
-				&times;
-			</button>
-		</div>
+		<span class="flex-1">{@html data.banner.message}</span>
+		{#if data.banner.dismissible !== false}
+			<div class="flex gap-2">
+				<button
+					class="shrink-0 rounded px-2 py-0.5 text-xs font-medium/none opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+					on:click={() => (bannerDismissed = true)}
+					aria-label="Okay"
+				>
+					Okay
+				</button>
+				<button
+					class="shrink-0 rounded px-2 py-0.5 text-xs font-medium/none opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+					on:click={dismissBanner}
+					aria-label="Don't show again"
+				>
+					Don't show again
+				</button>
+			</div>
+		{/if}
 	</div>
 {/if}
 
@@ -356,6 +375,41 @@
 		</div>
 	{/if}
 </div>
+
+{#if fullscreenMedia}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
+		on:click={() => (fullscreenMedia = null)}
+		role="dialog"
+		aria-modal="true"
+		aria-label="Fullscreen media viewer"
+	>
+		<div class="relative max-h-full max-w-full" on:click|stopPropagation>
+			{#if fullscreenMedia.isVideo}
+				<video
+					src={fullscreenMedia.src}
+					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
+					controls
+					autoplay
+					playsinline
+				/>
+			{:else}
+				<img
+					src={fullscreenMedia.src}
+					alt={fullscreenMedia.alt}
+					class="h-auto max-h-[85vh] w-auto max-w-[95vw]"
+				/>
+			{/if}
+			<button
+				class="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white"
+				on:click={() => (fullscreenMedia = null)}
+				aria-label="Close fullscreen"
+			>
+				&times;
+			</button>
+		</div>
+	</div>
+{/if}
 
 <style>
 /* Compact the typography plugin spacing */

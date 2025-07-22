@@ -49,8 +49,19 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const fileContent = fs.readFileSync(filePath, 'utf-8');
 	const eventName = event;
-
 	const sections = fileContent.split('---').filter((s) => s.trim());
+
+	// Parse the MAIN frontmatter (first block)
+	const mainFMRaw = sections[0] || '';
+	const mainData = matter(`---\n${mainFMRaw}\n---`).data || {};
+	const banner = mainData.warning
+		? {
+				message: mainData.warning,
+				type: mainData.warning_type || 'warning',
+				dismissible: mainData.warning_dismissible !== false
+		  }
+		: null;
+
 	const posts = [];
 
 	// Start from the second frontmatter section, skipping the main one
@@ -96,5 +107,5 @@ export const load: PageServerLoad = async ({ params }) => {
 		  }))
 		: [];
 
-	return { posts, event, leftoverImages };
-}; 
+	return { posts, event, leftoverImages, banner };
+};
