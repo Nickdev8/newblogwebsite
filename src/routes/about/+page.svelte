@@ -45,7 +45,7 @@
 					type: 'loop',
 					drag: 'free',
 					snap: true,
-					perPage: 3,
+					perPage: 4,
 					perMove: 1,
 					wheel: true,
 					gap: '1rem',
