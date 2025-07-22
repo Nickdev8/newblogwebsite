@@ -43,7 +43,7 @@
 		{#each data.events as event, i}
 			<div
 				in:fly={{ y: 50, duration: 500, delay: i * 150 }}
-				class="overflow-hidden rounded-lg bg-white shadow-lg transition-transform duration-300 hover:scale-105"
+				class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-lg transition-transform duration-300 hover:scale-105"
 			>
 				<a href="/{event.slug}" class="block">
 					{#if event.coverImage.endsWith('.mp4')}
@@ -63,8 +63,8 @@
 						/>
 					{/if}
 					<div class="p-6">
-						<h2 class="text-2xl font-bold capitalize text-gray-800">{event.title}</h2>
-						<p class="mt-2 text-gray-600">{event.description}</p>
+						<h2 class="text-2xl font-bold capitalize text-gray-800 dark:text-gray-100">{event.title}</h2>
+						<p class="mt-2 text-gray-600 dark:text-gray-300">{event.description}</p>
 					</div>
 				</a>
 			</div>

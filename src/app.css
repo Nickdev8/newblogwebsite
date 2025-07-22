@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply bg-gray-100 text-gray-900;
+}
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+/* Optional: dark mode for prose (markdown content) */
+:global(.dark .prose) {
+  --tw-prose-body: #d1d5db;
+  --tw-prose-headings: #fff;
+  --tw-prose-links: #93c5fd;
+  --tw-prose-bold: #fff;
+  --tw-prose-counters: #a1a1aa;
+  --tw-prose-bullets: #a1a1aa;
+  --tw-prose-hr: #374151;
+  --tw-prose-quotes: #fbbf24;
+  --tw-prose-quote-borders: #fbbf24;
+  --tw-prose-captions: #a1a1aa;
+  --tw-prose-code: #fbbf24;
+  --tw-prose-pre-bg: #1e293b;
+  --tw-prose-pre-border: #334155;
+  --tw-prose-th-borders: #334155;
+  --tw-prose-td-borders: #334155;
+}

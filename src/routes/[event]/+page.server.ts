@@ -107,5 +107,15 @@ export const load: PageServerLoad = async ({ params }) => {
 		  }))
 		: [];
 
-	return { posts, event, leftoverImages, banner };
+	return {
+		posts,
+		event,
+		leftoverImages,
+		banner,
+		title: mainData.title || '',
+		description: mainData.description || '',
+		coverImage: mainData.coverImage || '',
+		content: '', // or mainData.content if you want
+		images: []   // or mainData.images || []
+	};
 };
