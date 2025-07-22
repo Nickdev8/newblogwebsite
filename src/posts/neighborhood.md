@@ -642,46 +642,12 @@ I signed up right away.
 
 So did Asker, a thoughtful and enthusiastic person
 Elliott, someone I really respect and look up to
-And Alice, one of the kindest, most grounded people I’ve ever met
+And Alice, a kind individual
 
 ## I Got In
 That night, I was added to a group chat with 18 others.
 Elliott and Asker were in.
 But Alice wasn’t.
-
-I kept refreshing, hoping she’d appear. But she didn’t.
-It hurt more than I expected.
-
-I didn’t want to say something rash to Thomas in the moment, but I did write him a message. Just to be honest.
-
-## Dear Thomas
-![alt text](/blogimages/neighborhood/goldengatepark.mp4){right}
-```
-*Sent at 1:22 AM, July 11, 2025*
-
-I'm in kind of a pickle.
-I only want to stay if I know I’ll really be happy here.
-
-Oscar wants to move to Lower Haight. Elliott is still deciding between Orlando and here.
-But what’s hitting me hardest is Alice not getting selected.
-
-I genuinely believe she is more mature and emotionally grounded than anyone else in the program. including me.
-
-Over the past few nights, we’ve grown close. She’s been a calming presence during all this chaos. I don’t think I can do this program without her.
-
-I also don’t think it’s too late to reconsider.
-Four people in Lower Haight won’t feel like a community. Six or seven would.
-
-And with her parents not being home right now, she might not even have a stable place to return to. She’s also one of the original organizers.
-
-She deserves this more than I do.
-
-I’d love to hear your side of things and maybe help however I can.
-I’m going to bed now, and I’ll see how I feel in the morning.
-
-Best,
-Nick
-```
 
 ## Tomorrow Is Undercity
 Tomorrow is Undercity, another Hack Club event. It’s a multi-day hackathon held at GitHub HQ.
