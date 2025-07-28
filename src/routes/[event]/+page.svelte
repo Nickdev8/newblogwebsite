@@ -1,366 +1,389 @@
 <script lang="ts">
-// @ts-nocheck
-import { onMount, tick } from 'svelte';
-import { slide } from 'svelte/transition';
-import { browser } from '$app/environment';
-import ReactionBar from '$lib/ReactionBar.svelte';
+	// @ts-nocheck
+	import { onMount, tick } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import { browser } from '$app/environment';
+	import ReactionBar from '$lib/ReactionBar.svelte';
 
-export let data: {
-	posts: {
-		date: string;
+	export let data: {
+		posts: {
+			date: string;
+			title: string;
+			slug: string;
+			content: string;
+			holeImages: { src: string; alt: string; layout: string[] }[];
+		}[];
+		event: string;
+		leftoverImages: { src: string; alt: string }[];
+		banner?: {
+			message: string;
+			type?: 'info' | 'warning' | 'danger' | 'success';
+			dismissible?: boolean;
+		} | null;
 		title: string;
-		slug: string;
+		description: string;
+		coverImage: string;
 		content: string;
-		holeImages: { src: string; alt: string; layout: string[] }[];
-	}[];
-	event: string;
-	leftoverImages: { src: string; alt: string }[];
-	banner?: {
-		message: string;
-		type?: 'info' | 'warning' | 'danger' | 'success';
-		dismissible?: boolean;
-	} | null;
-	title: string;
-	description: string;
-	coverImage: string;
-	content: string;
-	images: string[];
-};
+		images: string[];
+	};
 
-/* ------------------------------------------------------------------ */
-/*  PERSISTENCE LAYER (single key, debounced save)                     */
-/* ------------------------------------------------------------------ */
+	/* ------------------------------------------------------------------ */
+	/*  PERSISTENCE LAYER (single key, debounced save)                     */
+	/* ------------------------------------------------------------------ */
 
-const STORAGE_KEY = `eventState:${data.event}`;
-type Persisted = {
-	read: string[];
-	expanded: string[];
-	opened: string[];
-	struck: string[];
-	bannerDismissed: boolean;
-};
+	const STORAGE_KEY = `eventState:${data.event}`;
+	type Persisted = {
+		read: string[];
+		expanded: string[];
+		opened: string[];
+		struck: string[];
+		bannerDismissed: boolean;
+	};
 
-function loadState(): Persisted {
-	if (typeof localStorage === 'undefined') return fallback();
-	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
-		if (!raw) return fallback();
-		const parsed = JSON.parse(raw);
-		return { ...fallback(), ...parsed };
-	} catch {
-		return fallback();
-	}
-	function fallback(): Persisted {
-		return { read: [], expanded: [], opened: [], struck: [], bannerDismissed: false };
-	}
-}
-
-let state: Persisted = loadState();
-
-// Derived runtime structures (what the UI actually uses)
-let readSlugs = new Set<string>(state.read);
-let expandedSlugs: string[] = state.expanded;
-let openedSlugs = new Set<string>(state.opened);
-let struckSlugs = new Set<string>(state.struck);
-let bannerDismissed = state.bannerDismissed;
-
-// Cheap debounce with rAF
-let saveRaf: number | null = null;
-function queueSave() {
-	if (typeof localStorage === 'undefined') return;
-	if (saveRaf) cancelAnimationFrame(saveRaf);
-	saveRaf = requestAnimationFrame(() => {
-		state = {
-			read: Array.from(readSlugs),
-			expanded: expandedSlugs,
-			opened: Array.from(openedSlugs),
-			struck: Array.from(struckSlugs),
-			bannerDismissed
-		};
+	function loadState(): Persisted {
+		if (typeof localStorage === 'undefined') return fallback();
 		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-		} catch {}
-		saveRaf = null;
-	});
-}
-
-// Save before leaving the page as a last resort
-if (typeof window !== 'undefined') {
-	window.addEventListener('beforeunload', queueSave);
-}
-
-/* ------------------------------------------------------------------ */
-/*  UI STATE                                                          */
-/* ------------------------------------------------------------------ */
-
-const allPostSlugs = data.posts.map((p) => p.slug);
-let initialLoad = true;
-let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
-
-let hoveredSlug: string | null = null;
-let strikeTimeout: ReturnType<typeof setTimeout> | null = null;
-
-const bannerTypeClasses: Record<string, string> = {
-	warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
-	danger: 'bg-red-100 text-red-900 border-red-300',
-	info: 'bg-blue-100 text-blue-900 border-blue-300',
-	success: 'bg-green-100 text-green-900 border-green-300'
-};
-
-let bannerKey = '';
-$: if (data.banner) {
-	bannerKey = `bannerDismissed_${data.event}_${encodeURIComponent(data.banner.message)}`;
-}
-
-// Lock background scroll when fullscreen modal is open
-$: typeof document !== 'undefined' &&
-	(document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
-
-/* ------------------------------------------------------------------ */
-/*  REACTIONS                                                          */
-/* ------------------------------------------------------------------ */
-
-const ANON_KEY = 'anon_id_v1';
-function getAnonId() {
-	if (typeof localStorage === 'undefined') return 'no-localstorage';
-	let id = localStorage.getItem(ANON_KEY);
-	if (!id) {
-		id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-		localStorage.setItem(ANON_KEY, id);
-	}
-	return id;
-}
-const anon_id = getAnonId();
-
-const REACT_KEY = (slug: string) => `reacted:${data.event}:${slug}`;
-
-type ReactionState = {
-	counts: Record<string, number>;
-	views: number;
-	mine: boolean;
-	loading: boolean;
-};
-
-let reactions: Record<string, ReactionState> = {};
-
-async function loadReaction(slug: string) {
-	const res = await fetch(`/api/reactions/${data.event}/${slug}`);
-	const { counts, views } = await res.json();
-	reactions = {
-		...reactions,
-		[slug]: {
-			counts,
-			views,
-			mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
-			loading: false
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (!raw) return fallback();
+			const parsed = JSON.parse(raw);
+			return { ...fallback(), ...parsed };
+		} catch {
+			return fallback();
 		}
-	};
-}
-
-async function toggleReaction(slug: string, type: string) {
-	const current = reactions[slug] || { counts: {}, views: 0, mine: false, loading: false };
-	const add = !current.mine;
-
-	reactions = { ...reactions, [slug]: { ...current, loading: true } };
-
-	const res = await fetch(`/api/reactions/${data.event}/${slug}`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ mode: 'toggle', type, anon_id })
-	});
-
-	const { counts, views, error } = await res.json();
-	if (error) {
-		console.error(error);
-		reactions = { ...reactions, [slug]: { ...current, loading: false } };
-		return;
-	}
-
-	if (typeof localStorage !== 'undefined') {
-		if (add) localStorage.setItem(REACT_KEY(slug), '1');
-		else localStorage.removeItem(REACT_KEY(slug));
-	}
-
-	reactions = {
-		...reactions,
-		[slug]: { counts, views, mine: add, loading: false }
-	};
-}
-
-/* ------------------------------------------------------------------ */
-/*  MISC HELPERS                                                       */
-/* ------------------------------------------------------------------ */
-
-function markAsRead(slug: string) {
-	if (readSlugs.has(slug)) return;
-	const next = new Set(readSlugs);
-	next.add(slug);
-	readSlugs = next;
-	queueSave();
-}
-
-function toggleExpand(slug: string) {
-	if (expandedSlugs.includes(slug)) {
-		expandedSlugs = expandedSlugs.filter((s) => s !== slug);
-	} else {
-		expandedSlugs = [...expandedSlugs, slug];
-		openedSlugs.add(slug);
-		markAsRead(slug);
-	}
-	queueSave();
-}
-
-function openAll() {
-	expandedSlugs = [...allPostSlugs];
-	allPostSlugs.forEach((s) => {
-		openedSlugs.add(s);
-		readSlugs.add(s);
-	});
-	queueSave();
-}
-
-function collapseAll() {
-	expandedSlugs = [];
-	queueSave();
-}
-
-function dismissBanner() {
-	bannerDismissed = true;
-	if (typeof localStorage !== 'undefined') {
-		localStorage.setItem(bannerKey, 'true');
-	}
-	queueSave();
-}
-
-function isVideo(src: string) {
-	return src.endsWith('.mp4');
-}
-
-function hasLayout(image: { layout: string[] }, layout: string) {
-	return image.layout.includes(layout);
-}
-
-function getLayoutClasses(image: { layout: string[] }) {
-	const base = 'cursor-pointer my-2 sm:my-3 rounded-lg object-contain shadow-md';
-
-	const side = hasLayout(image, 'right')
-		? 'md:float-right md:ml-4 md:mb-2'
-		: hasLayout(image, 'left')
-			? 'md:float-left md:mr-4 md:mb-2'
-			: 'mx-auto';
-
-	const width = hasLayout(image, 'hole')
-		? 'w-full max-w-2xl mx-auto'
-		: hasLayout(image, 'vertical')
-			? 'w-full sm:w-1/2 md:w-1/5'
-			: hasLayout(image, 'horizantal') || hasLayout(image, 'horizontal')
-				? 'w-full sm:w-3/4 md:w-2/5'
-				: hasLayout(image, 'left') || hasLayout(image, 'right')
-					? 'w-full sm:w-2/3 md:w-1/4'
-					: 'w-full max-w-sm mx-auto';
-
-	return [base, side, width].join(' ');
-}
-
-function openFullscreen(src: string, alt: string) {
-	fullscreenMedia = { src, alt, isVideo: isVideo(src) };
-}
-
-function tryStartStrikeTimer(slug: string) {
-	if (expandedSlugs.includes(slug) && hoveredSlug === slug && !struckSlugs.has(slug)) {
-		if (strikeTimeout) clearTimeout(strikeTimeout);
-		strikeTimeout = setTimeout(() => {
-			struckSlugs.add(slug);
-			queueSave();
-		}, 1000);
-	}
-}
-
-function clearStrikeTimer() {
-	if (strikeTimeout) clearTimeout(strikeTimeout);
-	strikeTimeout = null;
-}
-
-function unmarkRead(slug: string) {
-	if (!readSlugs.has(slug)) return;
-	const next = new Set(readSlugs);
-	next.delete(slug);
-	readSlugs = next;
-	queueSave();
-}
-function markAllUnread() {
-	readSlugs = new Set();
-	queueSave();
-}
-
-const VIEW_THRESHOLD = 0.35; // ~35% visible
-const VIEW_MS = 2500;        // 2.5 seconds
-
-function readOnView(node: HTMLElement, slug: string) {
-	if (typeof IntersectionObserver === 'undefined') {
-		markAsRead(slug);
-		return { destroy() {} };
-	}
-	let timer: number | null = null;
-	const observer = new IntersectionObserver(
-		([entry]) => {
-			if (entry.isIntersecting && entry.intersectionRatio >= VIEW_THRESHOLD) {
-				if (timer) clearTimeout(timer);
-				timer = window.setTimeout(() => {
-					markAsRead(slug);
-					observer.disconnect();
-				}, VIEW_MS);
-			} else if (timer) {
-				clearTimeout(timer);
-				timer = null;
-			}
-		},
-		{ threshold: [0, VIEW_THRESHOLD, 1] }
-	);
-	observer.observe(node);
-	return {
-		destroy() {
-			observer.disconnect();
-			if (timer) clearTimeout(timer);
-		}
-	};
-}
-
-/* ------------------------------------------------------------------ */
-/*  MOUNT                                                              */
-/* ------------------------------------------------------------------ */
-
-onMount(async () => {
-	// Ensure bannerDismissed mirrors previous local key if you still want that older behavior
-	if (data.banner && typeof localStorage !== 'undefined') {
-		const stored = localStorage.getItem(bannerKey);
-		if (stored === 'true') {
-			bannerDismissed = true;
+		function fallback(): Persisted {
+			return { read: [], expanded: [], opened: [], struck: [], bannerDismissed: false };
 		}
 	}
 
-	// Always start collapsed, but we keep the saved line-through/read state
-	expandedSlugs = [];
-	queueSave();
+	let state: Persisted = loadState();
 
-	await tick();
-	initialLoad = false;
-	await Promise.all(data.posts.map((p) => loadReaction(p.slug)));
+	// Derived runtime structures (what the UI actually uses)
+	let readSlugs = new Set<string>(state.read);
+	let expandedSlugs: string[] = state.expanded;
+	let openedSlugs = new Set<string>(state.opened);
+	let struckSlugs = new Set<string>(state.struck);
+	let bannerDismissed = state.bannerDismissed;
 
-	if (!browser) return;
-	const seedKey = `seeded:${data.event}`;
-	if (sessionStorage.getItem(seedKey)) return;
-	sessionStorage.setItem(seedKey, '1');
-
-	const id = anon_id;
-	for (const slug of allPostSlugs) {
-		fetch(`/api/reactions/${data.event}/${slug}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ mode: 'seed', anon_id: id })
+	// Cheap debounce with rAF
+	let saveRaf: number | null = null;
+	function queueSave() {
+		if (typeof localStorage === 'undefined') return;
+		if (saveRaf) cancelAnimationFrame(saveRaf);
+		saveRaf = requestAnimationFrame(() => {
+			state = {
+				read: Array.from(readSlugs),
+				expanded: expandedSlugs,
+				opened: Array.from(openedSlugs),
+				struck: Array.from(struckSlugs),
+				bannerDismissed
+			};
+			try {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			} catch {}
+			saveRaf = null;
 		});
 	}
-});
+
+	// Save before leaving the page as a last resort
+	if (typeof window !== 'undefined') {
+		window.addEventListener('beforeunload', queueSave);
+	}
+
+	/* ------------------------------------------------------------------ */
+	/*  UI STATE                                                          */
+	/* ------------------------------------------------------------------ */
+
+	const allPostSlugs = data.posts.map((p) => p.slug);
+	let initialLoad = true;
+	let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
+
+	let hoveredSlug: string | null = null;
+	let strikeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	const bannerTypeClasses: Record<string, string> = {
+		warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
+		danger: 'bg-red-100 text-red-900 border-red-300',
+		info: 'bg-blue-100 text-blue-900 border-blue-300',
+		success: 'bg-green-100 text-green-900 border-green-300'
+	};
+
+	let bannerKey = '';
+	$: if (data.banner) {
+		bannerKey = `bannerDismissed_${data.event}_${encodeURIComponent(data.banner.message)}`;
+	}
+
+	// Lock background scroll when fullscreen modal is open
+	$: typeof document !== 'undefined' &&
+		(document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
+
+	/* ------------------------------------------------------------------ */
+	/*  REACTIONS                                                          */
+	/* ------------------------------------------------------------------ */
+
+	const ANON_KEY = 'anon_id_v1';
+	function getAnonId() {
+		if (typeof localStorage === 'undefined') return 'no-localstorage';
+		let id = localStorage.getItem(ANON_KEY);
+		if (!id) {
+			id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+			localStorage.setItem(ANON_KEY, id);
+		}
+		return id;
+	}
+	const anon_id = getAnonId();
+
+	const REACT_KEY = (slug: string) => `reacted:${data.event}:${slug}`;
+
+	type ReactionState = {
+		counts: Record<string, number>;
+		views: number;
+		mine: boolean;
+		loading: boolean;
+	};
+
+	let reactions: Record<string, ReactionState> = {};
+
+	async function loadReaction(slug: string) {
+		const res = await fetch(`/api/reactions/${data.event}/${slug}`);
+		const { counts, views } = await res.json();
+		reactions = {
+			...reactions,
+			[slug]: {
+				counts,
+				views,
+				mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
+				loading: false
+			}
+		};
+	}
+
+	async function toggleReaction(slug: string, type: string) {
+		const current = reactions[slug] || { counts: {}, views: 0, mine: false, loading: false };
+		const add = !current.mine;
+
+		reactions = { ...reactions, [slug]: { ...current, loading: true } };
+
+		const res = await fetch(`/api/reactions/${data.event}/${slug}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ mode: 'toggle', type, anon_id })
+		});
+
+		const { counts, views, error } = await res.json();
+		if (error) {
+			console.error(error);
+			reactions = { ...reactions, [slug]: { ...current, loading: false } };
+			return;
+		}
+
+		if (typeof localStorage !== 'undefined') {
+			if (add) localStorage.setItem(REACT_KEY(slug), '1');
+			else localStorage.removeItem(REACT_KEY(slug));
+		}
+
+		reactions = {
+			...reactions,
+			[slug]: { counts, views, mine: add, loading: false }
+		};
+	}
+
+	/* ------------------------------------------------------------------ */
+	/*  MISC HELPERS                                                       */
+	/* ------------------------------------------------------------------ */
+	function wrapNoTranslateWords(content: string): string {
+		let words = ['Neighborhood', 'Undercity', 'Hack Club'];
+		words = [...new Set(words)].sort((a, b) => b.length - a.length);
+
+		const wrappedWords: string[] = [];
+
+		for (const word of words) {
+			if (!word) continue;
+			const escaped = word.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+			const regex = new RegExp(`\\b(${escaped})\\b`, 'gi');
+
+			if (regex.test(content)) {
+				wrappedWords.push(word);
+				content = content.replace(regex, '<span translate="no"> $1 </span>');
+			}
+		}
+
+		if (wrappedWords.length > 0) {
+			console.log('[wrapNoTranslateWords:title]', wrappedWords, 'in:', content);
+		}
+
+		return content;
+	}
+
+	function markAsRead(slug: string) {
+		if (readSlugs.has(slug)) return;
+		const next = new Set(readSlugs);
+		next.add(slug);
+		readSlugs = next;
+		queueSave();
+	}
+
+	function toggleExpand(slug: string) {
+		if (expandedSlugs.includes(slug)) {
+			expandedSlugs = expandedSlugs.filter((s) => s !== slug);
+		} else {
+			expandedSlugs = [...expandedSlugs, slug];
+			openedSlugs.add(slug);
+			markAsRead(slug);
+		}
+		queueSave();
+	}
+
+	function openAll() {
+		expandedSlugs = [...allPostSlugs];
+		allPostSlugs.forEach((s) => {
+			openedSlugs.add(s);
+			readSlugs.add(s);
+		});
+		queueSave();
+	}
+
+	function collapseAll() {
+		expandedSlugs = [];
+		queueSave();
+	}
+
+	function dismissBanner() {
+		bannerDismissed = true;
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem(bannerKey, 'true');
+		}
+		queueSave();
+	}
+
+	function isVideo(src: string) {
+		return src.endsWith('.mp4');
+	}
+
+	function hasLayout(image: { layout: string[] }, layout: string) {
+		return image.layout.includes(layout);
+	}
+
+	function getLayoutClasses(image: { layout: string[] }) {
+		const base = 'cursor-pointer my-2 sm:my-3 rounded-lg object-contain shadow-md';
+
+		const side = hasLayout(image, 'right')
+			? 'md:float-right md:ml-4 md:mb-2'
+			: hasLayout(image, 'left')
+				? 'md:float-left md:mr-4 md:mb-2'
+				: 'mx-auto';
+
+		const width = hasLayout(image, 'hole')
+			? 'w-full max-w-2xl mx-auto'
+			: hasLayout(image, 'vertical')
+				? 'w-full sm:w-1/2 md:w-1/5'
+				: hasLayout(image, 'horizantal') || hasLayout(image, 'horizontal')
+					? 'w-full sm:w-3/4 md:w-2/5'
+					: hasLayout(image, 'left') || hasLayout(image, 'right')
+						? 'w-full sm:w-2/3 md:w-1/4'
+						: 'w-full max-w-sm mx-auto';
+
+		return [base, side, width].join(' ');
+	}
+
+	function openFullscreen(src: string, alt: string) {
+		fullscreenMedia = { src, alt, isVideo: isVideo(src) };
+	}
+
+	function tryStartStrikeTimer(slug: string) {
+		if (expandedSlugs.includes(slug) && hoveredSlug === slug && !struckSlugs.has(slug)) {
+			if (strikeTimeout) clearTimeout(strikeTimeout);
+			strikeTimeout = setTimeout(() => {
+				struckSlugs.add(slug);
+				queueSave();
+			}, 1000);
+		}
+	}
+
+	function clearStrikeTimer() {
+		if (strikeTimeout) clearTimeout(strikeTimeout);
+		strikeTimeout = null;
+	}
+
+	function unmarkRead(slug: string) {
+		if (!readSlugs.has(slug)) return;
+		const next = new Set(readSlugs);
+		next.delete(slug);
+		readSlugs = next;
+		queueSave();
+	}
+	function markAllUnread() {
+		readSlugs = new Set();
+		queueSave();
+	}
+
+	const VIEW_THRESHOLD = 0.35; // ~35% visible
+	const VIEW_MS = 2500; // 2.5 seconds
+
+	function readOnView(node: HTMLElement, slug: string) {
+		if (typeof IntersectionObserver === 'undefined') {
+			markAsRead(slug);
+			return { destroy() {} };
+		}
+		let timer: number | null = null;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && entry.intersectionRatio >= VIEW_THRESHOLD) {
+					if (timer) clearTimeout(timer);
+					timer = window.setTimeout(() => {
+						markAsRead(slug);
+						observer.disconnect();
+					}, VIEW_MS);
+				} else if (timer) {
+					clearTimeout(timer);
+					timer = null;
+				}
+			},
+			{ threshold: [0, VIEW_THRESHOLD, 1] }
+		);
+		observer.observe(node);
+		return {
+			destroy() {
+				observer.disconnect();
+				if (timer) clearTimeout(timer);
+			}
+		};
+	}
+
+	/* ------------------------------------------------------------------ */
+	/*  MOUNT                                                              */
+	/* ------------------------------------------------------------------ */
+
+	onMount(async () => {
+		// Ensure bannerDismissed mirrors previous local key if you still want that older behavior
+		if (data.banner && typeof localStorage !== 'undefined') {
+			const stored = localStorage.getItem(bannerKey);
+			if (stored === 'true') {
+				bannerDismissed = true;
+			}
+		}
+
+		// Always start collapsed, but we keep the saved line-through/read state
+		expandedSlugs = [];
+		queueSave();
+
+		await tick();
+		initialLoad = false;
+		await Promise.all(data.posts.map((p) => loadReaction(p.slug)));
+
+		if (!browser) return;
+		const seedKey = `seeded:${data.event}`;
+		if (sessionStorage.getItem(seedKey)) return;
+		sessionStorage.setItem(seedKey, '1');
+
+		const id = anon_id;
+		for (const slug of allPostSlugs) {
+			fetch(`/api/reactions/${data.event}/${slug}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ mode: 'seed', anon_id: id })
+			});
+		}
+	});
 </script>
 
 {#if data.banner && !bannerDismissed}
@@ -397,7 +420,7 @@ onMount(async () => {
 	role="document"
 >
 	<div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-		<h1 class="text-2xl font-bold capitalize sm:text-3xl">{data.event}</h1>
+		<h1 class="text-2xl font-bold capitalize sm:text-3xl" translate="no">{data.event}</h1>
 		<div class="flex flex-wrap gap-2 sm:gap-3">
 			<button
 				on:click={openAll}
@@ -465,7 +488,7 @@ onMount(async () => {
 									? 'text-blue-800 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-200'
 									: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200'}
 							>
-								{post.title}
+								<span>{@html wrapNoTranslateWords(`<span>${post.title}</span>`)}</span>
 							</span>
 						</div>
 					</button>
@@ -523,7 +546,7 @@ onMount(async () => {
 							{/if}
 						{/each}
 
-						{@html post.content}
+						{@html wrapNoTranslateWords(post.content)}
 					</div>
 				{/if}
 			</li>

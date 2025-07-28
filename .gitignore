@@ -25,3 +25,4 @@ static/blogimages/*/*.*
 static/blogimages/*/extra/*.*
 temp.txt
 buildcommandlist.txt
++page.js

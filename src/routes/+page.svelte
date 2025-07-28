@@ -10,6 +10,10 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 
+	import VisitedWorldMap from '$lib/VisitedWorldMap.svelte';
+
+	const visited = ['US', 'FR', 'JP', 'BR'];
+
 	onMount(() => {
 		const savedScrollY = localStorage.getItem('scrollY_main');
 		if (savedScrollY) {
@@ -63,7 +67,7 @@
 						/>
 					{/if}
 					<div class="p-6">
-						<h2 class="text-2xl font-bold capitalize text-gray-800 dark:text-gray-100">{event.title}</h2>
+						<h2 translate="no" class="text-2xl font-bold capitalize text-gray-800 dark:text-gray-100">{event.title}</h2>
 						<p class="mt-2 text-gray-600 dark:text-gray-300">{event.description}</p>
 					</div>
 				</a>
@@ -74,3 +78,14 @@
 		<p class="mt-8 text-center text-gray-500">No events found.</p>
 	{/if}
 </div>
+
+<section class="mt-16 px-4">
+	<h2 class="mb-6 text-center text-3xl font-bold text-gray-800 dark:text-gray-100">Places I've Been</h2>
+	<div class="mx-auto max-w-5xl">
+		<VisitedWorldMap {visited} />
+
+		<p class="mt-4 text-center text-gray-600 dark:text-gray-400 text-sm">
+			Countries I've visited are shown in <span class="text-blue-600 dark:text-blue-400 font-semibold">blue</span>.
+		</p>
+	</div>
+</section>
