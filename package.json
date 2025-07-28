@@ -16,6 +16,7 @@
 		"@tailwindcss/typography": "^0.5.12",
 		"@types/eslint": "8.56.0",
 		"@types/node": "^24.0.15",
+		"@types/svelte-leafletjs": "^0.8.7",
 		"autoprefixer": "^10.4.19",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -35,7 +36,9 @@
 		"@splidejs/splide": "^4.1.4",
 		"@splidejs/svelte-splide": "^0.2.9",
 		"gray-matter": "^4.0.3",
+		"leaflet": "^1.9.4",
 		"marked": "^16.1.1",
-		"mdsvex": "^0.11.0"
+		"mdsvex": "^0.11.0",
+		"svelte-leafletjs": "^1.0.1"
 	}
 }

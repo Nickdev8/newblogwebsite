@@ -27,3 +27,7 @@ body {
   --tw-prose-th-borders: #334155;
   --tw-prose-td-borders: #334155;
 }
+
+:root.dark .map-tiles {
+  filter: brightness(0.7) contrast(0.85) hue-rotate(180deg) saturate(0.9);
+}
