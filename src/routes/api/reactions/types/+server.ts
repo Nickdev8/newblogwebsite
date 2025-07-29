@@ -20,3 +20,4 @@ export const GET: RequestHandler = async () => {
   } catch {}
   return json(DEFAULT_TYPES);
 };
+

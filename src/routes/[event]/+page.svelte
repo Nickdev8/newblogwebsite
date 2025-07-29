@@ -230,6 +230,7 @@
 			openedSlugs.add(slug);
 			markAsRead(slug);
 		}
+		
 		queueSave();
 	}
 
