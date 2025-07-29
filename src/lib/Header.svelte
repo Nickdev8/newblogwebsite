@@ -36,6 +36,11 @@
 					class="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
 					>About Me</a
 				>
+				<a
+					href="/contact"
+					class="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+					>Contact</a
+				>
 				<!-- Custom switch toggle -->
 				<label
 					class="relative ml-4 inline-block h-8 w-14 select-none align-middle"
