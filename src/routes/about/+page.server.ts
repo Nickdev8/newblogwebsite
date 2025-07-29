@@ -43,3 +43,4 @@ export async function load() {
 
 	return { carouselImages, aboutMeImage };
 } 
+

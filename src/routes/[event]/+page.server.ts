@@ -31,6 +31,7 @@ function getLayoutClasses(image: { layout: string[] }) {
 			classes.push('w-1/2');
 		} else {
 			classes.push('w-1/3');
+			
 		}
 	} else {
 		// Default case for images without float or hole hints

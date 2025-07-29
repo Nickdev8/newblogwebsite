@@ -69,6 +69,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
   return json(result);
 };
 
+
 export const GET: RequestHandler = async ({ params }) => {
   const types = await getTypes();
   const keys = types.map(t => t.key);
