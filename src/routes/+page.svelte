@@ -13,6 +13,7 @@
 	import { fly } from 'svelte/transition';
 
 	import MapView from '$lib/MapView.svelte';
+	import { Compass, Calendar, Inbox, MapPin, ArrowRightCircle } from 'lucide-svelte';
 
 	const locations = [
 		...data.events.map((e) => ({ lat: e.lat, lng: e.lng, title: e.title })),
@@ -111,18 +112,21 @@
 </script>
 
 <div class="m-8">
-	<h1 class="mb-8 text-center text-4xl font-bold">My Adventures</h1>
+	<h1 class="mb-8 flex items-center justify-center space-x-2 text-center text-4xl font-bold">
+		<Compass class="h-8 w-8 text-blue-500" />
+		<span>My Adventures</span>
+	</h1>
 	<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 		{#each data.events as event, i}
 			<div
 				in:fly={{ y: 50, duration: 500, delay: i * 150 }}
 				class="overflow-hidden rounded-lg bg-white shadow-lg transition-transform duration-300 hover:scale-105 dark:bg-gray-800"
 			>
-				<a href="/{event.slug}" class="block">
+				<a href="/{event.slug}" class="block h-full flex flex-col">
 					{#if event.coverImage.endsWith('.mp4')}
 						<video
 							src={event.coverImage}
-							class="h-48 w-full object-cover"
+							class="h-48 w-full object-cover flex"
 							autoplay
 							loop
 							muted
@@ -132,29 +136,40 @@
 						<img
 							src={event.coverImage}
 							alt="Cover image for {event.title}"
-							class="h-48 w-full object-cover"
+							class="h-48 w-full object-cover flex"
 						/>
 					{/if}
-					<div class="p-6">
-						<h2
-							translate="no"
-							class="text-2xl font-bold capitalize text-gray-800 dark:text-gray-100"
-						>
-							{event.title}
-						</h2>
-						<p class="mt-2 text-gray-600 dark:text-gray-300">{event.description}</p>
+					<div class="content-between p-6 flex-1 flex flex-col">
+						<div class="flex flex-col">
+							<div class="flex items-center space-x-2">
+								<Calendar class="h-5 w-5 text-gray-500 dark:text-gray-400" />
+								<h2 translate="no" class="text-2xl font-bold">{event.title}</h2>
+							</div>
+							<p class="mt-2 text-gray-600 dark:text-gray-300">{event.description}</p>
+						</div>
+
+						<div class="mt-auto flex-1 justify-items-end justify-self-end content-end">
+							<ArrowRightCircle class="h-6 w-6 text-blue-500" />
+						</div>
 					</div>
 				</a>
 			</div>
 		{/each}
 	</div>
 	{#if data.events.length === 0}
-		<p class="mt-8 text-center text-gray-500">No events found.</p>
+		<p class="mt-8 flex items-center justify-center space-x-2 text-center text-gray-500">
+			<Inbox class="h-6 w-6" />
+			<span>No events found.</span>
+		</p>
 	{/if}
 </div>
 
 <section class="mb-8 mt-16 px-4">
-	<h2 class="mb-6 text-center text-3xl font-bold">Places I've Been</h2>
+	<h2 class="mb-6 flex items-center justify-center space-x-2 text-center text-3xl font-bold">
+		<MapPin class="h-7 w-7 text-green-500" />
+		<span>Places I’ve Been</span>
+	</h2>
+
 	<div
 		class="mx-auto w-full max-w-screen-2xl overflow-hidden rounded-xl border border-gray-200 shadow-md dark:border-gray-700"
 	>
