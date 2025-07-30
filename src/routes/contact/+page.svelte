@@ -155,8 +155,9 @@
 
   {#if formResult.error}
     <div class="mt-6 flex items-start gap-3 rounded-lg border border-red-300 bg-red-50 p-4 text-red-900 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200" role="alert">
-      <!-- error icon... -->
       <p class="text-sm font-medium">{formResult.error}</p>
     </div>
   {/if}
 </div>
+
+

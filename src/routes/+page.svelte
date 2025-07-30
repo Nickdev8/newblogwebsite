@@ -83,6 +83,7 @@
 			title: 'Vacation'
 		}
 	];
+	
 
 	onMount(() => {
 		const savedScrollY = localStorage.getItem('scrollY_main');

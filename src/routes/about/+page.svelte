@@ -17,6 +17,7 @@
 
 
 
+
 <div class="m-8">
 	<h1 class="mb-8 text-center text-4xl font-bold text-gray-900 dark:text-gray-100">About Me</h1>
 	<div class="mb-16 overflow-hidden rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md">
