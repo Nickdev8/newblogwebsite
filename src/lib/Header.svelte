@@ -21,62 +21,45 @@
 
 <header class="bg-white shadow-md transition-colors dark:bg-gray-900">
 	<nav class="container mx-auto px-6 py-4">
-		<div class="flex items-center justify-between">
+		<!-- 3-col grid: brand / center links / right nav + toggle -->
+		<div class="grid grid-cols-3 items-center">
+			<!-- Left: Logo / site title -->
 			<div class="text-2xl font-bold text-gray-800 dark:text-gray-100">
 				<a href="/">Nick's Blog</a>
 			</div>
-			<div class="flex items-center space-x-4">
-				<a
-					href="/"
-					class="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-					>Home</a
-				>
-				<a
-					href="/about"
-					class="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-					>About Me</a
-				>
-				<a
-					href="/contact"
-					class="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-					>Contact</a
-				>
-				<!-- Custom switch toggle -->
+
+			<!-- Center: main page | friend book | experiences -->
+			<div class="flex justify-center space-x-2 text-gray-600 dark:text-gray-300">
+				<a href="/" class="hover:text-blue-600 dark:hover:text-blue-400">Main Page</a>
+				<span class="select-none">|</span>
+				<a href="/experiences" class="hover:text-blue-600 dark:hover:text-blue-400">Experiences</a>
+				<span class="select-none">|</span>
+				<a href="/about" class="hover:text-blue-600 dark:hover:text-blue-400">About Me</a>
+				<span class="select-none">|</span>
+				<a href="/contact" class="hover:text-blue-600 dark:hover:text-blue-400">Contact</a>
+			</div>
+
+			<!-- Right: existing nav + dark toggle -->
+			<div class="flex items-center justify-end space-x-4">
+				<!-- Dark mode toggle -->
 				<label
-					class="relative ml-4 inline-block h-8 w-14 select-none align-middle"
+					class="relative inline-block h-8 w-14 select-none align-middle cursor-pointers"
 					aria-label="Toggle dark mode"
 				>
-					<!-- <input
-						type="checkbox"
-						bind:checked={dark}
-						on:change={() => {
-							localStorage.theme = dark ? 'dark' : 'light';
-							updateTheme();
-						}}
-						aria-checked={dark}
-						tabindex="0"
-					/> -->
 					<input
 						type="checkbox"
-						class="peer absolute left-0 top-0 z-10 h-full w-full cursor-pointer opacity-0"
+						class="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
 						bind:checked={dark}
-						on:change={() => {
-							updateTheme();
-						}}
+						on:change={updateTheme}
 					/>
-
-					<!-- Slider background -->
 					<span
-						class="absolute bottom-0 left-0 right-0 top-0 rounded-full bg-indigo-200 transition-colors
-                            duration-500 peer-checked:bg-indigo-600
-                            dark:bg-indigo-800 dark:peer-checked:bg-yellow-400"
+						class="absolute inset-0 rounded-full bg-indigo-200 transition-colors duration-500
+                   peer-checked:bg-indigo-600 dark:bg-indigo-800 dark:peer-checked:bg-yellow-400"
 					></span>
-					<!-- Thumb -->
 					<span
 						class="absolute bottom-[15%] left-[10%] flex h-[1.4em] w-[1.4em] items-center justify-center
-                            rounded-full bg-white shadow
-                            transition-all duration-500 peer-checked:translate-x-[1.5em]
-                            dark:bg-gray-900"
+                   rounded-full bg-white shadow transition-all duration-500
+                   peer-checked:translate-x-[1.5em] dark:bg-gray-900"
 					>
 						{#if dark}
 							<!-- Moon icon -->
@@ -86,11 +69,7 @@
 								viewBox="0 0 24 24"
 								stroke="currentColor"
 							>
-								<path
-									stroke="currentColor"
-									stroke-width="2"
-									d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
-								/>
+								<path stroke-width="2" d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
 							</svg>
 						{:else}
 							<!-- Sun icon -->

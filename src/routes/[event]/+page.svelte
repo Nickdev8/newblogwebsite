@@ -4,6 +4,10 @@
 	import { slide } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import ReactionBar from '$lib/ReactionBar.svelte';
+	import { Minimize, MessageCircleWarning } from 'lucide-svelte';
+
+	export let src: string;
+	export let alt: string;
 
 	export let data: {
 		posts: {
@@ -230,7 +234,7 @@
 			openedSlugs.add(slug);
 			markAsRead(slug);
 		}
-		
+
 		queueSave();
 	}
 
@@ -631,12 +635,20 @@
 			{/if}
 
 			<button
-				class="absolute right-2 top-2 rounded-full bg-black/50 p-2 text-white"
+				class="absolute right-2 top-2 size-10 rounded-full bg-black/50 p-2 text-white"
 				on:click={() => (fullscreenMedia = null)}
 				aria-label="Close fullscreen"
 			>
-				&times;
+				<Minimize />
 			</button>
+
+			<a
+				href={`/contact?image=${encodeURIComponent(fullscreenMedia.src)}`}
+				aria-label="Report this image"
+				class="absolute bottom-2 left-2 size-10 rounded-full bg-black/50 p-2 text-white transition hover:bg-black/60"
+			>
+				<MessageCircleWarning />
+			</a>
 		</div>
 	</section>
 {/if}
