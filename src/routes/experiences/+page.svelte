@@ -22,6 +22,7 @@
     { src: '/whatidoimg/3dprinter.webp', title: 'Ender 3 V2', info: 'https://nickesselman.nl/?project=3dprinting' },
     { src: '/whatidoimg/laptop.webp', title: 'Arch Linux Laptop', info: 'https://nickesselman.nl/?project=stickers' },
     { src: '/whatidoimg/pcbfront.webp', title: 'Micro Pad', info: 'https://nickesselman.nl/?project=hackpad', repo: 'https://github.com/Nickdev8/macropad' }
+
   ];
 
   let modalProject: Project | null = null;
