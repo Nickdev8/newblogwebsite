@@ -17,9 +17,13 @@ export async function load() {
 			slug,
 			title: data.title || slug,
 			description: data.description || 'No description available.',
-			coverImage: data.coverImage || '/placeholder.png'
+			coverImage: data.coverImage || '/placeholder.png',
+			live: data.live || false
 		};
 	});
+
+	// Sort events to show live events first
+	events.sort((a, b) => (b.live ? 1 : -1));
 
 	return { events };
 }
