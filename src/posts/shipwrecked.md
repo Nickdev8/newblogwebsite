@@ -2,18 +2,23 @@
 title: "Shipwrecked"
 description: "An upcoming adventure with Hack Club. Stay tuned for the full story of what happened at Shipwrecked!"
 coverImage: /blogimages/shipwrecked/placeholder.webp
-warning: "This post is starting 8th of august."
-warning_type: info
+warning: "This post is currenly in the works! check back in every day to see the new updates"
+warning_type: success
 warning_dismissible: true
+live: true
 ---
 ---
-title: "Coming Soon"
-date: "2025-08-8"
-discription: "Undercity is a 4 day hackathon in Github HQ"
+title: "Day 0: The Journey Begins"
+date: "2025-08-07"
 ---
 
-## This event is on the horizon!
+## Off to the Island
 
-I'm getting ready for Shipwrecked, a new Hack Club event. I'll be documenting my journey and experiences here.
+The adventure has officially started! I'm currently at Munich Airport for a layover, and this place is wild. I read online that there's minigolf, a giant giraffe statue, and even a climbing park somewhere in here. Time to explore!
 
-Check back soon for the full story!
+## Airport Adventures
+
+![alt text](/blogimages/shipwrecked/minigolfatairport.png){right}
+
+I found the minigolf course, but didn't have a chance to play. It looked as random and amazing as it sounds! Now, I'm on a quest to find that giraffe. This layover is turning into a mini-adventure of its own. Shipwrecked, here I come!
+
