@@ -6,12 +6,10 @@
 	import ReactionBar from '$lib/ReactionBar.svelte';
 	import { Minimize, MessageCircleWarning } from 'lucide-svelte';
 
-	export let src: string;
-	export let alt: string;
-
 	export let data: {
 		posts: {
-			date: string;
+		
+date: string;
 			title: string;
 			slug: string;
 			content: string;
@@ -202,7 +200,7 @@
 
 		for (const word of words) {
 			if (!word) continue;
-			const escaped = word.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+			const escaped = word.replace(/[-/\\^$*+?.()|[\\\]{}]/g, '\\$&');
 			const regex = new RegExp(`\\b(${escaped})\\b`, 'gi');
 
 			if (regex.test(content)) {
@@ -421,9 +419,10 @@
 
 <div
 	class="mx-auto max-w-none px-3 py-4 sm:px-4 sm:py-6 md:max-w-[1100px] md:px-6 lg:max-w-[1280px] lg:px-8"
-	on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
-	role="document"
->
+		on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
+		role="document"
+		tabindex="0"
+	>
 	<div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
 		<h1 class="text-2xl font-bold capitalize sm:text-3xl" translate="no">{data.event}</h1>
 		<div class="flex flex-wrap gap-2 sm:gap-3">
@@ -606,16 +605,16 @@
 </div>
 
 {#if fullscreenMedia}
-	<section
+	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
-		tabindex="0"
 		role="dialog"
 		aria-modal="true"
-		aria-label="Fullscreen media viewer"
+		aria-labelledby="fullscreen-media-title"
 		on:click={() => (fullscreenMedia = null)}
 		on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
 	>
 		<div class="relative max-h-full max-w-full" on:click|stopPropagation>
+			<h2 id="fullscreen-media-title" class="sr-only">{fullscreenMedia.alt}</h2>
 			{#if fullscreenMedia.isVideo}
 				<video
 					src={fullscreenMedia.src}
@@ -650,7 +649,7 @@
 				<MessageCircleWarning />
 			</a>
 		</div>
-	</section>
+	</div>
 {/if}
 
 <style>
