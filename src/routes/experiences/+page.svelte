@@ -145,17 +145,18 @@
 
 	<!-- Modal -->
 	{#if modalProject}
-		<section
+		<div
 			class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
-			tabindex="0"
 			role="dialog"
 			aria-modal="true"
-			aria-label="Fullscreen media viewer"
+			aria-labelledby="modal-title"
 			on:click={closeModal}
 			on:keydown={(e) => e.key === 'Escape' && closeModal()}
 		>
 			<div
 				class="relative max-h-full w-full max-w-xl rounded-2xl bg-white p-4 shadow-xl dark:bg-gray-800"
+				role="document"
+				tabindex="0"
 				on:click|stopPropagation
 				transition:slide
 			>
@@ -186,7 +187,7 @@
 				/>
 
 				<!-- Title under image -->
-				<h3 class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-gray-100">
+				<h3 id="modal-title" class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-gray-100">
 					{modalProject.title}
 				</h3>
 
@@ -213,8 +214,8 @@
 						</a>
 					{/if}
 				</div>
-			</div>
-		</section>
+		</div>
+		</div>
 	{/if}
 
 	<!-- Contact & Social Links -->

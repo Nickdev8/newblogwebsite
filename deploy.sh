@@ -55,15 +55,16 @@ fi
 cd \"\$REMOTE_DIR\"
 npm ci --omit=dev
 
-if pm2 describe \"\$PM2_NAME\" >/dev/null 2>&1; then
-  pm2 reload \"\$PM2_NAME\" --update-env
+if pm2 describe "$PM2_NAME" >/dev/null 2>&1; then
+  PORT=3002 pm2 reload "$PM2_NAME" --update-env
 else
   if [ -f ecosystem.config.js ]; then
-    pm2 startOrReload ecosystem.config.js --only \"\$PM2_NAME\" --update-env
+    PORT=3002 pm2 startOrReload ecosystem.config.js --only "$PM2_NAME" --update-env
   else
-    REACTIONS_FILE=\"\$DATA_DIR/reactions.json\" pm2 start build/index.js --name \"\$PM2_NAME\"
+    PORT=3002 REACTIONS_FILE="$DATA_DIR/reactions.json" pm2 start build/index.js --name "$PM2_NAME"
   fi
 fi
+
 
 pm2 save || true
 '"
