@@ -19,9 +19,9 @@
 
 ---
 
-Hey! This is the code behind my blog. It’s a SvelteKit app with a tiny JSON "DB" for reactions and view counts. No Postgres, no Firebase—just files on disk and a Raspberry Pi doing its thing behind nginx + PM2.
+This repository contains the source code for my personal blog, built with SvelteKit. It features a lightweight JSON-based backend for managing reactions and view counts, eliminating the need for external databases like PostgreSQL or Firebase. The application is designed to run efficiently on a Raspberry Pi, leveraging nginx as a reverse proxy and PM2 for process management.
 
-If you just want to run it locally or deploy it to your own Pi/VPS, skim the **Quick Start** and **Deploy** bits below.
+For local development or deployment to a Raspberry Pi/VPS, please refer to the **Quick Start** and **Deployment** sections below.
 
 ## Quick Start
 
@@ -42,7 +42,8 @@ npm run preview  # http://localhost:3000
 
 * Markdown posts (frontmatter via `gray-matter`, HTML via `marked`).
 * LocalStorage to remember what you expanded/read.
-* Reactions + views via `/api/reactions/...` endpoints.
+* Reactions + views via `/api/reactions/...` endpoints, with a more prominent view counter that only displays when views are present.
+* Clearer language duration data on the experiences page.
 * Zero external DBs, just JSON files with atomic writes.
 * Simple deploy script with rsync + PM2 reloads.
 
@@ -61,18 +62,18 @@ npm run preview  # http://localhost:3000
 .
 ├── src/
 │   ├── lib/
-│   │   ├── ReactionBar.svelte
+│   │   └── ReactionBar.svelte
 │   │   └── server/reactionStore.ts        # JSON helpers
 │   ├── routes/
 │   │   ├── api/reactions/[event]/[slug]/+server.ts
 │   │   ├── api/reactions/types/+server.ts
 │   │   └── [event]/+page.svelte           # blog post UI
+│   │   └── experiences/+page.svelte       # experiences page
 │   └── posts/                             # markdown posts
 ├── data/
 │   ├── reaction-types.json
 │   └── reactions.json                     # stays on server, not overwritten
 ├── static/
-├── ecosystem.config.cjs                   # PM2 config
 ├── deploy.sh                              # rsync deploy script
 ├── package.json
 └── README.md
@@ -140,7 +141,7 @@ Set these in PM2 (see below) so the server knows where to read/write.
 * Writes go to a temp file, then `rename()` for atomic replace.
 * Only one PM2 instance (`pm2 scale blog 1`).
 
-## Deployment (Raspberry Pi or any Linux box)
+## Deployment (Raspberry Pi or any Linux box)
 
 ### One-time setup
 
@@ -262,6 +263,4 @@ SvelteKit’s a11y linter will complain about click handlers on non-interactive 
 
 ---
 
-Happy blogging! <:)
-
-*Readme vibes courtesy of me + ChatGPT*
+Happy blogging!

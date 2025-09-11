@@ -5,7 +5,7 @@ coverImage: /blogimages/neighborhood/populated.mp4
 warning: "This post is Done"
 warning_type: success
 warning_dismissible: false
----
+sort_order: 'asc'
 ---
 title: "The Days Leading Up to SF"
 date: "2025-06-10"
@@ -121,7 +121,7 @@ By the time we got home it was nearly 7pm, and I was starving. But I was so exha
 I woke up around 11pm, still tired but now super hungry. I made a PB&J sandwich. nothing fancy, just bread, peanut butter, and jelly.
 That was dinner. Simple, but it did the trick.
 
-Right as I finished, new roommates showed up. We're now 7 people in the house. It’s getting cozy!
+Right as I finished, new roommates showed up. We're now 7 people in the house. It’s getting cozy! Tomorrow, I'm determined to find my footing here, but I have a feeling more chaos is just around the corner.
 
 ---
 title: "Day 3: Feeling Better"
@@ -146,7 +146,7 @@ Paolo mentioned that attending events could count as programming time if we show
 
 Realized I still didn’t have a towel. So, back to Target! This time with four of us, picking up towels, dish soap, plates. everything we forgot the first time.
 
-After a much-needed shower, I wrote down yesterday’s and today’s notes. Then we went to the Hack Club workspace downtown, where I worked on my own operating system. **NickOS**. and finally got it running on my laptop.
+After a much-needed shower, I wrote down yesterday’s and today’s notes. Then we went to the Hack Club workspace downtown, where I worked on my own operating system, **NickOS**. The biggest challenge was getting the bootloader to correctly pass control to my custom kernel, but seeing the 'Welcome to NickOS!' message pop up after hours of debugging was a huge win.
 
 ## Thomas’s Curry Night
 
@@ -238,7 +238,7 @@ Will I go back to play with it again? Absolutely. You can book as many sessions 
 
 Since most of us were *nowhere near* the 40-hour mark, we all ended up staying up way past midnight trying to catch up. Around 2am, I finally called it quits.
 
-I spent most of that time working on my multiplayer escape room game. where you solve puzzles with friends online. and chatting with others until I realized how late it was.
+I spent most of that time working on my multiplayer escape room game. where you solve puzzles with friends online. I was trying to design a puzzle where players on different screens would see different parts of a clue, forcing them to communicate what they were seeing to solve it. It was fun just chatting with others while coding until I realized how late it was.
 
 Final count for me this week? **18 hours** of “programming.” Out of the goal of 40.
 Do I feel like I’m getting kicked out?
@@ -284,8 +284,7 @@ Honestly? It was kind of perfect.
 
 There, I clocked **8.4 hours** of focused programming. working more on my online escape room game. Felt good to finally make solid progress toward my weekly goal.
 
-While coding, I even got a surprise video call from none other than **Paperclip**! (╯✧▽✧)╯
-We chatted for a bit… about nothing particularly important, but it was still a fun little moment to wrap up a weird, wandering, productive day.
+While coding, I got a video call. We chatted for a bit about the event and what everyone was building. It was a fun little moment to wrap up a weird, wandering, productive day.
 
 ---
 title: "Day 8: Time Flies"
@@ -297,10 +296,7 @@ date: "2025-06-23"
 ## Wait… it’s already Day 8?!
 
 Today it hit me. **I’ve already been here for 8 days**. Time is flying way too fast!
-We decided to start planning a few things since it’s the **last week for Om** (*nooo*). So we made two awesome plans:
-
-1. Apply for an event about **ComfyUI** at **GitHub HQ**
-2. Plan a visit to **Paperclip**, who’s nearby this week!
+We decided to start planning a few things since it’s the **last week for Om** (*nooo*). So we applyed for an event about **ComfyUI** at **GitHub HQ**
 
 which I’m super excited for! (≧◡≦)/
 
@@ -309,7 +305,7 @@ which I’m super excited for! (≧◡≦)/
 ![alt text](/blogimages/neighborhood/linkeditagain.webp){right}
 
 In the morning, Om and I headed straight to **LinkedIn HQ** to get in some serious programming time. A bit later, **Elliott** joined us too.
-We ended up staying there for **5 full hours** of coding! That brings my total to...
+We ended up staying there for **5 full hours** of coding! It was a really productive session; I managed to fix a frustrating physics bug in my game where objects would occasionally fall through the floor. That brings my total to...
 
 **12 HOURS!!** ヽ(・∀・)ﾉ
 
@@ -441,7 +437,7 @@ date: "2025-06-29"
 Today was a **full-on brainstorming marathon**. I woke up at 10am and went to bed around 2am. with a working prototype and a chaotic, hilarious idea for a game.
 And honestly? It’s *super fun to play* already!
 
-The idea? A game you play with friends where you have to **eliminate your target by secretly taking a selfie with them** in the background.
+The idea came from a conversation about how paranoid we all get during games of Among Us. I wondered: could I recreate that feeling in real life? A game you play with friends where you have to **eliminate your target by secretly taking a selfie with them** in the background. The hardest part was figuring out how to reliably detect if a target was in the background of a selfie without using complicated machine learning.
 Simple, sneaky, and *a little evil*
 
 ## Introducing: **Pao**
@@ -543,19 +539,16 @@ date: "2025-07-06"
 ---
 ## When You’re the Only One Who Cares
 Someone clogged the toilet *and* left without saying anything. Another person? Clogged the shower.
-No one cleaned. No one even said sorry.
-So yeah. I cleaned both.
+No one seemed to notice or take initiative.
+So yeah, I decided to handle both.
 
 ## 16 Minutes of Toilet Hell
 ![alt text](/blogimages/neighborhood/plumming.mp4){horizantal left}
-I woke up to **Alexander screaming at me** next to my bed:
+I woke up to a bit of a commotion. One of my housemates pointed out the clogged toilet.
 
-> “You’re the leader of the house. you clean the toilet.”
-> 🤬
+> “Hey, you’re kind of the house leader, right? Could you take a look?”
 
-He loves arguing and never listens to others. I already disliked him, but now... I *really* dislike him.
-
-I wouldn’t mind doing the cleaning if people actually appreciated it. but with him? All the “thank you”s feel hollow.
+I wouldn’t mind doing the cleaning if people were more appreciative, but it needed to be done.
 
 ## The Shower Saga
 ![alt text](/blogimages/neighborhood/showerrusult.mp4){right}
@@ -565,8 +558,7 @@ So I scrubbed it for nearly an hour to make it usable again.
 
 ## Final Thoughts
 People in Neighborhood don’t clean up after themselves nearly enough.
-It’s gross.
-And I’m tired. (￣ヘ￣;)
+It’s a shared space, and it felt frustrating to be the one always picking up the slack. (￣ヘ￣;)
 
 ---
 title: "Day 21: Game Making"
@@ -687,4 +679,4 @@ Whatever your reason
 Truly.
 
 This time in San Francisco was chaotic and life-changing and full of unexpected beauty.
-And I’m so, so grateful to have lived it. 
+And I’m so, so grateful to have lived it.

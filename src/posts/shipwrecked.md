@@ -2,10 +2,10 @@
 title: "Shipwrecked"
 description: "An upcoming adventure with Hack Club. Stay tuned for the full story of what happened at Shipwrecked!"
 coverImage: /blogimages/shipwrecked/placeholder.webp
-warning: "This post is currently in the works! Check back in every day to see the new updates."
+warning: "Shipwrecked was amazing! tysm!"
 warning_type: success
-warning_dismissible: true
-live: true
+warning_dismissible: false
+sort_order: 'asc'
 ---
 ---
 title: "Day 0: The Journey Begins"
@@ -39,7 +39,7 @@ And when we arrived… WHO DO I SEE?!
 For anyone who doesn't know, Paolo is my favorite human in Hack Club. Seeing him there was the perfect welcome.
 We all went out for food, but I was so exhausted from being awake for nearly 24 hours (plus jet lag) that I went to bed pretty early.
 
-I’m so excited for tomorrow. I get to meet all the other Hack Clubbers, the team, and especially *Paperclip*! Jeremy and some other awesome people are coming too! :yay:
+I'm excited to meet everyone tomorrow, including some of the event organizers like Paperclip. Jeremy and some other awesome people are coming too! :yay:
 
 ---
 title: "Day 1: The Island"
@@ -89,8 +89,7 @@ date: "2025-08-09"
 
 ## A Good Morning
 
-Today is Day 2. After a quick shower, I went outside, and who do I see? **It's Paperclip!**
-I joined her and another guy, and we walked around for a bit, meeting more people. We ended up going on a small hike, which was a great way to see more of the island. The views were incredible.
+Today is Day 2. After a quick shower, I went outside and saw **Paperclip**. I joined her and another guy, and we walked around for a bit, meeting more people. We ended up going on a small hike, which was a great way to see more of the island. The views were incredible.
 
 Later, we all sat down to play a few rounds of Uno. It got pretty competitive, but it was all in good fun. During the game, we met Criss. He’s a super interesting and fun guy, and we had a great chat about Hack Club and other random stuff.
 
@@ -102,7 +101,7 @@ After breakfast, we all went to a workshop with Zach. He talked about the financ
 
 ## Towers and Beaches
 
-After Zach's workshop, a tower building competition started. The challenge was to build the biggest tower using only sticks. The prize? An IKEA plushie! Some people showed off their engineering skills, building sturdy towers with lots of triangles (maybe too many! XD). One creative team even used a tree for support, and they ended up winning.
+After Zach's workshop, a tower building competition started. The challenge was to build the biggest tower using only sticks. The prize? An IKEA plushie! Some people showed off their engineering skills, building sturdy towers with lots of triangles. One creative team even used a tree for support, and they ended up winning.
 
 ![Building towers together](/blogimages/shipwrecked/group%20making%20towers.png){right}
 
@@ -110,13 +109,13 @@ After the competition, we got the chance to go for a swim at the beach. I went w
 
 ![The beach on the island](/blogimages/shipwrecked/beatch.png){hole}
 
-But the day wasn't over yet! Soon after, we joined another workshop, this time hosted by Evan and Sophia on how to run your own hackathon. It was more educational than entertaining, but still decent. During the workshop, I got a text from an unknown number saying, "lol nick pay attention to evan." Turns out, it was one of the organizers! Pretty funny.
+But the day wasn't over yet! Soon after, we joined another workshop on how to run your own hackathon. It was more educational than entertaining, but still decent.
 
 Dinner time was burgers! We had to eat quickly because the showcase for our second challenge was in 30 minutes. After the showcase, where we got some cool merch, there was a campfire with a talent show and lightning talks. People started to lose interest pretty quickly and left.
 
 ![Some of the cool merch we got](/blogimages/shipwrecked/morestickers.jpg){left}
 
-I found Paperclip again! I hadn't seen her since the morning because she was working on the challenge the entire time. We chilled in a group for a bit, walked around, and then went back to the lightning talks around midnight. They were still going, talking about the most random stuff.
+I saw **Paperclip** again in a group of people. We all chilled for a bit, walked around, and then went back to the lightning talks around midnight. They were still going, talking about the most random stuff.
 
 ![The coastline at night](/blogimages/shipwrecked/nightlifecoastline.jpg){hole}
 
@@ -125,7 +124,7 @@ title: "Day 3: Dinos and Drama"
 date: "2025-08-10"
 ---
 
-I woke up after only 3.5 hours of sleep, so I skipped the morning run and went straight to breakfast. I didn't do much after, just talked with Paperclip and called my family back home. 
+I woke up after only 3.5 hours of sleep, so I skipped the morning run and went straight to breakfast. I didn't do much after, just talked with a few people, including **Paperclip**, and called my family back home. 
 
 After lunch, it was time for the ship showcase, science fair style! Everyone walked around, and the organizers were giving out stickers. Suddenly, we heard William's voice over the speakers, along with a girl's voice, explaining the next challenge. Then, a giant pink inflatable dinosaur appeared on stage, chasing one of the villagers!
 
@@ -133,6 +132,32 @@ After all that drama, there was an announcement for a spicy challenge on the bea
 
 ![The Orphius plushie prize](/blogimages/shipwrecked/orphius%20plushy.jpg){right}
 
-Later, I hung out with Paperclip, Jeremy, and Parneel. It was a chill end to a crazy day.
+Later, I hung out with Jeremy and Parneel. It was a chill end to a crazy day.
 
 ![Parneel chilling on the couch](/blogimages/shipwrecked/parneelonthecoutch.jpg){hole}
+
+---
+title: "Day 4: The Final Day"
+date: "2025-08-11"
+---
+
+## Last Morning on the Island
+
+I woke up feeling a mix of exhaustion and excitement. It was the last day, and the energy on the island was different, a little quieter, a little more reflective. We had our last breakfast together, and people were already starting to exchange contact info and make plans to stay in touch.
+
+## Closing Ceremony & Final Showcase
+In the afternoon, we all gathered in the main tent one last time for the closing ceremony. This was also the showcase for the "communicate without words" challenge. It was hilarious to see what everyone came up with. One team developed a whole system of elaborate hand gestures, while another created a series of rhythmic drum beats to signal different messages.
+
+After the demos, Zach gave a final speech, thanking everyone for making Shipwrecked so special. He talked about the importance of building things together and finding your people. A message that really hit home after the last few weeks.
+
+## Ferry back to land
+Not to long after we all had to grab our stuff and get on board, that was without relizing the last place i saw most of the amazing people here. becouse soon after we arrived we got on the bus to the airport. and since all of us had different gates we all just split up without relizing it. kind of the best non emotional ending.
+
+
+## Final Thoughts
+
+Shipwrecked was exactly the experience I needed. After the chaos and abrupt ending of Neighborhood, being on an island disconnected from the world, surrounded by people who just wanted to build, learn, and have fun, was incredibly refreshing. It wasn't about hours or competition; it was about community.
+
+I left with a bag full of merch, a phone full of new contacts, and a renewed sense of excitement for what's next. This is what Hack Club is all about.
+
+Thank you, Shipwrecked. It was unforgettable.

@@ -78,7 +78,7 @@
 </script>
 
 <div class="flex flex-wrap items-center gap-2 text-base select-none" role="group" aria-label="Reactions">
-	{#each types as r}
+	<!-- {#each types as r}
 		<button
 			type="button"
 			class="flex items-center gap-1 transition-opacity hover:opacity-80 focus:outline-none"
@@ -89,10 +89,12 @@
 			<span class={mine.has(r.key) ? 'opacity-100' : 'opacity-50 filter grayscale'}>{r.emoji}</span>
 			<span class="text-xs text-gray-500 dark:text-gray-300">{counts[r.key] ?? 0}</span>
 		</button>
-	{/each}
+	{/each} -->
 
-	<div class="flex items-center gap-1 text-sm opacity-70" title="Views">
-		<span aria-hidden="true">👁</span>
-		<span class="text-xs text-gray-500 dark:text-gray-300">{views}</span>
+	{#if views > 0}
+	<div class="flex items-center gap-1.5 text-base opacity-80" title="Views">
+		<span aria-hidden="true" class="text-sm">👁️</span>
+		<span class="text-sm font-medium text-gray-600 dark:text-gray-300">{views}</span>
 	</div>
+	{/if}
 </div>

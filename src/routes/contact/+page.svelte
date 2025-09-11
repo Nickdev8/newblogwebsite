@@ -36,7 +36,7 @@
   </h1>
 
   <h4 class="mb-8 text-center text-xl font-bold text-gray-600 dark:text-gray-400">
-    Please! A Simple Hi is good eneugh
+    A Simple Hi is good eneugh
   </h4>
 
   <form method="POST" action="/contact" use:enhance class="space-y-6 rounded-lg bg-white shadow-lg p-8 transition-colors duration-300 dark:bg-gray-800">
