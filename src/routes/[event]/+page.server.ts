@@ -74,7 +74,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const holeImages: { src: string; alt: string; layout: string[] }[] = [];
 		let textContent = parsedContent.replace(
-			/!\[([^\]]*)\]\(([^)]*)\)(?:\{([^}]*)\})?/g,
+			/!\[(.*?)(\s+alt="(.*?)")?\]\((.*?)\)(?:\{(.*?)\})?/g,
 			(match, alt, src, layout) => {
 				const layoutArr = layout ? layout.trim().split(/\s+/) : [];
 				holeImages.push({ src, alt, layout: layoutArr });
@@ -94,18 +94,20 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 	}
 
-	if (event === 'undercity') {
-		posts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-	} else {
+	const sortOrder = mainData.sort_order || 'asc';
+
+	if (sortOrder === 'desc') {
 		posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+	} else {
+		posts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 	}
 
 	const extraImagesDir = path.join('static', 'blogimages', eventName, 'extra');
 	const leftoverImages = fs.existsSync(extraImagesDir)
 		? fs.readdirSync(extraImagesDir).map((file) => ({
-				src: `/blogimages/${eventName}/extra/${file}`,
-				alt: 'Extra image'
-		  }))
+						src: `/blogimages/${eventName}/extra/${file}`,
+						alt: 'Extra image'
+			  }))
 		: [];
 
 	return {

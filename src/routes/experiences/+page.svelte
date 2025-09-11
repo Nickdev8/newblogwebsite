@@ -1,38 +1,17 @@
 <script lang="ts">
-  import { slide } from 'svelte/transition';
-  import { ExternalLink, Minimize, MessageCircleWarning } from 'lucide-svelte';
+  import { ExternalLink, MessageCircleWarning } from 'lucide-svelte';
 
-  type Skill = { name: string; years: number; projects: number };
+  type Skill = { name: string; duration: string };
   const skills: Skill[] = [
-    { name: 'C# (Unity)', years: 8, projects: 67 },
-    { name: 'TypeScript', years: 1, projects: 5 },
-    { name: 'Svelte / SvelteKit', years: 1, projects: 5 },
-    { name: 'HTML/CSS', years: 3, projects: 15 },
-    { name: 'Python', years: 4, projects: 10 },
-    { name: 'Arduino', years: 3, projects: 3 }
+    { name: 'C# (Unity)', duration: '8 years, 67 projects' },
+    { name: 'TypeScript', duration: '1 year, 5 projects' },
+    { name: 'Svelte / SvelteKit', duration: '1 year, 5 projects' },
+    { name: 'HTML/CSS', duration: '3 years, 15 projects' },
+    { name: 'Python', duration: '4 years, 10 projects' },
+    { name: 'Arduino', duration: '3 years, 15 projects' }
   ];
 
-  interface Project {
-    src: string;
-    title: string;
-    info?: string;
-    repo?: string;
-  }
-  const projects: Project[] = [
-    { src: '/whatidoimg/3dprinter.webp', title: 'Ender 3 V2', info: 'https://nickesselman.nl/?project=3dprinting' },
-    { src: '/whatidoimg/laptop.webp', title: 'Arch Linux Laptop', info: 'https://nickesselman.nl/?project=stickers' },
-    { src: '/whatidoimg/pcbfront.webp', title: 'Micro Pad', info: 'https://nickesselman.nl/?project=hackpad', repo: 'https://github.com/Nickdev8/macropad' }
-
-  ];
-
-  let modalProject: Project | null = null;
-
-  function openModal(p: Project) {
-    modalProject = p;
-  }
-  function closeModal() {
-    modalProject = null;
-  }
+  
 
   const languagesHtml = `
     <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="Visual Studio Code" width="45" height="45">
@@ -91,164 +70,61 @@
 <div class="container mx-auto p-6 space-y-12">
   <!-- Core Skills & Technologies -->
   <section>
-    <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Core Skills & Technologies</h2>
-    <!-- Bars -->
-    <div class="space-y-6">
+    <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">Core Skills & Technologies</h2>
+    <!-- <div class="flex justify-center mb-6">
+      <img src="https://github-readme-stats.hackclub.dev/api/wakatime?username=1160&api_domain=hackatime.hackclub.com&&custom_title=Hackatime+Stats&layout=compact&cache_seconds=0&langs_count=8&theme=transparent" alt="Hackatime Stats" class="w-full max-w-md" />
+    </div> -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {#each skills as skill}
-        <div>
-          <div class="flex mb-1">
-            <span class="font-medium text-gray-800 dark:text-gray-200">{skill.name}</span>
-          </div>
-          <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full mb-2">
-            <div
-              class="h-3 rounded-full bg-blue-500 dark:bg-blue-400 transition-all"
-              style="width: {Math.round((skill.years / Math.max(...skills.map(s => s.years))) * 100)}%"
-            ></div>
-          </div>
-          <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full">
-            <div
-              class="h-3 rounded-full bg-green-500 dark:bg-green-400 transition-all"
-              style="width: {Math.round((skill.projects / Math.max(...skills.map(s => s.projects))) * 100)}%"
-            ></div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
+          <div class="flex justify-center items-baseline gap-2">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200">{skill.name}</h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">{skill.duration}</p>
           </div>
         </div>
       {/each}
     </div>
-
-    <!-- Languages & Tools -->
-    <div class="mt-8">
-      <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Languages & Tools</h3>
-      <div class="grid gap-4" style="grid-template-columns: repeat(16, auto);">
-        {@html languagesHtml}
-      </div>
-    </div>
   </section>
 
-  <!-- Experience Snapshot -->
+  <!-- Languages & Tools -->
   <section>
-    <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Experience Snapshot</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {#each projects as proj}
-        <button
-          type="button"
-          class="cursor-pointer rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition flex flex-col"
-          on:click={() => openModal(proj)}
-        >
-          <img src={proj.src} alt={proj.title} class="w-full h-48 object-cover" />
-          <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800">
-            <span class="font-semibold text-gray-800 dark:text-gray-200">{proj.title}</span>
-          </div>
-        </button>
-      {/each}
+    <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">Languages & Tools</h2>
+    <div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-6">
+      {@html languagesHtml}
     </div>
   </section>
 
-	<!-- Modal -->
-	{#if modalProject}
-		<div
-			class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="modal-title"
-			on:click={closeModal}
-			on:keydown={(e) => e.key === 'Escape' && closeModal()}
-		>
-			<div
-				class="relative max-h-full w-full max-w-xl rounded-2xl bg-white p-4 shadow-xl dark:bg-gray-800"
-				role="document"
-				tabindex="0"
-				on:click|stopPropagation
-				transition:slide
-			>
-				<!-- Header with close and report -->
-				<div class="mb-4 flex justify-end space-x-2">
-					<button
-						aria-label="Close fullscreen"
-						class="rounded-full bg-gray-200 p-2 transition hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-						on:click={closeModal}
-					>
-						<Minimize class="text-gray-800 dark:text-gray-200" />
-					</button>
-					<a
-						href={`/contact?project=${encodeURIComponent(modalProject.title)}`}
-						aria-label="Report this project"
-						class="rounded-full bg-red-200 p-2 transition hover:bg-red-300 dark:bg-red-700 dark:hover:bg-red-600"
-						on:click|stopPropagation
-					>
-						<MessageCircleWarning class="text-red-600 dark:text-red-300" />
-					</a>
-				</div>
-
-				<!-- Media -->
-				<img
-					src={modalProject.src}
-					alt={modalProject.title}
-					class="mx-auto max-h-[70vh] w-auto rounded-lg"
-				/>
-
-				<!-- Title under image -->
-				<h3 id="modal-title" class="mt-4 text-center text-xl font-bold text-gray-900 dark:text-gray-100">
-					{modalProject.title}
-				</h3>
-
-				<!-- Links -->
-				<div class="mt-2 flex justify-center space-x-4">
-					{#if modalProject.info}
-						<a
-							href={modalProject.info}
-							target="_blank"
-							class="flex items-center space-x-1 text-blue-600 hover:underline dark:text-blue-400"
-						>
-							<ExternalLink size={16} />
-							<span>Info</span>
-						</a>
-					{/if}
-					{#if modalProject.repo}
-						<a
-							href={modalProject.repo}
-							target="_blank"
-							class="flex items-center space-x-1 text-green-600 hover:underline dark:text-green-400"
-						>
-							<ExternalLink size={16} />
-							<span>Repo</span>
-						</a>
-					{/if}
-				</div>
-		</div>
-		</div>
-	{/if}
-
-	<!-- Contact & Social Links -->
-	<footer class="mt-12 text-center">
-		<h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">Contact & Social Links</h2>
-		<div
-			class="flex flex-col items-center justify-center space-y-2 sm:flex-row sm:space-x-6 sm:space-y-0"
-		>
-			<a
-				href="/contact"
-				class="flex items-center space-x-1 font-semibold text-blue-600 hover:underline dark:text-blue-400"
-			>
-				<MessageCircleWarning />
-				<span>Contact Me</span>
-			</a>
-			<a
-				href="https://github.com/NickDev8"
-				target="_blank"
-				class="flex items-center space-x-1 hover:text-gray-600 dark:hover:text-gray-300"
-			>
-				<ExternalLink />
-				<span>GitHub</span>
-			</a>
-			<a
-				href="https://linkedin.com/in/nick-esselman"
-				target="_blank"
-				class="flex items-center space-x-1 hover:text-gray-600 dark:hover:text-gray-300"
-			>
-				<ExternalLink />
-				<span>LinkedIn</span>
-			</a>
-		</div>
-	</footer>
+  <!-- Contact & Social Links -->
+  <footer class="mt-12 text-center">
+    <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">Contact & Social Links</h2>
+    <div
+      class="flex flex-col items-center justify-center space-y-2 sm:flex-row sm:space-x-6 sm:space-y-0"
+    >
+      <a
+        href="/contact"
+        class="flex items-center space-x-1 font-semibold text-blue-600 hover:underline dark:text-blue-400"
+      >
+        <MessageCircleWarning />
+        <span>Contact Me</span>
+      </a>
+      <a
+        href="https://github.com/NickDev8"
+        target="_blank"
+        class="flex items-center space-x-1 hover:text-gray-600 dark:hover:text-gray-300"
+      >
+        <ExternalLink />
+        <span>GitHub</span>
+      </a>
+      <a
+        href="https://linkedin.com/in/nick-esselman"
+        target="_blank"
+        class="flex items-center space-x-1 hover:text-gray-600 dark:hover:text-gray-300"
+      >
+        <ExternalLink />
+        <span>LinkedIn</span>
+      </a>
+    </div>
+  </footer>
 </div>
 
 <style>

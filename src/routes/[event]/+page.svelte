@@ -146,17 +146,26 @@ date: string;
 	let reactions: Record<string, ReactionState> = {};
 
 	async function loadReaction(slug: string) {
-		const res = await fetch(`/api/reactions/${data.event}/${slug}`);
-		const { counts, views } = await res.json();
-		reactions = {
-			...reactions,
-			[slug]: {
-				counts,
-				views,
-				mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
-				loading: false
-			}
-		};
+		try {
+			const res = await fetch(`/api/reactions/${data.event}/${slug}`);
+			if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+			const { counts, views } = await res.json();
+			reactions = {
+				...reactions,
+				[slug]: {
+					counts,
+					views,
+					mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
+					loading: false
+				}
+			};
+		} catch (error) {
+			console.error(`Failed to load reactions for ${slug}:`, error);
+			reactions = {
+				...reactions,
+				[slug]: { counts: {}, views: 0, mine: false, loading: false } // Fallback to default state
+			};
+		}
 	}
 
 	async function toggleReaction(slug: string, type: string) {
@@ -259,7 +268,7 @@ date: string;
 	}
 
 	function isVideo(src: string) {
-		return src.endsWith('.mp4');
+		return src && src.endsWith('.mp4');
 	}
 
 	function hasLayout(image: { layout: string[] }, layout: string) {
@@ -380,11 +389,15 @@ date: string;
 
 		const id = anon_id;
 		for (const slug of allPostSlugs) {
-			fetch(`/api/reactions/${data.event}/${slug}`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ mode: 'seed', anon_id: id })
-			});
+			try {
+				await fetch(`/api/reactions/${data.event}/${slug}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ mode: 'seed', anon_id: id })
+				});
+			} catch (error) {
+				console.error(`Failed to seed view for ${slug}:`, error);
+			}
 		}
 	});
 </script>
@@ -420,7 +433,7 @@ date: string;
 <div
 	class="mx-auto max-w-none px-3 py-4 sm:px-4 sm:py-6 md:max-w-[1100px] md:px-6 lg:max-w-[1280px] lg:px-8"
 		on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
-		role="document"
+		role="application"
 		tabindex="0"
 	>
 	<div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -438,12 +451,12 @@ date: string;
 			>
 				Collapse All
 			</button>
-			<button
+			<!-- <button
 				on:click={markAllUnread}
 				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
 			>
 				Mark All as Unread
-			</button>
+			</button> -->
 		</div>
 	</div>
 
@@ -462,16 +475,7 @@ date: string;
 					clearStrikeTimer();
 				}}
 			>
-				<!-- {#if readSlugs.has(post.slug)}
-					<button
-						on:click|stopPropagation={() => unmarkRead(post.slug)}
-						title="Mark as unread"
-						aria-label="Mark as unread"
-						class="absolute right-2 top-2 text-[10px] text-gray-400 hover:text-gray-700 sm:text-xs"
-					>
-						✕
-					</button>
-				{/if} -->
+				
 
 				<!-- HEADER ROW -->
 				<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
@@ -517,36 +521,38 @@ date: string;
 						transition:slide={!initialLoad ? { duration: 350, easing: (t) => t * t } : undefined}
 					>
 						{#each post.holeImages as image}
-							{#if isVideo(image.src)}
-								<button
-									type="button"
-									class={getLayoutClasses(image)}
-									on:click={() => openFullscreen(image.src, image.alt)}
-									aria-label={image.alt || 'Open video fullscreen'}
-									style="padding:0;border:none;background:none;"
-								>
-									<video
-										src={image.src}
-										autoplay={!hasLayout(image, 'dontautostart')}
-										loop={!hasLayout(image, 'dontautostart')}
-										muted={!hasLayout(image, 'dontautostart')}
-										playsinline={!hasLayout(image, 'dontautostart')}
-										controls={hasLayout(image, 'dontautostart')}
-										tabindex="-1"
+							{#if image && image.src}
+								{#if isVideo(image.src)}
+									<button
+										type="button"
+										class={getLayoutClasses(image)}
+										on:click={() => openFullscreen(image.src, image.alt)}
+										aria-label={image.alt || 'Open video fullscreen'}
+										style="padding:0;border:none;background:none;"
 									>
-										<track kind="captions" />
-									</video>
-								</button>
-							{:else}
-								<button
-									type="button"
-									class={getLayoutClasses(image)}
-									on:click={() => openFullscreen(image.src, image.alt)}
-									aria-label={image.alt || 'Open image fullscreen'}
-									style="padding:0;border:none;background:none;"
-								>
-									<img src={image.src} alt={image.alt} tabindex="-1" />
-								</button>
+										<video
+											src={image.src}
+											autoplay={!hasLayout(image, 'dontautostart')}
+											loop={!hasLayout(image, 'dontautostart')}
+											muted={!hasLayout(image, 'dontautostart')}
+											playsinline={!hasLayout(image, 'dontautostart')}
+											controls={hasLayout(image, 'dontautostart')}
+											tabindex="-1"
+										>
+											<track kind="captions" />
+										</video>
+									</button>
+								{:else}
+									<button
+										type="button"
+										class={getLayoutClasses(image)}
+										on:click={() => openFullscreen(image.src, image.alt)}
+										aria-label={image.alt || 'Open image fullscreen'}
+										style="padding:0;border:none;background:none;"
+									>
+										<img src={image.src} alt={image.alt} tabindex="-1" />
+									</button>
+								{/if}
 							{/if}
 						{/each}
 
