@@ -43,5 +43,8 @@
 		"nodemailer": "^7.0.5",
 		"svelte-email": "^0.0.4",
 		"svelte-leafletjs": "^1.0.1"
-	}
+	},
+	"overrides": {
+   	 	"rollup": "^4.46.3"
+  	}
 }
