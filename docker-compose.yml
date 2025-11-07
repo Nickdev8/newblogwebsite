@@ -1,14 +1,15 @@
-
-version: '3.8'
-
+name: blog.nickesselman.nl
 services:
-  website:
+  web:
     build:
       context: .
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
+      dockerfile: Dockerfile
+    image: blog.nickesselman.nl:prod
     restart: unless-stopped
-    volumes:
-      - ./data/reactions.json:/app/data/reactions.json
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: "0.0.0.0"
+    ports:
+      - "127.0.0.1:3011:3000"
+    working_dir: /app

@@ -1,25 +1,20 @@
+# syntax=docker/dockerfile:1.7
 
-# Use a lightweight Node.js image
-FROM node:20-alpine AS base
-
-# Set the working directory
-WORKDIR /app
-
-# Install dependencies
-COPY package.json package-lock.json ./
-RUN npm install
-
-# Copy the rest of the application code
-COPY . .
-
-# Build the SvelteKit application
+FROM node:20-bookworm AS builder
+WORKDIR /work
+COPY app/package*.json ./
+RUN npm ci
+COPY app/ ./
 RUN npm run build
 
-# Prune dev dependencies
-RUN npm prune --production
-
-# Expose the port the app runs on
+FROM node:20-bookworm AS runtime
+RUN useradd -r -s /usr/sbin/nologin nodeuser
+WORKDIR /app
+COPY app/package*.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /work/build ./build
+USER nodeuser
+ENV HOST=0.0.0.0
+ENV PORT=3000
 EXPOSE 3000
-
-# Set the entrypoint to start the Node.js server
-CMD [ "node", "build/index.js" ]
+CMD ["node", "build"]
