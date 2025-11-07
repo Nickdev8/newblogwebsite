@@ -1,33 +1,33 @@
-node_modules
+app/node_modules
 
 # Output
-.output
-.vercel
-.netlify
-.wrangler
-/.svelte-kit
-/build
+app/.output
+app/.vercel
+app/.netlify
+app/.wrangler
+app/.svelte-kit
+app/build
 
 # OS
 .DS_Store
 Thumbs.db
 
 # Env
-.env
-.env.*
-!.env.example
-!.env.test
+app/.env
+app/.env.*
+!app/.env.example
+!app/.env.test
 
 # Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
-static/blogimages/*/*.*
-static/blogimages/*/extra/*.*
-temp.txt
-buildcommandlist.txt
-+page.js
+app/vite.config.js.timestamp-*
+app/vite.config.ts.timestamp-*
+app/static/blogimages/*/*.*
+app/static/blogimages/*/extra/*.*
+app/temp.txt
+app/buildcommandlist.txt
+app/+page.js
 
-*/*.webp
-*/*.png
-*/*.jpg
-*/*.jpeg
+app/*/*.webp
+app/*/*.png
+app/*/*.jpg
+app/*/*.jpeg
