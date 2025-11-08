@@ -4,7 +4,7 @@
 	import { slide } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import ReactionBar from '$lib/ReactionBar.svelte';
-	import { Minimize, MessageCircleWarning } from 'lucide-svelte';
+	import { ChevronDown, Minimize, MessageCircleWarning } from 'lucide-svelte';
 
 	export let data: {
 		posts: {
@@ -34,6 +34,7 @@ date: string;
 	/* ------------------------------------------------------------------ */
 
 	const STORAGE_KEY = `eventState:${data.event}`;
+	const hasLocalStorage = browser && typeof localStorage !== 'undefined';
 	type Persisted = {
 		read: string[];
 		expanded: string[];
@@ -42,22 +43,27 @@ date: string;
 		bannerDismissed: boolean;
 	};
 
+	const fallbackState = (): Persisted => ({
+		read: [],
+		expanded: [],
+		opened: [],
+		struck: [],
+		bannerDismissed: false
+	});
+
 	function loadState(): Persisted {
-		if (typeof localStorage === 'undefined') return fallback();
+		if (!hasLocalStorage) return fallbackState();
 		try {
 			const raw = localStorage.getItem(STORAGE_KEY);
-			if (!raw) return fallback();
+			if (!raw) return fallbackState();
 			const parsed = JSON.parse(raw);
-			return { ...fallback(), ...parsed };
+			return { ...fallbackState(), ...parsed };
 		} catch {
-			return fallback();
-		}
-		function fallback(): Persisted {
-			return { read: [], expanded: [], opened: [], struck: [], bannerDismissed: false };
+			return fallbackState();
 		}
 	}
 
-	let state: Persisted = loadState();
+	let state: Persisted = hasLocalStorage ? loadState() : fallbackState();
 
 	// Derived runtime structures (what the UI actually uses)
 	let readSlugs = new Set<string>(state.read);
@@ -69,7 +75,7 @@ date: string;
 	// Cheap debounce with rAF
 	let saveRaf: number | null = null;
 	function queueSave() {
-		if (typeof localStorage === 'undefined') return;
+		if (!hasLocalStorage) return;
 		if (saveRaf) cancelAnimationFrame(saveRaf);
 		saveRaf = requestAnimationFrame(() => {
 			state = {
@@ -87,7 +93,7 @@ date: string;
 	}
 
 	// Save before leaving the page as a last resort
-	if (typeof window !== 'undefined') {
+	if (browser) {
 		window.addEventListener('beforeunload', queueSave);
 	}
 
@@ -98,9 +104,29 @@ date: string;
 	const allPostSlugs = data.posts.map((p) => p.slug);
 	let initialLoad = true;
 	let fullscreenMedia: { src: string; alt: string; isVideo: boolean } | null = null;
+	let fullscreenPanel: HTMLDivElement | null = null;
 
 	let hoveredSlug: string | null = null;
 	let strikeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	const readableTitle = data.title || data.event;
+	const heroDescription =
+		data.description ||
+		'A slow, long-form journal of what I was building, noticing, and collecting along the way.';
+	const firstEntry = data.posts[0];
+	const lastEntry = data.posts[data.posts.length - 1];
+	const dateFormatter = new Intl.DateTimeFormat('en', {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric'
+	});
+	const formatDate = (value?: string) => (value ? dateFormatter.format(new Date(value)) : '—');
+	const heroHighlights = [
+		{ label: 'Entries logged', value: data.posts.length || '—' },
+		{ label: 'First note', value: formatDate(firstEntry?.date) },
+		{ label: 'Latest update', value: formatDate(lastEntry?.date) }
+	];
+	const entryBadge = (index: number) => `Entry ${String(index + 1).padStart(2, '0')}`;
 
 	const bannerTypeClasses: Record<string, string> = {
 		warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
@@ -115,8 +141,16 @@ date: string;
 	}
 
 	// Lock background scroll when fullscreen modal is open
-	$: typeof document !== 'undefined' &&
-		(document.body.style.overflow = fullscreenMedia ? 'hidden' : '');
+	$: if (browser && typeof document !== 'undefined') {
+		document.body.style.overflow = fullscreenMedia ? 'hidden' : '';
+	}
+
+	function handleWindowClick(event: MouseEvent) {
+		if (!fullscreenMedia) return;
+		const target = event.target as Node | null;
+		if (target && fullscreenPanel?.contains(target)) return;
+		fullscreenMedia = null;
+	}
 
 	/* ------------------------------------------------------------------ */
 	/*  REACTIONS                                                          */
@@ -124,7 +158,7 @@ date: string;
 
 	const ANON_KEY = 'anon_id_v1';
 	function getAnonId() {
-		if (typeof localStorage === 'undefined') return 'no-localstorage';
+		if (!hasLocalStorage) return 'no-localstorage';
 		let id = localStorage.getItem(ANON_KEY);
 		if (!id) {
 			id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
@@ -132,7 +166,7 @@ date: string;
 		}
 		return id;
 	}
-	const anon_id = getAnonId();
+	const anon_id = hasLocalStorage ? getAnonId() : 'server-render';
 
 	const REACT_KEY = (slug: string) => `reacted:${data.event}:${slug}`;
 
@@ -155,7 +189,7 @@ date: string;
 				[slug]: {
 					counts,
 					views,
-					mine: typeof localStorage !== 'undefined' && localStorage.getItem(REACT_KEY(slug)) === '1',
+					mine: hasLocalStorage && localStorage.getItem(REACT_KEY(slug)) === '1',
 					loading: false
 				}
 			};
@@ -187,7 +221,7 @@ date: string;
 			return;
 		}
 
-		if (typeof localStorage !== 'undefined') {
+		if (hasLocalStorage) {
 			if (add) localStorage.setItem(REACT_KEY(slug), '1');
 			else localStorage.removeItem(REACT_KEY(slug));
 		}
@@ -261,7 +295,7 @@ date: string;
 
 	function dismissBanner() {
 		bannerDismissed = true;
-		if (typeof localStorage !== 'undefined') {
+		if (hasLocalStorage) {
 			localStorage.setItem(bannerKey, 'true');
 		}
 		queueSave();
@@ -367,7 +401,7 @@ date: string;
 
 	onMount(async () => {
 		// Ensure bannerDismissed mirrors previous local key if you still want that older behavior
-		if (data.banner && typeof localStorage !== 'undefined') {
+		if (data.banner && hasLocalStorage) {
 			const stored = localStorage.getItem(bannerKey);
 			if (stored === 'true') {
 				bannerDismissed = true;
@@ -402,6 +436,15 @@ date: string;
 	});
 </script>
 
+<svelte:window
+	on:keydown={(event) => {
+		if (event.key === 'Escape' && fullscreenMedia) {
+			fullscreenMedia = null;
+		}
+	}}
+	on:click={handleWindowClick}
+/>
+
 {#if data.banner && !bannerDismissed}
 	<!-- Top warning banner -->
 	<div
@@ -430,151 +473,224 @@ date: string;
 	</div>
 {/if}
 
-<div
-	class="mx-auto max-w-none px-3 py-4 sm:px-4 sm:py-6 md:max-w-[1100px] md:px-6 lg:max-w-[1280px] lg:px-8"
-		on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
-		role="application"
-		tabindex="0"
-	>
-	<div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-		<h1 class="text-2xl font-bold capitalize sm:text-3xl" translate="no">{data.event}</h1>
-		<div class="flex flex-wrap gap-2 sm:gap-3">
-			<button
-				on:click={openAll}
-				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
-			>
-				Open All
-			</button>
-			<button
-				on:click={collapseAll}
-				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
-			>
-				Collapse All
-			</button>
-			<!-- <button
-				on:click={markAllUnread}
-				class="cursor-pointer text-[11px] text-gray-500 transition hover:text-gray-700 hover:underline dark:text-gray-200 sm:text-xs"
-			>
-				Mark All as Unread
-			</button> -->
+<article class="reading-shell mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-10">
+	<section class="hero-grid grid gap-8 rounded-[36px] border border-black/5 bg-white/95 p-6 shadow-[0_45px_95px_rgba(15,23,42,0.18)] backdrop-blur dark:border-white/10 dark:bg-white/5 sm:p-10">
+		<div class="space-y-5">
+			<p class="text-xs uppercase tracking-[0.4em] text-gray-500 dark:text-gray-400">Field report</p>
+			<h1 class="text-4xl font-semibold text-gray-900 sm:text-5xl dark:text-white" translate="no">{readableTitle}</h1>
+			<p class="text-base text-gray-600 dark:text-gray-300">{heroDescription}</p>
+			<div class="flex flex-wrap gap-3">
+				<span class="rounded-full border border-black/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-gray-700 dark:border-white/10 dark:text-gray-200">
+					{data.event}
+				</span>
+				<span class="rounded-full border border-black/10 px-4 py-1 text-xs font-semibold text-gray-700 dark:border-white/10 dark:text-gray-200">
+					{data.posts.length} entr{data.posts.length === 1 ? 'y' : 'ies'}
+				</span>
+			</div>
+			<div class="grid gap-4 sm:grid-cols-3">
+				{#each heroHighlights as highlight}
+					<div class="rounded-2xl border border-black/5 bg-white/80 p-4 shadow-[0_20px_45px_rgba(15,23,42,0.08)] dark:border-white/15 dark:bg-white/5">
+						<p class="text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">{highlight.label}</p>
+						<p class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{highlight.value}</p>
+					</div>
+				{/each}
+			</div>
 		</div>
-	</div>
-
-	<ul class="mb-6 space-y-2 sm:space-y-3">
-		{#each data.posts as post}
-			<li
-				id={post.slug}
-				data-slug={post.slug}
-				class="relative rounded bg-white p-2.5 shadow transition hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 sm:p-3"
-				on:mouseenter={() => {
-					hoveredSlug = post.slug;
-					tryStartStrikeTimer(post.slug);
-				}}
-				on:mouseleave={() => {
-					if (hoveredSlug === post.slug) hoveredSlug = null;
-					clearStrikeTimer();
-				}}
-			>
-				
-
-				<!-- HEADER ROW -->
-				<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-					<button
-						class="flex-1 cursor-pointer text-left"
-						on:click={() => {
-							const willOpen = !expandedSlugs.includes(post.slug);
-							toggleExpand(post.slug);
-							if (willOpen) markAsRead(post.slug);
-						}}
-						aria-expanded={expandedSlugs.includes(post.slug)}
-						aria-controls={`content-${post.slug}`}
-					>
-						<div class="text-[11px] text-gray-500 dark:text-gray-400 sm:text-xs">{post.date}</div>
-						<div class="font-semibold sm:text-xl">
-							<span
-								class={readSlugs.has(post.slug)
-									? 'text-blue-800 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-200'
-									: 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200'}
-							>
-								<span>{@html wrapNoTranslateWords(`<span>${post.title}</span>`)}</span>
-							</span>
-						</div>
-					</button>
-
-					<div class="mt-1 sm:ml-3 sm:mt-0">
-						<!-- RIGHT SIDE REACTIONS -->
-						<ReactionBar
-							event={data.event}
-							slug={post.slug}
-							expanded={expandedSlugs.includes(post.slug)}
-							on:toggle={(e) => toggleReaction(post.slug, e.detail.type)}
-							on:loaded={() => loadReaction(post.slug)}
-						/>
-					</div>
+		<div class="relative overflow-hidden rounded-[28px] border border-black/5 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-[0_35px_75px_rgba(15,23,42,0.2)] dark:border-white/10">
+			{#if data.coverImage}
+				<img src={data.coverImage} alt={readableTitle} class="h-full w-full object-cover" loading="lazy" />
+			{:else}
+				<div class="h-full min-h-[280px] w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.4),_transparent),linear-gradient(135deg,_#0f172a,_#1e1b4b)]"></div>
+			{/if}
+			<div class="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 via-black/60 to-transparent px-5 py-4 text-sm text-white">
+				<div>
+					<p class="text-[0.65rem] uppercase tracking-[0.4em] text-white/70">Now reading</p>
+					<p class="text-lg font-semibold">{readableTitle}</p>
 				</div>
+				<span class="rounded-full border border-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em]">Slow web</span>
+			</div>
+		</div>
+	</section>
 
-				{#if expandedSlugs.includes(post.slug)}
-					<div
-						id={`content-${post.slug}`}
-						use:readOnView={post.slug}
-						class="prose prose-sm sm:prose mt-3 flow-root max-w-none overflow-hidden rounded border border-gray-200 bg-gray-50 p-3 shadow-inner dark:border-gray-700 dark:bg-gray-900 sm:p-4"
-						transition:slide={!initialLoad ? { duration: 350, easing: (t) => t * t } : undefined}
+	<section class="mt-8 rounded-[28px] border border-black/5 bg-white/85 p-5 shadow-[0_25px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-white/5">
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div>
+				<p class="text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">Reading controls</p>
+				<p class="text-sm text-gray-600 dark:text-gray-300">
+					Open everything at once or move entry by entry—your place is saved quietly in the background.
+				</p>
+			</div>
+			<div class="flex flex-wrap gap-2">
+				<button
+					on:click={openAll}
+					class="inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 dark:bg-white dark:text-gray-900"
+				>
+					Open all
+				</button>
+				<button
+					on:click={collapseAll}
+					class="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white"
+				>
+					Collapse all
+				</button>
+				<a
+					href="/contact"
+					class="inline-flex items-center gap-2 rounded-full border border-dashed border-black/20 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-gray-300"
+				>
+					Say hi
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="mt-12">
+		<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+			<div>
+				<p class="text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">Field log</p>
+				<h2 class="text-3xl font-semibold text-gray-900 dark:text-white">Entries in this arc</h2>
+				<p class="text-sm text-gray-600 dark:text-gray-300">
+					Tap into each dispatch for the full write-up, supporting media, and live reaction counts.
+				</p>
+			</div>
+			<p class="text-sm font-semibold uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+				{data.posts.length} entr{data.posts.length === 1 ? 'y' : 'ies'}
+			</p>
+		</div>
+
+		{#if data.posts.length === 0}
+			<p class="mt-6 rounded-2xl border border-dashed border-black/10 bg-white/70 p-6 text-center text-gray-500 dark:border-white/15 dark:bg-white/5 dark:text-gray-300">
+				No posts found for this event.
+			</p>
+		{:else}
+			<ol class="mt-6 space-y-6">
+				{#each data.posts as post, index}
+					<li
+						id={post.slug}
+						data-slug={post.slug}
+						class="relative rounded-[32px] border border-black/5 bg-white/90 p-5 shadow-[0_25px_55px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-black/20 dark:border-white/10 dark:bg-white/5"
+						on:mouseenter={() => {
+							hoveredSlug = post.slug;
+							tryStartStrikeTimer(post.slug);
+						}}
+						on:mouseleave={() => {
+							if (hoveredSlug === post.slug) hoveredSlug = null;
+							clearStrikeTimer();
+						}}
 					>
-						{#each post.holeImages as image}
-							{#if image && image.src}
-								{#if isVideo(image.src)}
+						<article class="space-y-5">
+							<header class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+								<div class="space-y-2">
+									<div class="flex flex-wrap items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
+										<span>{entryBadge(index)}</span>
+										<span class="h-1 w-1 rounded-full bg-gray-300 dark:bg-white/30"></span>
+										<span>{formatDate(post.date)}</span>
+										{#if readSlugs.has(post.slug)}
+											<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[0.6rem] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-100">
+												Read
+											</span>
+										{:else}
+											<span class="rounded-full bg-sky-100 px-2 py-0.5 text-[0.6rem] font-semibold text-sky-700 dark:bg-sky-500/20 dark:text-sky-100">
+												New
+											</span>
+										{/if}
+									</div>
+									<h3 class="text-2xl font-semibold text-gray-900 dark:text-white">
+										<span>{@html wrapNoTranslateWords(`<span>${post.title}</span>`)}</span>
+									</h3>
+								</div>
+								<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
 									<button
 										type="button"
-										class={getLayoutClasses(image)}
-										on:click={() => openFullscreen(image.src, image.alt)}
-										aria-label={image.alt || 'Open video fullscreen'}
-										style="padding:0;border:none;background:none;"
+										class="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 dark:border-white/20 dark:text-white"
+										on:click={() => {
+											const willOpen = !expandedSlugs.includes(post.slug);
+											toggleExpand(post.slug);
+											if (willOpen) markAsRead(post.slug);
+										}}
+										aria-expanded={expandedSlugs.includes(post.slug)}
+										aria-controls={`content-${post.slug}`}
 									>
-										<video
-											src={image.src}
-											autoplay={!hasLayout(image, 'dontautostart')}
-											loop={!hasLayout(image, 'dontautostart')}
-											muted={!hasLayout(image, 'dontautostart')}
-											playsinline={!hasLayout(image, 'dontautostart')}
-											controls={hasLayout(image, 'dontautostart')}
-											tabindex="-1"
-										>
-											<track kind="captions" />
-										</video>
+										{expandedSlugs.includes(post.slug) ? 'Hide entry' : 'Read entry'}
+										<ChevronDown class={`h-4 w-4 transition-transform ${expandedSlugs.includes(post.slug) ? 'rotate-180' : ''}`} />
 									</button>
-								{:else}
-									<button
-										type="button"
-										class={getLayoutClasses(image)}
-										on:click={() => openFullscreen(image.src, image.alt)}
-										aria-label={image.alt || 'Open image fullscreen'}
-										style="padding:0;border:none;background:none;"
-									>
-										<img src={image.src} alt={image.alt} tabindex="-1" />
-									</button>
-								{/if}
+									<ReactionBar
+										event={data.event}
+										slug={post.slug}
+										expanded={expandedSlugs.includes(post.slug)}
+										on:toggle={(e) => toggleReaction(post.slug, e.detail.type)}
+										on:loaded={() => loadReaction(post.slug)}
+									/>
+								</div>
+							</header>
+
+							{#if expandedSlugs.includes(post.slug)}
+								<div
+									id={`content-${post.slug}`}
+									use:readOnView={post.slug}
+									class="prose prose-base mt-2 max-w-none flow-root rounded-[28px] border border-dashed border-black/10 bg-white/80 p-5 shadow-inner dark:border-white/15 dark:bg-white/5"
+									transition:slide={!initialLoad ? { duration: 350, easing: (t) => t * t } : undefined}
+								>
+									{#each post.holeImages as image}
+										{#if image && image.src}
+											{#if isVideo(image.src)}
+												<button
+													type="button"
+													class={getLayoutClasses(image)}
+													on:click={() => openFullscreen(image.src, image.alt)}
+													aria-label={image.alt || 'Open video fullscreen'}
+													style="padding:0;border:none;background:none;"
+												>
+													<video
+														src={image.src}
+														autoplay={!hasLayout(image, 'dontautostart')}
+														loop={!hasLayout(image, 'dontautostart')}
+														muted={!hasLayout(image, 'dontautostart')}
+														playsinline={!hasLayout(image, 'dontautostart')}
+														controls={hasLayout(image, 'dontautostart')}
+														tabindex="-1"
+													>
+														<track kind="captions" />
+													</video>
+												</button>
+											{:else}
+												<button
+													type="button"
+													class={getLayoutClasses(image)}
+													on:click={() => openFullscreen(image.src, image.alt)}
+													aria-label={image.alt || 'Open image fullscreen'}
+													style="padding:0;border:none;background:none;"
+												>
+													<img src={image.src} alt={image.alt} tabindex="-1" />
+												</button>
+											{/if}
+										{/if}
+									{/each}
+
+									{@html wrapNoTranslateWords(post.content)}
+								</div>
 							{/if}
-						{/each}
-
-						{@html wrapNoTranslateWords(post.content)}
-					</div>
-				{/if}
-			</li>
-		{/each}
-	</ul>
-
-	{#if data.posts.length === 0}
-		<p class="text-center text-gray-500">No posts found for this event.</p>
-	{/if}
+						</article>
+					</li>
+				{/each}
+			</ol>
+		{/if}
+	</section>
 
 	{#if data.leftoverImages.length > 0}
-		<div class="mt-8">
-			<h3 class="mb-4 text-xl font-semibold">Bonus Pictures</h3>
-			<div class="columns-1 gap-4 [column-fill:balance] sm:columns-2 lg:columns-4">
+		<section class="mt-12 rounded-[32px] border border-black/5 bg-white/90 p-6 shadow-[0_30px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-white/5">
+			<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+				<div>
+					<p class="text-xs uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">Loose frames</p>
+					<h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Extra captures from the trip</h3>
+					<p class="text-sm text-gray-600 dark:text-gray-300">Tap any tile to open it fullscreen.</p>
+				</div>
+				<span class="text-sm font-semibold text-gray-500 dark:text-gray-400">{data.leftoverImages.length} media</span>
+			</div>
+			<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.leftoverImages as image}
 					<button
 						type="button"
-						class="mb-4 w-full cursor-pointer break-inside-avoid overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+						class="group relative w-full overflow-hidden rounded-3xl border border-black/5 bg-white/80 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-white/10 dark:bg-white/5"
 						on:click={() => openFullscreen(image.src, image.alt)}
 						aria-label={image.alt || 'Open media fullscreen'}
 						style="padding:0;border:none;background:none;"
@@ -590,7 +706,7 @@ date: string;
 								controlsList="nodownload noplaybackrate noremoteplayback"
 								disablePictureInPicture
 								tabindex="-1"
-								class="pointer-events-none block h-auto w-full"
+								class="pointer-events-none block h-full w-full object-cover"
 							>
 								<track kind="captions" />
 							</video>
@@ -599,16 +715,16 @@ date: string;
 								src={image.src}
 								alt={image.alt}
 								loading="lazy"
-								class="block h-auto w-full"
+								class="block h-full w-full object-cover"
 								tabindex="-1"
 							/>
 						{/if}
 					</button>
 				{/each}
 			</div>
-		</div>
+		</section>
 	{/if}
-</div>
+</article>
 
 {#if fullscreenMedia}
 	<div
@@ -616,10 +732,9 @@ date: string;
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="fullscreen-media-title"
-		on:click={() => (fullscreenMedia = null)}
-		on:keydown={(e) => e.key === 'Escape' && (fullscreenMedia = null)}
+		tabindex="-1"
 	>
-		<div class="relative max-h-full max-w-full" on:click|stopPropagation>
+		<div class="relative max-h-full max-w-full" role="document" bind:this={fullscreenPanel}>
 			<h2 id="fullscreen-media-title" class="sr-only">{fullscreenMedia.alt}</h2>
 			{#if fullscreenMedia.isVideo}
 				<video
