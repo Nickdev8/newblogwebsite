@@ -39,7 +39,7 @@ And when we arrived… WHO DO I SEE?!
 For anyone who doesn't know, Paolo is my favorite human in Hack Club. Seeing him there was the perfect welcome.
 We all went out for food, but I was so exhausted from being awake for nearly 24 hours (plus jet lag) that I went to bed pretty early.
 
-I'm excited to meet everyone tomorrow, including some of the event organizers like Paperclip. Jeremy and some other awesome people are coming too! :yay:
+I'm excited to meet everyone tomorrow, including some of the event organizers I've heard so much about. Jeremy and some other awesome people are coming too! :yay:
 
 ---
 title: "Day 1: The Island"
@@ -89,7 +89,7 @@ date: "2025-08-09"
 
 ## A Good Morning
 
-Today is Day 2. After a quick shower, I went outside and saw **Paperclip**. I joined her and another guy, and we walked around for a bit, meeting more people. We ended up going on a small hike, which was a great way to see more of the island. The views were incredible.
+Today is Day 2. After a quick shower, I went outside and ran into one of the organizers. I joined them and another guy, and we walked around for a bit, meeting more people. We ended up going on a small hike, which was a great way to see more of the island. The views were incredible.
 
 Later, we all sat down to play a few rounds of Uno. It got pretty competitive, but it was all in good fun. During the game, we met Criss. He’s a super interesting and fun guy, and we had a great chat about Hack Club and other random stuff.
 
@@ -115,7 +115,7 @@ Dinner time was burgers! We had to eat quickly because the showcase for our seco
 
 ![Some of the cool merch we got](/blogimages/shipwrecked/morestickers.jpg){left}
 
-I saw **Paperclip** again in a group of people. We all chilled for a bit, walked around, and then went back to the lightning talks around midnight. They were still going, talking about the most random stuff.
+I spent more time with the organizers in a group of people. We all chilled for a bit, walked around, and then went back to the lightning talks around midnight. They were still going, talking about the most random stuff.
 
 ![The coastline at night](/blogimages/shipwrecked/nightlifecoastline.jpg){hole}
 
@@ -124,7 +124,7 @@ title: "Day 3: Dinos and Drama"
 date: "2025-08-10"
 ---
 
-I woke up after only 3.5 hours of sleep, so I skipped the morning run and went straight to breakfast. I didn't do much after, just talked with a few people, including **Paperclip**, and called my family back home. 
+I woke up after only 3.5 hours of sleep, so I skipped the morning run and went straight to breakfast. I didn't do much after, just talked with a few people from the crew, and called my family back home. 
 
 After lunch, it was time for the ship showcase, science fair style! Everyone walked around, and the organizers were giving out stickers. Suddenly, we heard William's voice over the speakers, along with a girl's voice, explaining the next challenge. Then, a giant pink inflatable dinosaur appeared on stage, chasing one of the villagers!
 

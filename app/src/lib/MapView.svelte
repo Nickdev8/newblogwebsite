@@ -109,4 +109,4 @@
 	});
 </script>
 
-<div bind:this={container} class="h-[80vh] w-full sm:h-[85vh] lg:h-[800px]" />
+<div bind:this={container} class="h-[55vh] w-full sm:h-[60vh] lg:h-[520px]" />
