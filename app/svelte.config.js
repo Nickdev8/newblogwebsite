@@ -6,7 +6,17 @@ const config = {
 	extensions: ['.svelte', '.md'],
 	preprocess: [vitePreprocess(), mdsvex({ extensions: ['.md'] })],
 	kit: {
-		adapter: adapter({ out: 'build' })
+		adapter: adapter({ out: 'build' }),
+		prerender: {
+			handleHttpError: ({ path, status }) => {
+				if (status === 404) {
+					console.warn(`Skipping missing asset during prerender: ${path}`);
+					return;
+				}
+
+				throw new Error(`Error ${status} while prerendering ${path}`);
+			}
+		}
 		// no prerender.default in v2
 	}
 };
