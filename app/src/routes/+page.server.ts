@@ -2,7 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { fetchRecentCommits } from '$lib/server/github';
+import type { GithubCommit } from '$lib/server/github';
 import { fetchContributionCalendar } from '$lib/server/githubContributions';
+import type { ContributionCalendar } from '$lib/server/githubContributions';
 
 export async function load() {
 	const postsDir = 'src/posts';
@@ -27,12 +29,22 @@ export async function load() {
 	// Sort events to show live events first
 	events.sort((a, b) => (b.live ? 1 : -1));
 
-	const recentCommits = await fetchRecentCommits(5);
+	let recentCommits: GithubCommit[] = [];
+	try {
+		recentCommits = await fetchRecentCommits(5);
+	} catch (error) {
+		console.error('Failed to fetch recent commits:', error);
+	}
 
 	const now = new Date();
 	const from = new Date(now);
 	from.setFullYear(from.getFullYear() - 2);
-	const contributions = await fetchContributionCalendar({ from: from.toISOString(), to: now.toISOString() });
+	let contributions: ContributionCalendar | null = null;
+	try {
+		contributions = await fetchContributionCalendar({ from: from.toISOString(), to: now.toISOString() });
+	} catch (error) {
+		console.error('Failed to fetch contribution calendar:', error);
+	}
 
 	return { events, recentCommits, contributions };
 }
