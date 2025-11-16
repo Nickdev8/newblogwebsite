@@ -7,7 +7,7 @@
 	let isMobileMenuOpen = false;
 
 	const navLinks = [
-		{ href: '/', label: 'Field Notes' },
+		{ href: '/', label: 'Posts' },
 		{ href: '/about', label: 'About' },
 		{ href: '/contact', label: 'Contact' }
 	];
@@ -37,7 +37,7 @@
 	}
 </script>
 
-<header class="sticky top-4 z-40 px-4 sm:px-8 lg:px-10">
+<header class="px-4 sm:px-8 lg:px-10">
 	<nav class="glass-panel flex flex-wrap items-center justify-between gap-6 px-6 py-4">
 		<a href="/" class="group grid gap-0.5 text-left">
 			<span class="text-base font-semibold uppercase tracking-[0.25em] text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-white">
