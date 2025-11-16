@@ -15,5 +15,3 @@ services:
     ports:
       - "127.0.0.1:3011:3000"
     working_dir: /app
-    volumes:
-      - ./app/src/posts:/app/src/posts
