@@ -29,6 +29,7 @@
 		content: string;
 		images: string[];
 		tripCommits?: GithubCommit[];
+		showCommitFeed?: boolean;
 		tripDateRange?: { start?: string; end?: string };
 		immichAlbum?: string;
 		tripContributions?: ContributionCalendar | null;
@@ -86,6 +87,7 @@
 	const totalEntriesLabel = data.posts.length === 1 ? 'entry' : 'entries';
 	const firstEntryId = journalEntries[0]?.id;
 	const tripCommits = data.tripCommits ?? [];
+	const showCommitFeed = data.showCommitFeed ?? false;
 	const tripDateRange = data.tripDateRange ?? {};
 	const immichAlbum = data.immichAlbum;
 	const tripContributions = data.tripContributions ?? null;
@@ -260,7 +262,7 @@ let fullscreenMedia: FullscreenMedia = null;
 		</div>
 	</section>
 
-	{#if tripCommits.length > 0}
+	{#if showCommitFeed && tripCommits.length > 0}
 		<div class="mt-10">
 			<TripCommitTimeline commits={tripCommits} eventName={readableTitle} dateRange={tripDateRange} />
 		</div>

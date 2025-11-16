@@ -53,6 +53,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	};
 
 	const posts: EventPost[] = [];
+	const showCommitFeed = Boolean(mainData.show_commits);
 
 	// Start from the second frontmatter section, skipping the main one
 	for (let i = 1; i < sections.length; i += 2) {
@@ -123,7 +124,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const startDate = posts[0]?.date;
 	const endDate = posts[posts.length - 1]?.date;
-	const tripCommits = await fetchCommitsBetween(startDate, endDate, 15);
+	const tripCommits = showCommitFeed ? await fetchCommitsBetween(startDate, endDate, 15) : [];
 
 	let tripContributions = null;
 	const showContributions = Boolean(mainData.show_contributions);
@@ -149,6 +150,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		content: '', // or mainData.content if you want
 		images: [], // or mainData.images || []
 		tripCommits,
+		showCommitFeed,
 		tripContributions,
 		tripDateRange: { start: startDate, end: endDate },
 		immichAlbum
