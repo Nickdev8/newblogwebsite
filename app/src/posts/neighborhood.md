@@ -6,6 +6,7 @@ warning: "This post is Done"
 warning_type: success
 warning_dismissible: false
 sort_order: 'asc'
+show_contributions: true
 ---
 title: "The Days Leading Up to SF"
 date: "2025-05-01"

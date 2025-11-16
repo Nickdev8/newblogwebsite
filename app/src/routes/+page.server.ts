@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { fetchRecentCommits } from '$lib/server/github';
+import { fetchContributionCalendar } from '$lib/server/githubContributions';
 
 export async function load() {
 	const postsDir = 'src/posts';
@@ -25,5 +27,12 @@ export async function load() {
 	// Sort events to show live events first
 	events.sort((a, b) => (b.live ? 1 : -1));
 
-	return { events };
+	const recentCommits = await fetchRecentCommits(5);
+
+	const now = new Date();
+	const from = new Date(now);
+	from.setFullYear(from.getFullYear() - 2);
+	const contributions = await fetchContributionCalendar({ from: from.toISOString(), to: now.toISOString() });
+
+	return { events, recentCommits, contributions };
 }

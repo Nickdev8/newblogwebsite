@@ -4,6 +4,9 @@ import matter from 'gray-matter';
 import { marked } from 'marked';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad, EntryGenerator } from './$types';
+import { fetchCommitsBetween } from '$lib/server/github';
+import { fetchContributionCalendar } from '$lib/server/githubContributions';
+import { env } from '$env/dynamic/private';
 
 export const entries: EntryGenerator = () => {
 	const postsDir = 'src/posts';
@@ -67,7 +70,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			const [fullMatch, altRaw = '', src = '', layoutRaw = ''] = match;
 			const preceding = parsedContent.slice(lastIndex, match.index);
 			if (preceding.trim()) {
-				blocks.push({ type: 'text', html: marked(preceding) });
+				blocks.push({ type: 'text', html: renderMarkdown(preceding) });
 			}
 
 			const layoutArr = layoutRaw ? layoutRaw.trim().split(/\s+/).filter(Boolean) : [];
@@ -85,7 +88,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const remaining = parsedContent.slice(lastIndex);
 		if (remaining.trim()) {
-			blocks.push({ type: 'text', html: marked(remaining) });
+			blocks.push({ type: 'text', html: renderMarkdown(remaining) });
 		}
 
 		if (data.date && data.title) {
@@ -115,8 +118,25 @@ export const load: PageServerLoad = async ({ params }) => {
 		? fs.readdirSync(extraImagesDir).map((file) => ({
 						src: `/blogimages/${eventName}/extra/${file}`,
 						alt: 'Extra image'
-			  }))
+		  }))
 		: [];
+
+	const startDate = posts[0]?.date;
+	const endDate = posts[posts.length - 1]?.date;
+	const tripCommits = await fetchCommitsBetween(startDate, endDate, 15);
+
+	let tripContributions = null;
+	const showContributions = Boolean(mainData.show_contributions);
+	if (showContributions && startDate && endDate) {
+		const fromISO = new Date(startDate).toISOString();
+		const toISO = new Date(endDate).toISOString();
+		tripContributions = await fetchContributionCalendar({ from: fromISO, to: toISO });
+	}
+
+	const envKeyBase = eventName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+	const scopedImmichEnvKey = `${envKeyBase}_IMMICH_ALBUM_URL`;
+	const envAlbum = env[scopedImmichEnvKey] || env.IMMICH_DEFAULT_ALBUM_URL;
+	const immichAlbum = mainData.immichAlbum || envAlbum || '';
 
 	return {
 		posts,
@@ -127,6 +147,17 @@ export const load: PageServerLoad = async ({ params }) => {
 		description: mainData.description || '',
 		coverImage: mainData.coverImage || '',
 		content: '', // or mainData.content if you want
-		images: []   // or mainData.images || []
+		images: [], // or mainData.images || []
+		tripCommits,
+		tripContributions,
+		tripDateRange: { start: startDate, end: endDate },
+		immichAlbum
 	};
 };
+	const renderMarkdown = (input: string) => {
+		const parsed = marked.parse(input);
+		if (typeof parsed === 'string') {
+			return parsed;
+		}
+		throw new Error('Async markdown rendering is not supported for trip posts.');
+	};
