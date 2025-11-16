@@ -14,32 +14,6 @@ export const entries: EntryGenerator = () => {
 	}));
 };
 
-function getLayoutClasses(image: { layout: string[] }) {
-	const classes: string[] = [];
-	if (image.layout.includes('right')) {
-		classes.push('float-right', 'ml-4', 'mb-2');
-	} else if (image.layout.includes('left')) {
-		classes.push('float-left', 'mr-4', 'mb-2');
-	}
-
-	if (image.layout.includes('hole')) {
-		classes.push('w-full', 'max-w-3xl', 'mr-auto');
-	} else if (image.layout.includes('left') || image.layout.includes('right')) {
-		if (image.layout.includes('vertical')) {
-			classes.push('w-1/4');
-		} else if (image.layout.includes('horizantal')) {
-			classes.push('w-1/2');
-		} else {
-			classes.push('w-1/3');
-			
-		}
-	} else {
-		// Default case for images without float or hole hints
-		classes.push('w-full', 'max-w-md', 'mx-auto');
-	}
-	return classes.join(' ');
-}
-
 export const load: PageServerLoad = async ({ params }) => {
 	const { event } = params;
 	const filePath = path.join('src/posts', `${event}.md`);
@@ -63,7 +37,19 @@ export const load: PageServerLoad = async ({ params }) => {
 		  }
 		: null;
 
-	const posts = [];
+	type MediaBlock = { type: 'media'; media: { src: string; alt: string; layout: string[] } };
+	type TextBlock = { type: 'text'; html: string };
+	type PostBlock = MediaBlock | TextBlock;
+
+	type EventPost = {
+		title: string;
+		date: string;
+		slug: string;
+		blocks: PostBlock[];
+		event: string;
+	};
+
+	const posts: EventPost[] = [];
 
 	// Start from the second frontmatter section, skipping the main one
 	for (let i = 1; i < sections.length; i += 2) {
@@ -72,23 +58,45 @@ export const load: PageServerLoad = async ({ params }) => {
 		const fullPostString = `---\n${frontmatter}\n---\n${content}`;
 		const { data, content: parsedContent } = matter(fullPostString);
 
-		const holeImages: { src: string; alt: string; layout: string[] }[] = [];
-		let textContent = parsedContent.replace(
-			/!\[(.*?)(\s+alt="(.*?)")?\]\((.*?)\)(?:\{(.*?)\})?/g,
-			(match, alt, src, layout) => {
-				const layoutArr = layout ? layout.trim().split(/\s+/) : [];
-				holeImages.push({ src, alt, layout: layoutArr });
-				return '';
+		const blocks: PostBlock[] = [];
+		const mediaRegex = /!\[(.*?)\]\((.*?)\)(?:\{(.*?)\})?/gs;
+		let lastIndex = 0;
+		let match: RegExpExecArray | null;
+
+		while ((match = mediaRegex.exec(parsedContent))) {
+			const [fullMatch, altRaw = '', src = '', layoutRaw = ''] = match;
+			const preceding = parsedContent.slice(lastIndex, match.index);
+			if (preceding.trim()) {
+				blocks.push({ type: 'text', html: marked(preceding) });
 			}
-		);
+
+			const layoutArr = layoutRaw ? layoutRaw.trim().split(/\s+/).filter(Boolean) : [];
+			blocks.push({
+				type: 'media',
+				media: {
+					src: src.trim(),
+					alt: altRaw.trim(),
+					layout: layoutArr
+				}
+			});
+
+			lastIndex = match.index + fullMatch.length;
+		}
+
+		const remaining = parsedContent.slice(lastIndex);
+		if (remaining.trim()) {
+			blocks.push({ type: 'text', html: marked(remaining) });
+		}
 
 		if (data.date && data.title) {
+			const entryNumber = posts.length + 1;
+			const safeSlug = `${eventName}-day-${entryNumber}`.replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
+
 			posts.push({
 				title: data.title,
 				date: data.date,
-				slug: `${eventName}-${i / 2}`,
-				content: marked(textContent.trim()),
-				holeImages,
+				slug: safeSlug,
+				blocks,
 				event: eventName
 			});
 		}

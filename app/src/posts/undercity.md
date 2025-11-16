@@ -54,7 +54,7 @@ The rest of the day I mostly sat next to SPC, who helped the organizers with bad
 title: "Day 2"
 date: "2025-07-12"
 ---
-![alt text](/blogimages/undercity/morningdemo.webp){right}
+![alt text](/blogimages/undercity/morningdemo.webp){hole}
 
 ## Morning Vibes
 
@@ -63,7 +63,7 @@ Right after waking up, the demos started. One team built a working **chocolate 3
 
 ## Refresh and Reset
 
-![alt text](/blogimages/undercity/dogersvssanfransico.webp){left}
+![alt text](/blogimages/undercity/dogersvssanfransico.webp){hole}
 
 I quickly went back home to shower, shave, and generally not feel like a mess. On my way back to GitHub HQ, I walked past a Dodgers vs. San Francisco Giants game.
 
@@ -88,12 +88,12 @@ John is the kind of person everyone deserves to meet at least once. Sadly, he wa
 
 ## Rooftop Views
 
-![alt text](/blogimages/undercity/githubroof.webp){left hole}
+![alt text](/blogimages/undercity/githubroof.webp){hole}
 After lunch, we headed to the rooftop of GitHub HQ. Beautiful views, deep conversations, and that surreal feeling of being somewhere really special.
 
 ## Zach
 
-![alt text](/blogimages/undercity/zackpig.webp){right}
+![alt text](/blogimages/undercity/zackpig.webp){hole}
 [Zach Latta](https://zachlatta.com/) is the founder of Hack Club. and easily one of the most inspiring people I’ve met.
 
 He started Hack Club because he wanted teenagers to feel like they could build real things. Not school projects. Not assignments. But things that *matter*.
@@ -108,7 +108,7 @@ This week has been chaotic, emotional, beautiful. and somehow, it all still feel
 title: "Day 4 Last Day of Undercity"
 date: "2025-07-14"
 ---
-![alt text](/blogimages/undercity/group.webp){hole right}
+![alt text](/blogimages/undercity/group.webp){hole}
 
 ## Final Demos
 

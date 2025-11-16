@@ -7,10 +7,10 @@
 		aboutMeImage: string;
 	};
 
-	const badges = ['Builder', 'Film nerd', 'Hack Clubber'];
+	const badges = ['Builder', 'Programmer', 'Nerd'];
 	const nowItems = [
-		{ label: 'Right now', value: 'Cutting the Neighborhood film diary' },
-		{ label: 'Next trip', value: 'Wherever the Hack Club bus parks' }
+		{ label: 'Right now', value: 'Making new friends and having the time of my life' },
+		{ label: 'Next trip', value: 'Waiting for the next trip' }
 	];
 
 	const simpleNotes = [
@@ -32,9 +32,9 @@
 		<div class="grid gap-8 lg:grid-cols-[1.1fr,0.9fr]">
 			<div class="space-y-4">
 				<p class="eyebrow">About Nick</p>
-				<h1 class="text-4xl font-semibold text-gray-900 dark:text-white">Making, filming, wandering.</h1>
+				<h1 class="text-4xl font-semibold text-gray-900 dark:text-white">Making, photogrophy, wandering.</h1>
 				<p class="text-base leading-relaxed text-gray-600 dark:text-gray-300">
-					I’m Nick—teenage builder, currently splitting time between code, film, and Hack Club events.
+					I’m Nick—teenage builder, currently splitting time between code, photogrophy, and Hack Club events.
 					This page is the quick version of who’s writing all those posts.
 				</p>
 				<div class="flex flex-wrap gap-2">
@@ -123,7 +123,7 @@
 
 	<section class="glass-panel space-y-4 text-center">
 		<p class="text-sm uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">Elsewhere</p>
-		<h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Want more frequent updates?</h2>
+		<h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Want to see my main site?</h2>
 		<p class="text-sm text-gray-600 dark:text-gray-300">
 			Most projects ship on nickesselman.nl, plus there’s a contact form if you want to collaborate or share an idea.
 		</p>

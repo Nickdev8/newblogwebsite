@@ -1,7 +1,7 @@
 ---
 title: "Shipwrecked"
 description: "An upcoming adventure with Hack Club. Stay tuned for the full story of what happened at Shipwrecked!"
-coverImage: /blogimages/shipwrecked/placeholder.webp
+coverImage: /blogimages/shipwrecked/campfiremain.jpg
 warning: "Shipwrecked was amazing! tysm!"
 warning_type: success
 warning_dismissible: false
@@ -28,7 +28,7 @@ After waiting at the terminal forever, well past our boarding time, I got a noti
 I checked it, and my jaw dropped. **First Class.**
 I never thought I’d experience this. The food was incredible, the service was top-notch, and the seats were amazing. What a way to start the trip!
 
-![View from the plane](/blogimages/shipwrecked/planepicture.jpg){right}
+![View from the plane](/blogimages/shipwrecked/planepicture.jpg){hole}
 
 ## More Friends!
 
@@ -53,12 +53,12 @@ I woke up in the hostel this morning to a lot of noise in my room. I didn’t sl
 
 I scrambled out of bed, grabbed my stuff, and rushed to join them. I ordered some bacon and eggs, which were really nice. 
 
-![Breakfast at the hostel](/blogimages/shipwrecked/breakfast%20by%20the%20hostel.jpg){left}
+![Breakfast at the hostel](/blogimages/shipwrecked/breakfast%20by%20the%20hostel.jpg){hole}
 
 After that, we all waited in the lobby for a few hours before heading to the pier to officially start Shipwrecked!
 
 ![Waiting at the pier](/blogimages/shipwrecked/the%20pier.jpg){hole}
-![On the boat to the island](/blogimages/shipwrecked/waiting%20on%20the%20boat.jpg){right}
+![On the boat to the island](/blogimages/shipwrecked/waiting%20on%20the%20boat.jpg){hole}
 
 ## Arrival and Challenges
 
@@ -68,7 +68,7 @@ We immediately got our first challenge: make a 2-5 minute video introducing ours
 
 After a decent dinner of salad, chicken, and cookies (an odd but welcome combo), we all gathered in the big tent for the opening ceremony. The energy was amazing! They went over the house rules and the plan for the event, which was filled with fun challenges and a mysterious island story to tie it all together.
 
-![Our first meal on the island](/blogimages/shipwrecked/first%20meal%20in%20the%20island.jpg){left}
+![Our first meal on the island](/blogimages/shipwrecked/first%20meal%20in%20the%20island.jpg){hole}
 
 ![Opening ceremony](/blogimages/shipwrecked/opening%20ceremony.jpg){hole}
 
@@ -97,13 +97,13 @@ Later, we all sat down to play a few rounds of Uno. It got pretty competitive, b
 
 After breakfast, we all went to a workshop with Zach. He talked about the financial systems of Hack Club and how it all works. It’s always fascinating to hear him speak, and it was cool to get a behind-the-scenes look at how Hack Club operates. It's amazing to see how much thought and effort goes into making all of this possible for us. The whole vibe of the day was super chill and fun, just a bunch of friends hanging out, learning, and exploring together.
 
-![Zach's workshop](/blogimages/shipwrecked/zachs%20workshop.jpg){left}
+![Zach's workshop](/blogimages/shipwrecked/zachs%20workshop.jpg){hole}
 
 ## Towers and Beaches
 
 After Zach's workshop, a tower building competition started. The challenge was to build the biggest tower using only sticks. The prize? An IKEA plushie! Some people showed off their engineering skills, building sturdy towers with lots of triangles. One creative team even used a tree for support, and they ended up winning.
 
-![Building towers together](/blogimages/shipwrecked/group%20making%20towers.png){right}
+![Building towers together](/blogimages/shipwrecked/group%20making%20towers.png){hole}
 
 After the competition, we got the chance to go for a swim at the beach. I went with a few others, and we drew some fun stuff in the sand. It was a perfect way to cool off. 
 
@@ -113,7 +113,7 @@ But the day wasn't over yet! Soon after, we joined another workshop on how to ru
 
 Dinner time was burgers! We had to eat quickly because the showcase for our second challenge was in 30 minutes. After the showcase, where we got some cool merch, there was a campfire with a talent show and lightning talks. People started to lose interest pretty quickly and left.
 
-![Some of the cool merch we got](/blogimages/shipwrecked/morestickers.jpg){left}
+![Some of the cool merch we got](/blogimages/shipwrecked/morestickers.jpg){hole}
 
 I spent more time with the organizers in a group of people. We all chilled for a bit, walked around, and then went back to the lightning talks around midnight. They were still going, talking about the most random stuff.
 
@@ -130,7 +130,7 @@ After lunch, it was time for the ship showcase, science fair style! Everyone wal
 
 After all that drama, there was an announcement for a spicy challenge on the beach. No context, just "go." I had other things to do, so I couldn't make it, but I heard it was a "hot ones" style challenge to see who could handle the most spice. The winner got an Orphius plushie!
 
-![The Orphius plushie prize](/blogimages/shipwrecked/orphius%20plushy.jpg){right}
+![The Orphius plushie prize](/blogimages/shipwrecked/orphius%20plushy.jpg){hole}
 
 Later, I hung out with Jeremy and Parneel. It was a chill end to a crazy day.
 
