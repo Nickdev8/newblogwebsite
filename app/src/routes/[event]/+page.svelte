@@ -1,5 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import TripCommitTimeline from '$lib/TripCommitTimeline.svelte';
+	import ImmichGallery from '$lib/ImmichGallery.svelte';
+	import ContributionGrid from '$lib/ContributionGrid.svelte';
+	import type { GithubCommit } from '$lib/server/github';
+	import type { ContributionCalendar } from '$lib/server/githubContributions';
 
 	export let data: {
 		posts: {
@@ -23,6 +28,10 @@
 		coverImage: string;
 		content: string;
 		images: string[];
+		tripCommits?: GithubCommit[];
+		tripDateRange?: { start?: string; end?: string };
+		immichAlbum?: string;
+		tripContributions?: ContributionCalendar | null;
 	};
 
 	const readableTitle = data.title || data.event;
@@ -76,6 +85,10 @@
 
 	const totalEntriesLabel = data.posts.length === 1 ? 'entry' : 'entries';
 	const firstEntryId = journalEntries[0]?.id;
+	const tripCommits = data.tripCommits ?? [];
+	const tripDateRange = data.tripDateRange ?? {};
+	const immichAlbum = data.immichAlbum;
+	const tripContributions = data.tripContributions ?? null;
 
 	let bannerDismissed = false;
 
@@ -247,6 +260,18 @@ let fullscreenMedia: FullscreenMedia = null;
 		</div>
 	</section>
 
+	{#if tripCommits.length > 0}
+		<div class="mt-10">
+			<TripCommitTimeline commits={tripCommits} eventName={readableTitle} dateRange={tripDateRange} />
+		</div>
+	{/if}
+
+	{#if tripContributions}
+		<div class="mt-8">
+			<ContributionGrid calendar={tripContributions} title="Commit heatmap" description="GitHub pushes logged during this trip" />
+		</div>
+	{/if}
+
 	<section class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
 		<nav class="jump-panel sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto self-start rounded-[28px] border border-black/5 bg-white/90 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-white/5">
 			<div class="flex items-center justify-between gap-3">
@@ -390,6 +415,8 @@ let fullscreenMedia: FullscreenMedia = null;
 			</div>
 		</section>
 	{/if}
+
+	<ImmichGallery shareUrl={immichAlbum} title={`Story reel from ${readableTitle}`} description="Live Immich album embed" />
 </article>
 
 {#if fullscreenMedia}

@@ -9,7 +9,7 @@ export type DB = { rows: Row[] };
 const FILE = process.env.REACTIONS_FILE || path.resolve('data/reactions.json');
 
 // serialize all mutations
-let queue = Promise.resolve();
+let queue: Promise<void> = Promise.resolve();
 
 async function readSafe(): Promise<DB> {
   try { return JSON.parse(await fs.readFile(FILE, 'utf8')); }
@@ -23,13 +23,17 @@ async function writeSafe(db: DB) {
 }
 
 export function mutateDB<T>(fn: (db: DB) => T | Promise<T>): Promise<T> {
-  queue = queue.then(async () => {
+  const next = queue.then(async () => {
     const db = await readSafe();
     const result = await fn(db);
     await writeSafe(db);
     return result;
   });
-  return queue as Promise<T>;
+  queue = next.then(
+    () => undefined,
+    () => undefined
+  );
+  return next;
 }
 
 export function countsFor(db: DB, event: string, slug: string, keys: string[], emojiToKey: Record<string,string>) {

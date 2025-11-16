@@ -6,16 +6,22 @@ import path from 'path';
 
 const TYPES_FILE = process.env.TYPES_FILE || path.resolve('src/data/reactionTypes.json');
 
-async function getTypes() {
-  try { return JSON.parse(await fs.readFile(TYPES_FILE, 'utf8')); }
-  catch {
-    return [
-      { key: 'laugh', emoji: '🤣' },
-      { key: 'cry',   emoji: '😢' },
-      { key: 'wow',   emoji: '😮' },
-      { key: 'heart', emoji: '❤️' },
-      { key: 'up',    emoji: '👍' }
-    ];
+type ReactionType = { key: string; emoji: string };
+
+const DEFAULT_TYPES: ReactionType[] = [
+  { key: 'laugh', emoji: '🤣' },
+  { key: 'cry', emoji: '😢' },
+  { key: 'wow', emoji: '😮' },
+  { key: 'heart', emoji: '❤️' },
+  { key: 'up', emoji: '👍' }
+];
+
+async function getTypes(): Promise<ReactionType[]> {
+  try {
+    const parsed = JSON.parse(await fs.readFile(TYPES_FILE, 'utf8'));
+    return Array.isArray(parsed) ? parsed : DEFAULT_TYPES;
+  } catch {
+    return DEFAULT_TYPES;
   }
 }
 
@@ -30,8 +36,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
   if (!mode) return json({ error: 'Bad body' }, { status: 400 });
 
   const types = await getTypes();
-  const keys = types.map(t => t.key);
-  const emojiToKey = Object.fromEntries(types.map(t => [t.emoji, t.key]));
+  const keys = types.map((type) => type.key);
+  const emojiToKey = Object.fromEntries(types.map((type) => [type.emoji, type.key] as const));
   if (type && !keys.includes(type) && emojiToKey[type]) type = emojiToKey[type];
 
   const { event, slug } = params;
@@ -72,8 +78,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
 export const GET: RequestHandler = async ({ params }) => {
   const types = await getTypes();
-  const keys = types.map(t => t.key);
-  const emojiToKey = Object.fromEntries(types.map(t => [t.emoji, t.key]));
+  const keys = types.map((type) => type.key);
+  const emojiToKey = Object.fromEntries(types.map((type) => [type.emoji, type.key] as const));
   const result = await mutateDB(db => countsFor(db, params.event, params.slug, keys, emojiToKey));
   return json(result);
 };

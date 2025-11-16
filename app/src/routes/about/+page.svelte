@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { Splide, SplideSlide } from '@splidejs/svelte-splide';
 	import '@splidejs/svelte-splide/css';
+	import ContributionGrid from '$lib/ContributionGrid.svelte';
+	import type { ContributionCalendar } from '$lib/server/githubContributions';
 
 	export let data: {
 		carouselImages: { src: string; isVideo: boolean }[];
 		aboutMeImage: string;
+		contributions?: ContributionCalendar | null;
 	};
 
 	const badges = ['Builder', 'Programmer', 'Nerd'];
@@ -64,6 +67,14 @@
 		</div>
 	</section>
 
+	{#if data.contributions}
+		<ContributionGrid
+			calendar={data.contributions}
+			title="Recent commits"
+			description="Past two years of GitHub pushes"
+		/>
+	{/if}
+
 	<section class="glass-panel space-y-4">
 		<p class="eyebrow">One-minute snapshot</p>
 		<h2 class="text-2xl font-semibold text-gray-900 dark:text-white">A few truths that keep me moving.</h2>
@@ -83,41 +94,42 @@
 					A rotating grab bag of stills and clips pulled straight from recent posts.
 				</p>
 			</div>
-			<Splide
-				options={{
-					type: 'loop',
-					gap: '1.25rem',
-					perPage: 3,
-					breakpoints: {
-						1024: { perPage: 2 },
-						640: { perPage: 1 }
-					},
-					autoplay: true,
-					interval: 3200,
-					pagination: false
-				}}
-				class="rounded-3xl"
-			>
-				{#each data.carouselImages as media}
-					<SplideSlide>
-						<div class="overflow-hidden rounded-3xl border border-black/5 bg-gray-200 dark:border-white/10 dark:bg-white/5">
-							{#if media.isVideo}
-								<video
-									src={media.src}
-									class="h-64 w-full object-cover"
-									loop
-									playsinline
-									use:playMuted
-								>
-									<track kind="captions" />
-								</video>
-							{:else}
-								<img src={media.src} alt="Gallery" class="h-64 w-full object-cover" loading="lazy" />
-							{/if}
-						</div>
-					</SplideSlide>
-				{/each}
-			</Splide>
+			<div class="rounded-3xl">
+				<Splide
+					options={{
+						type: 'loop',
+						gap: '1.25rem',
+						perPage: 3,
+						breakpoints: {
+							1024: { perPage: 2 },
+							640: { perPage: 1 }
+						},
+						autoplay: true,
+						interval: 3200,
+						pagination: false
+					}}
+				>
+					{#each data.carouselImages as media}
+						<SplideSlide>
+							<div class="overflow-hidden rounded-3xl border border-black/5 bg-gray-200 dark:border-white/10 dark:bg-white/5">
+								{#if media.isVideo}
+									<video
+										src={media.src}
+										class="h-64 w-full object-cover"
+										loop
+										playsinline
+										use:playMuted
+									>
+										<track kind="captions" />
+									</video>
+								{:else}
+									<img src={media.src} alt="Gallery" class="h-64 w-full object-cover" loading="lazy" />
+								{/if}
+							</div>
+						</SplideSlide>
+					{/each}
+				</Splide>
+			</div>
 		</section>
 	{/if}
 

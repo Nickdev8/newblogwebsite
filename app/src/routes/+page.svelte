@@ -1,4 +1,9 @@
 <script lang="ts">
+	import GitCommitPanel from '$lib/GitCommitPanel.svelte';
+	import ContributionGrid from '$lib/ContributionGrid.svelte';
+	import type { GithubCommit } from '$lib/server/github';
+	import type { ContributionCalendar } from '$lib/server/githubContributions';
+
 	export let data: {
 		events: {
 			slug: string;
@@ -7,10 +12,15 @@
 			coverImage: string;
 			live: boolean;
 		}[];
-	} = { events: [] };
+		recentCommits?: GithubCommit[];
+		contributions?: ContributionCalendar | null;
+	} = { events: [], recentCommits: [] };
 
 	const posts = data.events ?? [];
 	const heroYear = new Date().getFullYear();
+	const commits = data.recentCommits ?? [];
+	const contributions = data.contributions ?? null;
+	const livePost = posts.find((post) => post.live);
 </script>
 
 <main class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:max-w-7xl">
@@ -22,7 +32,17 @@
 		<p class="max-w-2xl text-sm text-gray-600 dark:text-gray-300">
 			Every entry lives here—raw notes, day-by-day recaps, and long-form write-ups from the places I've been building and exploring.
 		</p>
+		{#if livePost}
+			<a
+				href={`/${livePost.slug}`}
+				class="mt-4 inline-flex items-center gap-2 rounded-full border border-green-500/40 bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-green-500/20 dark:border-green-400/40 dark:text-green-200"
+			>
+				<span class="inline-flex size-2.5 rounded-full bg-green-500 shadow-[0_0_12px_rgba(74,222,128,0.8)]"></span>
+				Live now: {livePost.title}
+			</a>
+		{/if}
 	</section>
+
 
 	{#if posts.length === 0}
 		<section class="rounded-3xl border border-dashed border-black/10 bg-white/70 p-10 text-center text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
@@ -62,6 +82,18 @@
 				</li>
 			{/each}
 		</ul>
+	{/if}
+	
+	{#if contributions}
+		<ContributionGrid calendar={contributions} title="Recent commits" description="Past two years of activity" />
+	{/if}
+
+	{#if commits.length > 0}
+		<GitCommitPanel
+			{commits}
+			title="Build log"
+			description="Latest pushes across my repos"
+		/>
 	{/if}
 </main>
 

@@ -1,3 +1,5 @@
+import { fetchContributionCalendar } from '$lib/server/githubContributions';
+
 export async function load() {
 	const curatedSources = [
 		'/blogimages/neighborhood/planeride.webp',
@@ -20,7 +22,11 @@ export async function load() {
 	const aboutMeImages = ['/mainme.webp', '/aboutme-writing.webp', '/aboutme3.webp'];
 	const aboutMeImage = aboutMeImages[Math.floor(Math.random() * aboutMeImages.length)];
 
-	return { carouselImages, aboutMeImage };
-}
+	const now = new Date();
+	const from = new Date(now);
+	from.setFullYear(from.getFullYear() - 2);
+	const contributions = await fetchContributionCalendar({ from: from.toISOString(), to: now.toISOString() });
 
+	return { carouselImages, aboutMeImage, contributions };
+}
 
