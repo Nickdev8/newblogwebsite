@@ -31,3 +31,4 @@ app/*/*.webp
 app/*/*.png
 app/*/*.jpg
 app/*/*.jpeg
+app/*/*.svg
