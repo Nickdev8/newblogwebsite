@@ -19,6 +19,10 @@ const feedRepos = (env.GITHUB_FEED_REPOS || env.VITE_GITHUB_FEED_REPOS || '')
 	.map((value) => value.trim())
 	.filter(Boolean);
 const ownerLower = owner?.toLowerCase() || '';
+const repoFeedOptInValues = ['1', 'true', 'yes', 'on'];
+const repoFeedOptIn = repoFeedOptInValues.includes(
+	(env.GITHUB_USE_REPO_FEED || env.VITE_GITHUB_USE_REPO_FEED || '').toLowerCase()
+);
 
 const buildHeaders = () => {
 	const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
@@ -89,6 +93,7 @@ async function gatherPushCommits(maxCommits: number, maxPages = 4): Promise<Gith
 const repoCache = new Map<string, { timestamp: number; data: GithubCommit[] }>();
 const trackedRepoCache: { timestamp: number; repos: string[] } = { timestamp: 0, repos: [] };
 const TRACKED_REPO_CACHE_DURATION = 1000 * 60 * 10;
+const REPO_FETCH_CONCURRENCY = 4;
 
 const fetchRepoCommits = async (repo: string, limit: number, since?: string, until?: string): Promise<GithubCommit[]> => {
 	const cacheKey = `repo_${repo}_${since || 'all'}_${until || 'all'}_${limit}`;
@@ -196,13 +201,26 @@ const getTrackedRepos = async (max = 10): Promise<string[]> => {
 };
 
 const gatherRepoCommits = async (limit: number, since?: string, until?: string): Promise<GithubCommit[]> => {
-	const repos = await getTrackedRepos(limit * 3);
+	const repos = await getTrackedRepos(Math.max(limit, 5));
+	if (repos.length === 0) return [];
 	const perRepoLimit = Math.max(3, Math.ceil(limit / 2));
 	const collected: GithubCommit[] = [];
 
-	for (const repo of repos) {
-		const repoData = await fetchRepoCommits(repo, perRepoLimit, since, until);
-		collected.push(...repoData);
+	for (let i = 0; i < repos.length && collected.length < limit * 2; i += REPO_FETCH_CONCURRENCY) {
+		const batch = repos.slice(i, i + REPO_FETCH_CONCURRENCY);
+		const results = await Promise.all(
+			batch.map(async (repo) => {
+				try {
+					return await fetchRepoCommits(repo, perRepoLimit, since, until);
+				} catch (error) {
+					console.error('Failed to fetch repo commits for', repo, error);
+					return [];
+				}
+			})
+		);
+		for (const repoData of results) {
+			collected.push(...repoData);
+		}
 	}
 
 	return collected
@@ -214,7 +232,7 @@ const gatherRepoCommits = async (limit: number, since?: string, until?: string):
 		.slice(0, limit);
 };
 
-const useRepoFeed = () => feedRepos.length > 0 || Boolean(token);
+const useRepoFeed = () => feedRepos.length > 0 || repoFeedOptIn;
 
 export async function fetchRecentCommits(limit = 5): Promise<GithubCommit[]> {
 	const now = Date.now();

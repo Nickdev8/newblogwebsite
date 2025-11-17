@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import TripCommitTimeline from '$lib/TripCommitTimeline.svelte';
 	import ImmichGallery from '$lib/ImmichGallery.svelte';
 	import ContributionGrid from '$lib/ContributionGrid.svelte';
@@ -28,11 +29,10 @@
 		coverImage: string;
 		content: string;
 		images: string[];
-		tripCommits?: GithubCommit[];
 		showCommitFeed?: boolean;
+		showContributions?: boolean;
 		tripDateRange?: { start?: string; end?: string };
 		immichAlbum?: string;
-		tripContributions?: ContributionCalendar | null;
 	};
 
 	const readableTitle = data.title || data.event;
@@ -86,11 +86,22 @@
 
 	const totalEntriesLabel = data.posts.length === 1 ? 'entry' : 'entries';
 	const firstEntryId = journalEntries[0]?.id;
-	const tripCommits = data.tripCommits ?? [];
 	const showCommitFeed = data.showCommitFeed ?? false;
+	const showContributions = data.showContributions ?? false;
 	const tripDateRange = data.tripDateRange ?? {};
 	const immichAlbum = data.immichAlbum;
-	const tripContributions = data.tripContributions ?? null;
+	const shouldLoadTripTimeline = Boolean(showCommitFeed && tripDateRange.start && tripDateRange.end);
+	const shouldLoadTripContributions = Boolean(showContributions && tripDateRange.start && tripDateRange.end);
+
+	let tripTimelineSection: HTMLElement | null = null;
+	let tripContributionsSection: HTMLElement | null = null;
+
+	let tripCommits: GithubCommit[] = [];
+	let tripCommitsLoading = false;
+	let tripCommitsError: string | null = null;
+	let tripContributions: ContributionCalendar | null = null;
+	let tripContributionsLoading = false;
+	let tripContributionsError: string | null = null;
 
 	let bannerDismissed = false;
 
@@ -173,6 +184,115 @@ let fullscreenMedia: FullscreenMedia = null;
 	$: if (browser && typeof document !== 'undefined') {
 		document.body.style.overflow = fullscreenMedia ? 'hidden' : '';
 	}
+
+	const loadTripCommits = async () => {
+		if (!shouldLoadTripTimeline) return;
+		tripCommitsLoading = true;
+		tripCommitsError = null;
+		try {
+			const params = new URLSearchParams({
+				from: tripDateRange.start || '',
+				to: tripDateRange.end || '',
+				limit: '15'
+			});
+			const res = await fetch(`/api/github/trip-commits?${params.toString()}`);
+			if (!res.ok) {
+				throw new Error('Failed to fetch trip commits');
+			}
+			const json = await res.json();
+			tripCommits = json?.commits ?? [];
+		} catch (error) {
+			console.error('Error fetching trip commits', error);
+			tripCommitsError = 'Unable to load trip commits right now.';
+			tripCommits = [];
+		} finally {
+			tripCommitsLoading = false;
+		}
+	};
+
+	const loadTripContributions = async () => {
+		if (!shouldLoadTripContributions) return;
+		tripContributionsLoading = true;
+		tripContributionsError = null;
+		const from = tripDateRange.start ? new Date(tripDateRange.start) : null;
+		const to = tripDateRange.end ? new Date(tripDateRange.end) : null;
+		if (!from || !to || Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+			tripContributionsLoading = false;
+			return;
+		}
+		try {
+			const params = new URLSearchParams({
+				from: from.toISOString(),
+				to: to.toISOString()
+			});
+			const res = await fetch(`/api/github/contributions?${params.toString()}`);
+			if (!res.ok) {
+				throw new Error('Failed to fetch trip contributions');
+			}
+			const json = await res.json();
+			tripContributions = json?.contributions ?? null;
+		} catch (error) {
+			console.error('Error fetching trip contributions', error);
+			tripContributionsError = 'Unable to load contributions right now.';
+			tripContributions = null;
+		} finally {
+			tripContributionsLoading = false;
+		}
+	};
+
+	const setupLazyTrigger = (getNode: () => HTMLElement | null, trigger: () => void) => {
+		if (typeof window === 'undefined') {
+			return () => {};
+		}
+		if (!('IntersectionObserver' in window)) {
+			trigger();
+			return () => {};
+		}
+		const observer = new IntersectionObserver(
+			(entries, obs) => {
+				if (entries.some((entry) => entry.isIntersecting)) {
+					obs.disconnect();
+					trigger();
+				}
+			},
+			{ rootMargin: '200px' }
+		);
+		const watchForNode = () => {
+			const node = getNode();
+			if (node) {
+				observer.observe(node);
+			} else {
+				requestAnimationFrame(watchForNode);
+			}
+		};
+		watchForNode();
+		return () => observer.disconnect();
+	};
+
+	const triggerTripCommitsLoad = (force = false) => {
+		if (!shouldLoadTripTimeline) return;
+		if (tripCommitsLoading) return;
+		if (!force && tripCommits.length > 0) return;
+		loadTripCommits();
+	};
+
+	const triggerTripContributionsLoad = (force = false) => {
+		if (!shouldLoadTripContributions) return;
+		if (tripContributionsLoading) return;
+		if (!force && tripContributions) return;
+		loadTripContributions();
+	};
+
+	onMount(() => {
+		const cleanups: (() => void)[] = [];
+		if (shouldLoadTripTimeline) {
+			cleanups.push(setupLazyTrigger(() => tripTimelineSection, () => triggerTripCommitsLoad()));
+		}
+		if (shouldLoadTripContributions) {
+			cleanups.push(setupLazyTrigger(() => tripContributionsSection, () => triggerTripContributionsLoad()));
+		}
+		return () => cleanups.forEach((cleanup) => cleanup());
+	});
 </script>
 
 <svelte:window
@@ -262,15 +382,94 @@ let fullscreenMedia: FullscreenMedia = null;
 		</div>
 	</section>
 
-	{#if showCommitFeed && tripCommits.length > 0}
-		<div class="mt-10">
-			<TripCommitTimeline commits={tripCommits} eventName={readableTitle} dateRange={tripDateRange} />
+	{#if showCommitFeed && tripDateRange.start && tripDateRange.end}
+		<div class="mt-10" bind:this={tripTimelineSection}>
+			{#if tripCommitsLoading}
+				<section class="space-y-4 rounded-3xl border border-black/5 bg-white p-6 shadow-sm animate-pulse dark:border-white/10 dark:bg-white/5">
+					<div class="h-5 w-48 rounded bg-gray-200 dark:bg-white/10"></div>
+					<div class="space-y-3">
+						{#each Array(4) as _}
+							<div class="rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
+								<div class="h-3 w-32 rounded bg-gray-200 dark:bg-white/10"></div>
+								<div class="mt-2 h-3 w-56 rounded bg-gray-200 dark:bg-white/10"></div>
+								<div class="mt-2 h-3 w-24 rounded bg-gray-200 dark:bg-white/10"></div>
+							</div>
+						{/each}
+					</div>
+				</section>
+			{:else if tripCommits.length > 0}
+				<TripCommitTimeline commits={tripCommits} eventName={readableTitle} dateRange={tripDateRange} />
+			{:else if tripCommitsError}
+				<section class="rounded-3xl border border-dashed border-red-200 bg-red-50/60 p-6 text-sm text-red-700 dark:border-red-400/40 dark:bg-red-500/10 dark:text-red-200">
+					<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<span>{tripCommitsError}</span>
+						<button
+							type="button"
+							class="inline-flex items-center gap-2 rounded-full border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-600 hover:text-white dark:border-red-400/60 dark:text-red-200 dark:hover:bg-red-400/30"
+							on:click={() => triggerTripCommitsLoad(true)}
+						>
+							Retry
+						</button>
+					</div>
+				</section>
+			{:else}
+				<section class="rounded-3xl border border-dashed border-black/5 bg-white/80 p-6 text-center text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+					<div class="flex flex-col items-center gap-3">
+						<p>Load the trip's commit log when you're ready.</p>
+						<button
+							type="button"
+							class="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white dark:border-white/40 dark:text-white dark:hover:bg-white/10"
+							on:click={() => triggerTripCommitsLoad(true)}
+						>
+							Show trip commits
+						</button>
+					</div>
+				</section>
+			{/if}
 		</div>
 	{/if}
 
-	{#if tripContributions}
-		<div class="mt-8">
-			<ContributionGrid calendar={tripContributions} title="Commit heatmap" description="GitHub pushes logged during this trip" />
+	{#if showContributions && tripDateRange.start && tripDateRange.end}
+		<div class="mt-8" bind:this={tripContributionsSection}>
+			{#if tripContributionsLoading}
+				<section class="rounded-3xl border border-black/5 bg-white p-6 shadow-sm animate-pulse dark:border-white/10 dark:bg-white/5">
+					<div class="h-4 w-48 rounded bg-gray-200 dark:bg-white/10"></div>
+					<div class="mt-2 h-3 w-72 rounded bg-gray-200 dark:bg-white/10"></div>
+					<div class="mt-6 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+						{#each Array(8) as _}
+							<div class="h-20 rounded-2xl bg-gray-100 dark:bg-white/10" aria-hidden="true"></div>
+						{/each}
+					</div>
+				</section>
+			{:else if tripContributions}
+				<ContributionGrid calendar={tripContributions} title="Commit heatmap" description="GitHub pushes logged during this trip" />
+			{:else if tripContributionsError}
+				<section class="rounded-3xl border border-dashed border-red-200 bg-red-50/60 p-6 text-sm text-red-700 dark:border-red-400/40 dark:bg-red-500/10 dark:text-red-200">
+					<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<span>{tripContributionsError}</span>
+						<button
+							type="button"
+							class="inline-flex items-center gap-2 rounded-full border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 transition hover:-translate-y-0.5 hover:bg-red-600 hover:text-white dark:border-red-400/60 dark:text-red-200 dark:hover:bg-red-400/30"
+							on:click={() => triggerTripContributionsLoad(true)}
+						>
+							Retry
+						</button>
+					</div>
+				</section>
+			{:else}
+				<section class="rounded-3xl border border-dashed border-black/5 bg-white/80 p-6 text-center text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+					<div class="flex flex-col items-center gap-3">
+						<p>Load the GitHub heatmap for this trip.</p>
+						<button
+							type="button"
+							class="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white dark:border-white/40 dark:text-white dark:hover:bg-white/10"
+							on:click={() => triggerTripContributionsLoad(true)}
+						>
+							Show contributions
+						</button>
+					</div>
+				</section>
+			{/if}
 		</div>
 	{/if}
 
