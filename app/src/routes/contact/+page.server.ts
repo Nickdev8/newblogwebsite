@@ -1,11 +1,7 @@
 import type { Actions } from './$types';
 import { fail } from '@sveltejs/kit';
 import nodemailer from 'nodemailer';
-import {
-  EMAIL_APP_USER,
-  EMAIL_APP_PASSWORD,
-  EMAIL_APP_TO_ADDRESS
-} from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 export const prerender = false;
 
@@ -14,8 +10,8 @@ const transporter = nodemailer.createTransport({
   port: 465,           // SSL
   secure: true,        // true for 465, false for 587
   auth: {
-    user: EMAIL_APP_USER,
-    pass: EMAIL_APP_PASSWORD
+    user: env.EMAIL_APP_USER,
+    pass: env.EMAIL_APP_PASSWORD
   }
 });
 
@@ -81,8 +77,8 @@ Sender name: ${name}
 
     try {
       await transporter.sendMail({
-        from: `"blog.nickesselman.nl" <${EMAIL_APP_USER}>`,
-        to: EMAIL_APP_TO_ADDRESS,
+        from: `"blog.nickesselman.nl" <${env.EMAIL_APP_USER}>`,
+        to: env.EMAIL_APP_TO_ADDRESS,
         ...(replyTo ? { replyTo } : {}),
         subject: `New message (${method}) from ${name}`,
         text: fullText
