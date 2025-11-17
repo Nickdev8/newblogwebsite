@@ -25,6 +25,7 @@
 	let loading = false;
 	let errorMessage = '';
 	let abortController: AbortController | null = null;
+	let fullscreenAsset: GalleryAsset | null = null;
 
 	const parseError = async (response: Response) => {
 		try {
@@ -89,6 +90,14 @@
 	onDestroy(() => {
 		abortController?.abort();
 	});
+
+	const openFullscreen = (asset: GalleryAsset) => {
+		fullscreenAsset = asset;
+	};
+
+	const closeFullscreen = () => {
+		fullscreenAsset = null;
+	};
 </script>
 
 {#if valid}
@@ -105,7 +114,12 @@
 		{:else}
 			<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 				{#each assets as asset (asset.id)}
-					<div class="group relative overflow-hidden rounded-3xl border border-black/5 bg-white/80 shadow-sm dark:border-white/10 dark:bg-white/10">
+					<button
+						type="button"
+						class="group relative overflow-hidden rounded-3xl border border-black/5 bg-white/80 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-black/40 dark:border-white/10 dark:bg-white/10"
+						on:click={() => openFullscreen(asset)}
+						aria-label={`Open ${asset.alt || 'media'} fullscreen`}
+					>
 						{#if asset.isVideo}
 							<video
 								src={asset.previewUrl}
@@ -123,12 +137,50 @@
 								src={asset.previewUrl}
 								alt={asset.alt}
 								loading="lazy"
-								class="block h-full w-full object-cover transition duration-200 group-hover:scale-[1.01]"
+								class="block h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]"
 							/>
 						{/if}
-					</div>
+					</button>
 				{/each}
 			</div>
 		{/if}
 	</section>
+
+	{#if fullscreenAsset}
+		<div
+			class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="immich-fullscreen-title"
+		>
+			<div class="relative max-h-full max-w-full">
+				<h2 id="immich-fullscreen-title" class="sr-only">{fullscreenAsset.alt}</h2>
+				{#if fullscreenAsset.isVideo}
+					<video
+						src={fullscreenAsset.originalUrl || fullscreenAsset.previewUrl}
+						controls
+						playsinline
+						autoplay
+						class="h-auto max-h-[85vh] w-auto max-w-[95vw] rounded-3xl"
+					>
+						<track kind="captions" />
+					</video>
+				{:else}
+					<img
+						src={fullscreenAsset.originalUrl || fullscreenAsset.previewUrl}
+						alt={fullscreenAsset.alt}
+						class="h-auto max-h-[85vh] w-auto max-w-[95vw] rounded-3xl"
+						loading="eager"
+					/>
+				{/if}
+				<button
+					class="absolute right-2 top-2 size-10 rounded-full bg-black/60 text-2xl text-white shadow-lg transition hover:bg-black"
+					on:click={closeFullscreen}
+					aria-label="Close fullscreen media"
+				>
+					×
+				</button>
+			</div>
+		</div>
+	{/if}
 {/if}
