@@ -4,9 +4,6 @@ import matter from 'gray-matter';
 import { marked } from 'marked';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad, EntryGenerator } from './$types';
-import { fetchCommitsBetween } from '$lib/server/github';
-import type { GithubCommit } from '$lib/server/github';
-import { fetchContributionCalendar } from '$lib/server/githubContributions';
 import { env } from '$env/dynamic/private';
 
 export const entries: EntryGenerator = () => {
@@ -125,26 +122,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const startDate = posts[0]?.date;
 	const endDate = posts[posts.length - 1]?.date;
-	let tripCommits: GithubCommit[] = [];
-	if (showCommitFeed) {
-		try {
-			tripCommits = await fetchCommitsBetween(startDate, endDate, 15);
-		} catch (error) {
-			console.error('Failed to fetch trip commits:', error);
-		}
-	}
-
-	let tripContributions = null;
 	const showContributions = Boolean(mainData.show_contributions);
-	if (showContributions && startDate && endDate) {
-		const fromISO = new Date(startDate).toISOString();
-		const toISO = new Date(endDate).toISOString();
-		try {
-			tripContributions = await fetchContributionCalendar({ from: fromISO, to: toISO });
-		} catch (error) {
-			console.error('Failed to fetch trip contributions:', error);
-		}
-	}
 
 	const envKeyBase = eventName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
 	const scopedImmichEnvKey = `${envKeyBase}_IMMICH_ALBUM_URL`;
@@ -161,17 +139,16 @@ export const load: PageServerLoad = async ({ params }) => {
 		coverImage: mainData.coverImage || '',
 		content: '', // or mainData.content if you want
 		images: [], // or mainData.images || []
-		tripCommits,
 		showCommitFeed,
-		tripContributions,
 		tripDateRange: { start: startDate, end: endDate },
+		showContributions,
 		immichAlbum
 	};
 };
-	const renderMarkdown = (input: string) => {
-		const parsed = marked.parse(input);
-		if (typeof parsed === 'string') {
-			return parsed;
-		}
-		throw new Error('Async markdown rendering is not supported for trip posts.');
-	};
+const renderMarkdown = (input: string) => {
+	const parsed = marked.parse(input);
+	if (typeof parsed === 'string') {
+		return parsed;
+	}
+	throw new Error('Async markdown rendering is not supported for trip posts.');
+};
