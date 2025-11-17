@@ -33,7 +33,7 @@
 				{total} contributions
 			</span>
 		</header>
-		<div class="flex gap-1 overflow-x-auto" bind:this={scroller}>
+		<div class="flex gap-1 overflow-x-auto contrib-scroll" bind:this={scroller}>
 			{#each weeks as week}
 				<div class="grid grid-rows-7 gap-1">
 					{#each week.contributionDays as day}
@@ -56,11 +56,24 @@
 		border-radius: 3px;
 		background: #e5e7eb;
 	}
-	.contrib-panel::-webkit-scrollbar {
-		height: 6px;
+	.contrib-scroll {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(15, 23, 42, 0.35) rgba(15, 23, 42, 0.08);
+		padding-bottom: 0.5rem;
+		margin-bottom: -0.5rem;
 	}
-	.contrib-panel::-webkit-scrollbar-thumb {
-		background: rgba(15, 23, 42, 0.2);
+
+	.contrib-scroll::-webkit-scrollbar {
+		height: 8px;
+	}
+
+	.contrib-scroll::-webkit-scrollbar-track {
+		background: rgba(15, 23, 42, 0.08);
+		border-radius: 999px;
+	}
+
+	.contrib-scroll::-webkit-scrollbar-thumb {
+		background: linear-gradient(90deg, #2563eb, #14b8a6);
 		border-radius: 999px;
 	}
 </style>
