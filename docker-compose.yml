@@ -7,7 +7,7 @@ services:
     image: blog.nickesselman.nl:prod
     restart: unless-stopped
     env_file:
-      - app/.env
+      - .env
     environment:
       NODE_ENV: production
       PORT: "3000"
