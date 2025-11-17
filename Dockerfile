@@ -14,6 +14,7 @@ COPY app/package*.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /work/build ./build
 COPY app/src/posts ./src/posts
+RUN chown -R nodeuser:nodeuser /app
 USER nodeuser
 ENV HOST=0.0.0.0
 ENV PORT=3000
