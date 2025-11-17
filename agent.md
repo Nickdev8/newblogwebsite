@@ -37,7 +37,10 @@ npm run check   # type + a11y lint (currently warns if there are legacy issues)
 
 ## Deployment notes
 
-This project usually runs on a Raspberry Pi with PM2 and nginx. Don’t assume global services are available; stick to the existing Node/Tailwind stack. If you add dependencies, update `package.json` and document them in `README.md`.
+- Production runs inside Docker (see `docker-compose.yml`). Rebuild and restart with `docker compose up -d --build` from the repo root.
+- The container runs as the unprivileged `nodeuser` and bind-mounts `app/src/posts`, so make sure host permissions allow read access for that directory.
+- Secrets (GitHub token, email creds, Immich URL) live in `.env`; never log or commit them.
+- Stick to the existing Node/Tailwind stack. If you add dependencies, update `package.json` and mention them in `README.md`.
 
 ## Checklist before submitting changes
 
