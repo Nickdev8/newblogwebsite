@@ -473,8 +473,38 @@ let fullscreenMedia: FullscreenMedia = null;
 		</div>
 	{/if}
 
-	<section class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
-		<nav class="jump-panel sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto self-start rounded-[28px] border border-black/5 bg-white/90 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-white/5">
+	<section class="mt-10 space-y-5 lg:space-y-0 lg:grid lg:gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
+		<div class="lg:hidden">
+			{#if journalEntries.length === 0}
+				<div class="rounded-[24px] border border-dashed border-black/10 bg-white/85 p-5 text-center text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+					Entries will appear here once the trip is written up.
+				</div>
+			{:else}
+				<div class="mobile-jump-panel rounded-[26px] border border-black/5 bg-white/90 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-white/5">
+					<div class="flex items-center justify-between gap-3">
+						<div>
+							<p class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Navigator</p>
+							<p class="text-base font-semibold text-gray-900 dark:text-white">{journalEntries.length} day recap</p>
+						</div>
+						<span class="text-xs text-gray-500 dark:text-gray-400">Swipe to jump</span>
+					</div>
+					<div class="-mx-1 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 mobile-jump-scroll">
+						{#each journalEntries as entry}
+							<button
+								type="button"
+								class="jump-chip snap-start shrink-0 rounded-2xl border border-black/10 px-4 py-3 text-left text-sm font-semibold text-gray-800 transition hover:-translate-y-0.5 hover:border-black/30 hover:bg-black/5 dark:border-white/15 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/10"
+								on:click={() => jumpToEntry(entry.id)}
+							>
+								<span class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Day {entry.order}</span>
+								<p class="mt-1 text-base">{entry.title}</p>
+							</button>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		</div>
+
+		<nav class="jump-panel sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-y-auto self-start rounded-[28px] border border-black/5 bg-white/90 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-white/5 lg:block">
 			<div class="flex items-center justify-between gap-3">
 				<div>
 					<p class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Navigator</p>
@@ -507,7 +537,7 @@ let fullscreenMedia: FullscreenMedia = null;
 			{/if}
 		</nav>
 
-		<div class="journal-feed space-y-8">
+		<div class="journal-feed space-y-8 lg:col-start-2">
 			{#if journalEntries.length === 0}
 				<div class="rounded-[32px] border border-dashed border-black/10 bg-white/80 p-10 text-center text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
 					<p class="text-xl font-semibold">No entries just yet.</p>
@@ -704,6 +734,14 @@ let fullscreenMedia: FullscreenMedia = null;
 	.jump-panel::-webkit-scrollbar-thumb {
 		background: rgba(0, 0, 0, 0.25);
 		border-radius: 999px;
+	}
+
+	.mobile-jump-scroll {
+		scrollbar-width: none;
+	}
+
+	.mobile-jump-scroll::-webkit-scrollbar {
+		display: none;
 	}
 
 	.jump-timeline {

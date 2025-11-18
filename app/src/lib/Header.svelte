@@ -38,9 +38,9 @@
 </script>
 
 <header class="px-4 sm:px-8 lg:px-10">
-	<nav class="glass-panel flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-4">
-		<div class="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-			<a href="/" class="group grid gap-0.5 text-left sm:flex-1">
+	<nav class="glass-panel flex flex-col gap-4 px-5 py-5 sm:px-6 sm:py-4">
+		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+			<a href="/" class="group grid gap-0.5 text-left md:max-w-md md:flex-1">
 				<span class="text-base font-semibold uppercase tracking-[0.25em] text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-white">
 					Field Notes
 				</span>
@@ -50,48 +50,50 @@
 				<span class="text-xs text-gray-500 dark:text-gray-400">Stories of building & wandering</span>
 			</a>
 
-			<div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
-				<button
-					type="button"
-					on:click={toggleTheme}
-					aria-pressed={dark}
-					aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-					class="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1.5 text-sm font-semibold text-gray-700 transition hover:-translate-y-0.5 hover:border-black/40 dark:border-white/10 dark:text-gray-100"
-				>
-					{#if dark}
-						<Moon class="h-4 w-4" />
-						<span class="hidden sm:inline">Night</span>
-					{:else}
-						<Sun class="h-4 w-4" />
-						<span class="hidden sm:inline">Day</span>
-					{/if}
-				</button>
+			<div class="flex flex-1 flex-wrap items-center justify-between gap-3 md:justify-end md:gap-5">
+				<div class="hidden flex-wrap items-center gap-5 text-sm font-semibold text-gray-600 dark:text-gray-200 md:flex">
+					{#each navLinks as link}
+						<a
+							href={link.href}
+							class="transition hover:text-gray-900 dark:hover:text-white"
+						>
+							{link.label}
+						</a>
+					{/each}
+				</div>
 
-				<button
-					type="button"
-					on:click={toggleMobileMenu}
-					class="rounded-full border border-black/10 p-2 text-gray-700 transition hover:-translate-y-0.5 hover:border-black/40 dark:border-white/10 dark:text-gray-100 md:hidden"
-					aria-expanded={isMobileMenuOpen}
-				>
-					{#if isMobileMenuOpen}
-						<X class="h-5 w-5" />
-					{:else}
-						<Menu class="h-5 w-5" />
-					{/if}
-				</button>
+				<div class="flex items-center gap-3">
+					<button
+						type="button"
+						on:click={toggleTheme}
+						aria-pressed={dark}
+						aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+						class="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1.5 text-sm font-semibold text-gray-700 transition hover:-translate-y-0.5 hover:border-black/40 dark:border-white/10 dark:text-gray-100"
+					>
+						{#if dark}
+							<Moon class="h-4 w-4" />
+							<span class="hidden sm:inline">Night</span>
+						{:else}
+							<Sun class="h-4 w-4" />
+							<span class="hidden sm:inline">Day</span>
+						{/if}
+					</button>
+
+					<button
+						type="button"
+						on:click={toggleMobileMenu}
+						class="rounded-full border border-black/10 p-2 text-gray-700 transition hover:-translate-y-0.5 hover:border-black/40 dark:border-white/10 dark:text-gray-100 md:hidden"
+						aria-expanded={isMobileMenuOpen}
+					>
+						{#if isMobileMenuOpen}
+							<X class="h-5 w-5" />
+						{:else}
+							<Menu class="h-5 w-5" />
+						{/if}
+					</button>
+				</div>
 			</div>
 		</div>
-
-		<nav class="hidden items-center gap-6 text-sm font-semibold text-gray-600 dark:text-gray-200 md:flex">
-			{#each navLinks as link}
-				<a
-					href={link.href}
-					class="transition hover:text-gray-900 dark:hover:text-white"
-				>
-					{link.label}
-				</a>
-			{/each}
-		</nav>
 	</nav>
 
 	{#if isMobileMenuOpen}
