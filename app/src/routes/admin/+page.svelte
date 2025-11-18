@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -20,7 +21,7 @@
 			{#if loginError}
 				<p class="status error">{loginError}</p>
 			{/if}
-			<form method="post" action="?/login">
+			<form method="post" action={`${base}/admin?/login`}>
 				<label for="password">Password</label>
 				<input id="password" name="password" type="password" required />
 				<button type="submit">Unlock editor</button>
@@ -40,7 +41,7 @@
 				{:else}
 					{#each data.posts as post}
 						<li class:selected={post.slug === data.selectedSlug}>
-							<a href={`?post=${encodeURIComponent(post.slug)}`}>
+							<a href={`${base}/admin?post=${encodeURIComponent(post.slug)}`}>
 								<span class="post-title">{post.title}</span>
 								<span class="post-slug">{post.slug}.md</span>
 							</a>
@@ -48,7 +49,7 @@
 					{/each}
 				{/if}
 			</ul>
-			<form method="post" action="?/logout">
+			<form method="post" action={`${base}/admin?/logout`}>
 				<button type="submit" class="ghost">Log out</button>
 			</form>
 		</aside>
@@ -68,7 +69,7 @@
 						{/if}
 					</div>
 				</header>
-				<form method="post" action="?/save" class="editor__form">
+				<form method="post" action={`${base}/admin?/save`} class="editor__form">
 					<input type="hidden" name="slug" value={data.selectedSlug} />
 					<label for="content">Markdown</label>
 					<textarea id="content" name="content" rows="24" required>{data.content}</textarea>
