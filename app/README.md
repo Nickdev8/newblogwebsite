@@ -85,9 +85,20 @@ npm run preview  # http://localhost:3000
 REACTIONS_FILE=/srv/blog-data/reactions.json
 TYPES_FILE=/srv/blog-data/reaction-types.json
 PORT=3000
+ADMIN_PASSWORD=choose-a-strong-passphrase
 ```
 
 Set these in PM2 (see below) so the server knows where to read/write.
+
+## On-device Markdown Admin
+
+Need to tweak a post from your phone? Point your browser at `/admin`:
+
+1. Set `ADMIN_PASSWORD` (see env vars above) and redeploy.
+2. Visit `/admin`, enter the shared password, and pick a `.md` file from the list.
+3. Edit the raw markdown in the textarea and hit **Save changes**. The file is written directly to `src/posts` on disk.
+
+This mini-editor is intentionally simple—no media uploads, no slug management—so version control stays in sync and git history stays clean. Use your usual git workflow (or `docker compose` bind mounts) to back up edits.
 
 ## Reactions / Views API
 
