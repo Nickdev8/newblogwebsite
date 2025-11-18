@@ -1,22 +1,20 @@
 ---
-title: "Moonshot"
-description: "Template journal for the Florida launch sprint. Swap the copy and images with the real story."
+title: Moonshot
+date: 2025-09-01
+description: Template journal for the Florida launch sprint. Swap the copy and
+  images with the real story.
 coverImage: /blogimages/moonshot/placeholder.webp
-warning: "Draft template — replace text + media when you get back from the Cape."
+live: true
+sort_order: asc
+warning: Draft template — replace text + media when you get back from the Cape.
 warning_type: info
 warning_dismissible: true
-sort_order: 'asc'
-live: true
----
----
-title: "Day 0: Wheels Up"
-date: "2025-09-01"
 ---
 
 ![Travel day placeholder](/blogimages/moonshot/placeholder.webp){hole}
 
 ## Travel Log
-Write about leaving home, the airport energy, and the first moments that made the trip feel real.
+Write about leaving home, the airport energy, and the first moments that made the trip feel real..
 
 ## First Impressions
 Capture quick bullet notes on teammates, weather, or unexpected delays.
