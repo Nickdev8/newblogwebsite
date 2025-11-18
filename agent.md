@@ -43,12 +43,12 @@ npm run check   # type + a11y lint (currently warns if there are legacy issues)
 - Secrets (GitHub token, email creds, Immich URL) live in `.env`; never log or commit them.
 - Stick to the existing Node/Tailwind stack. If you add dependencies, update `package.json` and mention them in `README.md`.
 
-## Editing via Decap CMS
+## Markdown admin
 
-- `/admin` hosts Decap CMS; `static/admin/index.html` bootstraps it and `static/admin/config.yml` controls collections/media paths.
-- The config is served through `src/routes/admin/config.yml/+server.ts` (and `/config.yml` re-exports it). Keep those endpoints in sync with the static file.
-- GitHub is the configured backend, so any commit-impacting change must keep the repo public paths (`app/src/posts`, `app/static/blogimages`) accurate.
-- For local testing, run `npx decap-server` from the repo root alongside `npm run dev` so `/admin` can authenticate without GitHub.
+- `/admin` is a custom, password-protected editor. Set `ADMIN_PASSWORD` in `.env` (and Docker/PM2) so logins work.
+- Auth is cookie-based—no GitHub/Decap—so keep the password long and rotate if it leaks.
+- The editor only lists files from `app/src/posts` and lets you edit the raw markdown. It does **not** create slugs or upload media.
+- All writes happen directly on disk, so ensure bind mounts/storage permissions let the Node process write to `app/src/posts`.
 
 ## Checklist before submitting changes
 
