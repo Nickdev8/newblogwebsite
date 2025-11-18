@@ -4,10 +4,11 @@ This repo contains Nick’s personal SvelteKit blog. Use it as a journal, not a 
 
 ## Quick facts
 
-- Framework: SvelteKit (Node 20). Styling lives in `src/app.css` via Tailwind.
-- Posts are Markdown files inside `src/posts`. The home page pulls them through `src/routes/+page.server.ts`.
-- About/contact and other static pages sit under `src/routes/...`.
-- Reactions are stored in JSON via helpers in `src/lib/server/reactionStore.ts`; avoid breaking that API.
+- Everything app-related lives under `app/`; all paths below assume that prefix unless stated otherwise.
+- Framework: SvelteKit (Node 20). Styling lives in `app/src/app.css` via Tailwind.
+- Posts are Markdown files inside `app/src/posts`. The home page pulls them through `app/src/routes/+page.server.ts`.
+- About/contact and other static pages sit under `app/src/routes/...`.
+- Reactions are stored in JSON via helpers in `app/src/lib/server/reactionStore.ts`; avoid breaking that API.
 
 ## Local workflow
 
@@ -41,6 +42,13 @@ npm run check   # type + a11y lint (currently warns if there are legacy issues)
 - The container runs as the unprivileged `nodeuser` and bind-mounts `app/src/posts`, so make sure host permissions allow read access for that directory.
 - Secrets (GitHub token, email creds, Immich URL) live in `.env`; never log or commit them.
 - Stick to the existing Node/Tailwind stack. If you add dependencies, update `package.json` and mention them in `README.md`.
+
+## Editing via Decap CMS
+
+- `/admin` hosts Decap CMS; `static/admin/index.html` bootstraps it and `static/admin/config.yml` controls collections/media paths.
+- The config is served through `src/routes/admin/config.yml/+server.ts` (and `/config.yml` re-exports it). Keep those endpoints in sync with the static file.
+- GitHub is the configured backend, so any commit-impacting change must keep the repo public paths (`app/src/posts`, `app/static/blogimages`) accurate.
+- For local testing, run `npx decap-server` from the repo root alongside `npm run dev` so `/admin` can authenticate without GitHub.
 
 ## Checklist before submitting changes
 
