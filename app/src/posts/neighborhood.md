@@ -1,7 +1,7 @@
 ---
 title: Neighborhood
 description: A diary of my month-long journey in San Francisco with Hack Club. A story of coding, new friends, personal growth, and navigating the chaotic, beautiful, and unexpected moments of building and living in a community of makers.
-coverImage: /blogimages/neighborhood/populated.mp4
+coverImage: /blogimages/neighborhood/populated.webp
 warning: "This post is Done"
 warning_type: success
 warning_dismissible: false
@@ -501,7 +501,7 @@ date: "2025-07-04"
 ![alt text](/blogimages/neighborhood/someonejumpingoverisac.mp4){hole}
 
 ## So Many People
-![alt text](/blogimages/neighborhood/populated.mp4){hole}
+![alt text](/blogimages/neighborhood/populated.webp){hole}
 
 ## Coolest Things We Saw
 There was a guy doing flips *over* another Hack Clubber.
