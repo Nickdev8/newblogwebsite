@@ -11,7 +11,7 @@ export async function load() {
 		'/blogimages/undercity/githubroof.webp',
 		'/blogimages/undercity/group.webp',
 		'/blogimages/neighborhood/paolobeingsmart.mp4',
-		'/blogimages/neighborhood/populated.mp4'
+		'/blogimages/neighborhood/populated.webp'
 	];
 
 	const carouselImages = curatedSources.map((src) => ({
@@ -29,4 +29,3 @@ export async function load() {
 
 	return { carouselImages, aboutMeImage, contributions };
 }
-
