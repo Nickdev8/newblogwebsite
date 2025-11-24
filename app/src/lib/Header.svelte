@@ -37,8 +37,8 @@
 	}
 </script>
 
-<header class="px-4 sm:px-8 lg:px-10">
-	<nav class="glass-panel flex flex-col gap-4 px-5 py-5 sm:px-6 sm:py-4">
+<header class="px-0 sm:px-8 lg:px-10">
+	<nav class="glass-panel flex flex-col gap-4 px-4 py-5 sm:px-6 sm:py-4">
 		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 			<a href="/" class="group grid gap-0.5 text-left md:max-w-md md:flex-1">
 				<span class="text-base font-semibold uppercase tracking-[0.25em] text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-white">
