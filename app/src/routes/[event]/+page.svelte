@@ -4,6 +4,7 @@
 	import TripCommitTimeline from '$lib/TripCommitTimeline.svelte';
 	import ImmichGallery from '$lib/ImmichGallery.svelte';
 	import ContributionGrid from '$lib/ContributionGrid.svelte';
+	import { wrapNoTranslateWords } from '$lib/noTranslate';
 	import type { GithubCommit } from '$lib/server/github';
 	import type { ContributionCalendar } from '$lib/server/githubContributions';
 
@@ -33,6 +34,8 @@
 		showContributions?: boolean;
 		tripDateRange?: { start?: string; end?: string };
 		immichAlbum?: string;
+		timezone?: string;
+		timezoneLabel?: string;
 	};
 
 	const readableTitle = data.title || data.event;
@@ -92,6 +95,8 @@
 	const immichAlbum = data.immichAlbum;
 	const shouldLoadTripTimeline = Boolean(showCommitFeed && tripDateRange.start && tripDateRange.end);
 	const shouldLoadTripContributions = Boolean(showContributions && tripDateRange.start && tripDateRange.end);
+	const timezone = data.timezone || '';
+	const timezoneLabel = data.timezoneLabel || data.timezone || '';
 
 	let tripTimelineSection: HTMLElement | null = null;
 	let tripContributionsSection: HTMLElement | null = null;
@@ -112,6 +117,21 @@
 		{ label: 'First day', value: formatDate(data.posts[0]?.date) },
 		{ label: 'Latest update', value: formatDate(data.posts[data.posts.length - 1]?.date) }
 	];
+	let heroHighlightsWithTime = heroHighlights;
+	let localTime = timezone ? '--:--' : '';
+
+	const timeFormatter: Intl.DateTimeFormat | null = timezone
+		? new Intl.DateTimeFormat('en-US', {
+				timeZone: timezone,
+				hour: 'numeric',
+				minute: '2-digit'
+		  })
+		: null;
+
+	const refreshLocalTime = () => {
+		if (!timeFormatter) return;
+		localTime = timeFormatter.format(new Date());
+	};
 
 	const bannerTypeClasses: Record<string, string> = {
 		warning: 'border-yellow-200/80 bg-yellow-50 text-yellow-900 dark:border-yellow-300/50 dark:bg-yellow-900/20 dark:text-yellow-100',
@@ -143,7 +163,7 @@ let fullscreenMedia: FullscreenMedia = null;
 					? 'w-full sm:w-3/4 md:w-2/3'
 					: 'w-full max-w-2xl';
 
-		const orientationClass = hasLayout(layout, 'vertical') ? 'vertical-media' : '';
+		const orientationClass = hasLayout(layout, 'vertical') ? 'max-h-[520px]' : '';
 
 		return [base, alignClass, widthClass, orientationClass, 'my-4 sm:my-5'].join(' ');
 	}
@@ -161,25 +181,15 @@ let fullscreenMedia: FullscreenMedia = null;
 		const element = document.getElementById(id);
 		if (!element) return;
 		element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-		element.classList.add('journal-entry--focus');
-		window.setTimeout(() => element.classList.remove('journal-entry--focus'), 1400);
-	}
-
-	function wrapNoTranslateWords(content: string): string {
-		let words = ['Neighborhood', 'Undercity', 'Hack Club'];
-		words = [...new Set(words)].sort((a, b) => b.length - a.length);
-
-		for (const word of words) {
-			if (!word) continue;
-			const escaped = word.replace(/[-/\\^$*+?.()|[\\\]{}]/g, '\\$&');
-			const regex = new RegExp(`\\b(${escaped})\\b`, 'gi');
-			content = content.replace(regex, '<span translate="no">$1</span>');
-		}
-
-		return content;
+		const highlight = ['ring-2', 'ring-emerald-400', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-slate-900', 'shadow-xl'];
+		element.classList.add(...highlight);
+		window.setTimeout(() => element.classList.remove(...highlight), 1400);
 	}
 
 	$: showBanner = Boolean(banner && !bannerDismissed);
+	$: heroHighlightsWithTime = timezoneLabel
+		? [...heroHighlights, { label: `${timezoneLabel} time`, value: localTime || '—' }]
+		: heroHighlights;
 
 	$: if (browser && typeof document !== 'undefined') {
 		document.body.style.overflow = fullscreenMedia ? 'hidden' : '';
@@ -285,6 +295,11 @@ let fullscreenMedia: FullscreenMedia = null;
 
 	onMount(() => {
 		const cleanups: (() => void)[] = [];
+		if (timeFormatter) {
+			refreshLocalTime();
+			const id = window.setInterval(refreshLocalTime, 60_000);
+			cleanups.push(() => clearInterval(id));
+		}
 		if (shouldLoadTripTimeline) {
 			cleanups.push(setupLazyTrigger(() => tripTimelineSection, () => triggerTripCommitsLoad()));
 		}
@@ -304,81 +319,80 @@ let fullscreenMedia: FullscreenMedia = null;
 />
 
 {#if showBanner && banner}
-	<div
-		class={`flex w-full flex-col items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 ${bannerTypeClasses[banner.type || 'warning']}`}
-		role="alert"
-	>
-		<span class="flex-1">{@html banner.message}</span>
-		{#if banner.dismissible !== false}
-			<button
-				type="button"
-				class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/40 hover:text-current dark:hover:bg-white/10"
-				on:click={() => (bannerDismissed = true)}
-			>
-				Close
-			</button>
-		{/if}
+	<div class="mx-auto w-full max-w-[1600px] px-3 sm:px-6 lg:px-10">
+		<div
+			class={`flex w-full flex-col items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 ${bannerTypeClasses[banner.type || 'warning']}`}
+			role="alert"
+		>
+			<span class="flex-1">{@html banner.message}</span>
+			{#if banner.dismissible !== false}
+				<button
+					type="button"
+					class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/40 hover:text-current dark:hover:bg-white/10"
+					on:click={() => (bannerDismissed = true)}
+				>
+					Close
+				</button>
+			{/if}
+		</div>
 	</div>
 {/if}
 
 <article class="journal-shell mx-auto w-full max-w-[1600px] px-3 pt-0 pb-6 sm:mt-0 sm:px-6 lg:px-10">
-	<section class="journal-hero grid gap-6 rounded-[36px] border border-black/5 bg-white/95 p-4 shadow-[0_28px_55px_rgba(15,23,42,0.14)] dark:border-white/10 dark:bg-white/5 lg:grid-cols-[minmax(0,3fr)_2fr]">
-		<div class="relative overflow-hidden rounded-[28px] bg-slate-900 text-white">
-			{#if data.coverImage}
-				{#if isVideo(data.coverImage)}
-					<video src={data.coverImage} muted playsinline loop class="absolute inset-0 h-full w-full object-cover opacity-60"></video>
-				{:else}
-					<img src={data.coverImage} alt={readableTitle} class="absolute inset-0 h-full w-full object-cover opacity-70" loading="lazy" />
-				{/if}
-			{:else}
-				<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent),linear-gradient(135deg,_#0f172a,_#1e1b4b)] opacity-80"></div>
+	<section class="mt-2 grid items-center gap-6 rounded-[28px] border border-black/10 bg-gradient-to-br from-white/95 via-slate-50/95 to-white/95 p-6 shadow-[0_22px_40px_rgba(15,23,42,0.12)] dark:border-white/15 dark:from-slate-900/75 dark:via-slate-800/80 dark:to-slate-900/75 dark:shadow-[0_22px_40px_rgba(0,0,0,0.3)] lg:grid-cols-[1.1fr_0.9fr] lg:p-7">
+		<div class="space-y-3">
+			<p class="text-xs uppercase tracking-[0.28em] text-slate-600 dark:text-slate-200">Field report · {data.event}</p>
+			<h1 translate="no" class="text-[clamp(2rem,2.6vw,2.75rem)] font-bold leading-tight tracking-[-0.01em]">{readableTitle}</h1>
+			<p class="max-w-3xl text-sm leading-relaxed text-slate-700 dark:text-slate-200 sm:text-base">{heroDescription}</p>
+
+			<div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
+				<span class="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] dark:border-white/15">{data.posts.length} {totalEntriesLabel}</span>
+				<span>Updated {formatDate(data.posts[data.posts.length - 1]?.date)}</span>
+			</div>
+
+			{#if timezoneLabel}
+				<div class="mt-3">
+					<div class="inline-flex flex-col gap-1 rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-100/80 to-white/95 px-4 py-3 text-slate-800 shadow-[0_14px_28px_rgba(15,23,42,0.1)] dark:border-white/15 dark:from-slate-800/80 dark:to-slate-900/90 dark:text-slate-100 dark:shadow-[0_14px_28px_rgba(0,0,0,0.4)]">
+						<div class="text-[0.7rem] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300">Local time · {timezoneLabel}</div>
+						<div class="text-2xl font-semibold tracking-[-0.01em]">{localTime || '—'}</div>
+					</div>
+				</div>
 			{/if}
-			<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/60 to-black/10"></div>
-			<div class="relative z-10 flex h-full flex-col justify-between p-6 sm:p-8">
-				<div class="flex flex-wrap gap-2 text-[0.6rem] uppercase tracking-[0.4em] text-white/75">
-					<span class="rounded-full border border-white/30 px-3 py-0.5">Field report</span>
-					<span class="rounded-full border border-white/30 px-3 py-0.5">{data.event}</span>
-				</div>
-				<div class="space-y-3">
-					<h1 class="text-3xl font-semibold leading-tight sm:text-4xl" translate="no">{readableTitle}</h1>
-					<p class="text-sm text-white/80 sm:text-base">{heroDescription}</p>
-				</div>
-				<div class="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.3em] text-white/70">
-					<span>{data.posts.length} {totalEntriesLabel}</span>
-					<span class="inline-flex h-1 w-1 rounded-full bg-white/60"></span>
-					<span>Last touched {formatDate(data.posts[data.posts.length - 1]?.date)}</span>
-				</div>
-			</div>
+
+			{#if firstEntryId}
+				<button
+					type="button"
+					class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-white/25 dark:bg-white/10 dark:text-white"
+					on:click={() => jumpToEntry(firstEntryId)}
+				>
+					Jump to entries
+				</button>
+			{/if}
 		</div>
-		<div class="hidden flex-col justify-between rounded-[28px] border border-black/5 bg-gradient-to-b from-white to-slate-50 p-6 text-gray-900 dark:border-white/10 dark:from-white/5 dark:to-white/10 dark:text-white lg:flex">
-			<div>
-				<p class="text-xs uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Mission dossier</p>
-				<h2 class="mt-2 text-2xl font-semibold">Trip overview</h2>
-				<p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Snapshots of what has been logged so far.</p>
-				<div class="mt-5 grid gap-4 sm:grid-cols-2">
-					{#each heroHighlights as highlight}
-						<div class="rounded-2xl border border-black/10 bg-white/80 p-4 dark:border-white/15 dark:bg-white/5">
-							<p class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">{highlight.label}</p>
-							<p class="mt-2 text-xl font-semibold text-gray-900 dark:text-white">{highlight.value}</p>
-						</div>
-					{/each}
-				</div>
-			</div>
-			<div class="mt-6 flex flex-wrap items-center gap-4 border-t border-black/5 pt-4 text-sm dark:border-white/10">
-				<div>
-					<p class="font-semibold">{data.posts.length} {totalEntriesLabel} logged</p>
-					<p class="text-gray-600 dark:text-gray-300">Tracking {data.event}</p>
-				</div>
-				{#if firstEntryId}
-					<button
-						type="button"
-						class="inline-flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-900 transition hover:-translate-y-0.5 hover:bg-gray-900 hover:text-white dark:border-white/30 dark:text-white dark:hover:bg-white/10"
-						on:click={() => jumpToEntry(firstEntryId)}
-					>
-						Jump to timeline
-					</button>
+
+		{#if data.coverImage}
+			<div class="relative ml-auto w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
+				{#if isVideo(data.coverImage)}
+					<video src={data.coverImage} muted playsinline loop class="block h-full w-full object-cover" />
+				{:else}
+					<img src={data.coverImage} alt={readableTitle} class="block h-full w-full object-cover" loading="lazy" />
 				{/if}
 			</div>
+		{/if}
+	</section>
+
+	<section class="mt-6 rounded-3xl border border-black/10 bg-white/90 px-4 py-5 dark:border-white/10 dark:bg-slate-900/60 sm:px-5 lg:px-6">
+		<div class="flex flex-col gap-1">
+			<p class="text-xs uppercase tracking-[0.25em] text-slate-500 dark:text-slate-300">Mission dossier</p>
+			<h2 class="text-xl font-semibold text-slate-900 dark:text-white">At a glance</h2>
+		</div>
+		<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+			{#each heroHighlightsWithTime as highlight}
+				<div class="rounded-2xl border border-black/10 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+					<p class="text-[0.72rem] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300">{highlight.label}</p>
+					<p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">{highlight.value}</p>
+				</div>
+			{/each}
 		</div>
 	</section>
 
@@ -658,94 +672,3 @@ let fullscreenMedia: FullscreenMedia = null;
 		</div>
 	</div>
 {/if}
-
-<style>
-	:global(.journal-body .media-block video) {
-		display: block;
-	}
-
-	:global(.journal-entry .vertical-media img),
-	:global(.journal-entry .vertical-media video) {
-		max-height: 520px;
-		object-fit: cover;
-	}
-
-	:global(.journal-entry p) {
-		line-height: 1.75;
-	}
-
-	:global(.journal-entry h2),
-	:global(.journal-entry h3),
-	:global(.journal-entry h4) {
-		margin-top: 2rem;
-	}
-
-	:global(.journal-entry ul),
-	:global(.journal-entry ol) {
-		padding-left: 1.15rem;
-	}
-
-	:global(.journal-entry blockquote) {
-		margin: 1.25rem 0;
-		padding-left: 1rem;
-		border-left: 3px solid rgba(15, 23, 42, 0.15);
-	}
-
-	:global(.journal-entry--focus) {
-		border-color: #10b981;
-		box-shadow: 0 25px 55px rgba(15, 23, 42, 0.18), 0 0 0 3px rgba(16, 185, 129, 0.35);
-		transition: box-shadow 0.3s ease, border-color 0.3s ease;
-	}
-
-	.jump-panel::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.jump-panel::-webkit-scrollbar-thumb {
-		background: rgba(0, 0, 0, 0.25);
-		border-radius: 999px;
-	}
-
-	.mobile-jump-scroll {
-		scrollbar-width: none;
-	}
-
-	.mobile-jump-scroll::-webkit-scrollbar {
-		display: none;
-	}
-
-	.jump-timeline {
-		position: relative;
-		padding-left: 0.5rem;
-	}
-
-	.jump-timeline::before {
-		content: '';
-		position: absolute;
-		left: 4px;
-		top: 0.5rem;
-		bottom: 0.5rem;
-		width: 2px;
-		background: rgba(15, 23, 42, 0.1);
-	}
-
-	:global(.dark .jump-timeline::before) {
-		background: rgba(255, 255, 255, 0.15);
-	}
-
-	.jump-card {
-		position: relative;
-	}
-
-	.jump-card::before {
-		content: '';
-		position: absolute;
-		left: -0.95rem;
-		top: 1.4rem;
-		width: 9px;
-		height: 9px;
-		border-radius: 999px;
-		background: #10b981;
-		box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-	}
-</style>

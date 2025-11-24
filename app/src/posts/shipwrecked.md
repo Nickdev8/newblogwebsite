@@ -6,6 +6,8 @@ warning: "Shipwrecked was amazing! tysm!"
 warning_type: success
 warning_dismissible: false
 sort_order: 'asc'
+timezone: America/New_York
+timezone_label: Boston
 ---
 ---
 title: "Day 0: The Journey Begins"
