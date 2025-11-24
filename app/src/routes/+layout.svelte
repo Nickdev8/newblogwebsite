@@ -5,8 +5,8 @@
 
 <div class="page-shell min-h-screen">
 	<Header />
-	<main class="px-4 pb-16 pt-8 sm:px-8 lg:px-10">
-		<div class="mx-auto w-full max-w-7xl space-y-16">
+	<main class="px-0 pb-16 pt-8 sm:px-8 lg:px-10">
+		<div class="w-full max-w-none space-y-0 sm:space-y-16 sm:mx-auto sm:max-w-7xl">
 			<slot />
 		</div>
 	</main>

@@ -114,10 +114,10 @@
 	];
 
 	const bannerTypeClasses: Record<string, string> = {
-		warning: 'bg-yellow-100 text-yellow-900 border-yellow-300',
-		danger: 'bg-red-100 text-red-900 border-red-300',
-		info: 'bg-blue-100 text-blue-900 border-blue-300',
-		success: 'bg-green-100 text-green-900 border-green-300'
+		warning: 'border-yellow-200/80 bg-yellow-50 text-yellow-900 dark:border-yellow-300/50 dark:bg-yellow-900/20 dark:text-yellow-100',
+		danger: 'border-red-200/80 bg-red-50 text-red-900 dark:border-red-400/50 dark:bg-red-900/25 dark:text-red-100',
+		info: 'border-blue-200/80 bg-blue-50 text-blue-900 dark:border-blue-300/60 dark:bg-blue-900/30 dark:text-blue-50',
+		success: 'border-green-200/80 bg-green-50 text-green-900 dark:border-green-300/60 dark:bg-green-900/25 dark:text-green-50'
 	};
 
 type FullscreenMedia = { src: string; alt: string; isVideo: boolean } | null;
@@ -305,14 +305,14 @@ let fullscreenMedia: FullscreenMedia = null;
 
 {#if showBanner && banner}
 	<div
-		class={`flex w-full items-start gap-2 border-b px-3 py-2 text-sm sm:items-center sm:px-4 sm:py-2.5 ${bannerTypeClasses[banner.type || 'warning']}`}
+		class={`flex w-full flex-col items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 ${bannerTypeClasses[banner.type || 'warning']}`}
 		role="alert"
 	>
 		<span class="flex-1">{@html banner.message}</span>
 		{#if banner.dismissible !== false}
 			<button
 				type="button"
-				class="rounded-full border border-current px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em]"
+				class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/40 hover:text-current dark:hover:bg-white/10"
 				on:click={() => (bannerDismissed = true)}
 			>
 				Close
@@ -321,7 +321,7 @@ let fullscreenMedia: FullscreenMedia = null;
 	</div>
 {/if}
 
-<article class="journal-shell mx-auto w-full max-w-[1600px] px-4 pt-1 pb-6 sm:px-6 lg:px-10">
+<article class="journal-shell mx-auto w-full max-w-[1600px] px-3 pt-0 pb-6 sm:mt-0 sm:px-6 lg:px-10">
 	<section class="journal-hero grid gap-6 rounded-[36px] border border-black/5 bg-white/95 p-4 shadow-[0_28px_55px_rgba(15,23,42,0.14)] dark:border-white/10 dark:bg-white/5 lg:grid-cols-[minmax(0,3fr)_2fr]">
 		<div class="relative overflow-hidden rounded-[28px] bg-slate-900 text-white">
 			{#if data.coverImage}
@@ -350,7 +350,7 @@ let fullscreenMedia: FullscreenMedia = null;
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-col justify-between rounded-[28px] border border-black/5 bg-gradient-to-b from-white to-slate-50 p-6 text-gray-900 dark:border-white/10 dark:from-white/5 dark:to-white/10 dark:text-white">
+		<div class="hidden flex-col justify-between rounded-[28px] border border-black/5 bg-gradient-to-b from-white to-slate-50 p-6 text-gray-900 dark:border-white/10 dark:from-white/5 dark:to-white/10 dark:text-white lg:flex">
 			<div>
 				<p class="text-xs uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Mission dossier</p>
 				<h2 class="mt-2 text-2xl font-semibold">Trip overview</h2>
@@ -474,36 +474,6 @@ let fullscreenMedia: FullscreenMedia = null;
 	{/if}
 
 	<section class="mt-10 space-y-5 lg:space-y-0 lg:grid lg:gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
-		<div class="lg:hidden">
-			{#if journalEntries.length === 0}
-				<div class="rounded-[24px] border border-dashed border-black/10 bg-white/85 p-5 text-center text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
-					Entries will appear here once the trip is written up.
-				</div>
-			{:else}
-				<div class="mobile-jump-panel rounded-[26px] border border-black/5 bg-white/90 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-white/5">
-					<div class="flex items-center justify-between gap-3">
-						<div>
-							<p class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Navigator</p>
-							<p class="text-base font-semibold text-gray-900 dark:text-white">{journalEntries.length} day recap</p>
-						</div>
-						<span class="text-xs text-gray-500 dark:text-gray-400">Swipe to jump</span>
-					</div>
-					<div class="-mx-1 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 mobile-jump-scroll">
-						{#each journalEntries as entry}
-							<button
-								type="button"
-								class="jump-chip snap-start shrink-0 rounded-2xl border border-black/10 px-4 py-3 text-left text-sm font-semibold text-gray-800 transition hover:-translate-y-0.5 hover:border-black/30 hover:bg-black/5 dark:border-white/15 dark:text-white dark:hover:border-white/40 dark:hover:bg-white/10"
-								on:click={() => jumpToEntry(entry.id)}
-							>
-								<span class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Day {entry.order}</span>
-								<p class="mt-1 text-base">{entry.title}</p>
-							</button>
-						{/each}
-					</div>
-				</div>
-			{/if}
-		</div>
-
 		<nav class="jump-panel sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-y-auto self-start rounded-[28px] border border-black/5 bg-white/90 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-white/5 lg:block">
 			<div class="flex items-center justify-between gap-3">
 				<div>
@@ -545,7 +515,7 @@ let fullscreenMedia: FullscreenMedia = null;
 				</div>
 			{:else}
 				{#each journalEntries as entry}
-					<article id={entry.id} class="journal-entry scroll-mt-20 rounded-[32px] border border-black/5 bg-white/95 p-6 shadow-[0_28px_55px_rgba(15,23,42,0.12)] transition dark:border-white/10 dark:bg-white/5 sm:p-8">
+					<article id={entry.id} class="journal-entry scroll-mt-20 rounded-[32px] border border-black/5 bg-white/95 p-5 shadow-[0_28px_55px_rgba(15,23,42,0.12)] transition dark:border-white/10 dark:bg-white/5 sm:p-8">
 						<header class="flex flex-col gap-4 border-b border-black/5 pb-4 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p class="text-[0.65rem] uppercase tracking-[0.4em] text-gray-500 dark:text-gray-400">Day {entry.order}</p>
