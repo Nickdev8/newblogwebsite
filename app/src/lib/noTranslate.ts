@@ -1,4 +1,4 @@
-import { PUBLIC_NO_TRANSLATE_WORDS } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 const fallbackWords = ['Neighborhood', 'Shipwrecked', 'Undercity', 'Hack Club'];
 
@@ -8,7 +8,7 @@ const parseWords = (raw?: string) =>
 		.map((word) => word.trim())
 		.filter(Boolean);
 
-const resolvedWords = parseWords(PUBLIC_NO_TRANSLATE_WORDS) ?? [];
+const resolvedWords = parseWords(env.PUBLIC_NO_TRANSLATE_WORDS) ?? [];
 
 export const noTranslateWords = resolvedWords.length > 0 ? resolvedWords : fallbackWords;
 
