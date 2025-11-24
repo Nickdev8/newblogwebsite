@@ -7,6 +7,8 @@ warning_type: info
 warning_dismissible: true
 sort_order: 'asc'
 live: true
+timezone: America/New_York
+timezone_label: Florida
 ---
 ---
 title: "Day 0: The Start"
@@ -27,3 +29,6 @@ On the 27th and 28th they're hosting the world's biggest teenager-organized game
 ## We got what we need!
 For moonshot Me and my best friend Nazli made a project for school. A Disco Prullenbak (trashbin). 
 Its a big blue bin, where as soon as you throw something in -> Music start playing, Led start dancing, Smoke mashine goes off and a disco ball spins!
+
+## Whats next
+I've got the tickets, post event accomodation, hotels in Orlando and Miami and a nice layover in New York during Christmas! This is going to be amazing!! Me and nasi are so so exited!

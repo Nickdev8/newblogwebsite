@@ -7,6 +7,8 @@ warning_type: success
 warning_dismissible: false
 sort_order: 'asc'
 show_contributions: true
+timezone: America/Los_Angeles
+timezone_label: San Francisco
 ---
 title: "The Days Leading Up to SF"
 date: "2025-05-01"

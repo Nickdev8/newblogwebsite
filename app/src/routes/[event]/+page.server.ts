@@ -142,7 +142,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		showCommitFeed,
 		tripDateRange: { start: startDate, end: endDate },
 		showContributions,
-		immichAlbum
+		immichAlbum,
+		timezone: mainData.timezone || '',
+		timezoneLabel: mainData.timezone_label || ''
 	};
 };
 const renderMarkdown = (input: string) => {
