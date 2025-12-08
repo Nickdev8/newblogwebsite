@@ -22,4 +22,4 @@ services:
     working_dir: /app
     volumes:
       - ./app/src/posts:/app/src/posts
-      - ./app/static/blogimages:/app/static/blogimages
+      - ./app/static:/app/static
