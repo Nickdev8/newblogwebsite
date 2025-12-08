@@ -15,6 +15,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /work/build ./build
 COPY app/src/posts ./src/posts
 COPY app/static ./static
+RUN rm -rf /app/build/client/blogimages && ln -s /app/static/blogimages /app/build/client/blogimages
 RUN chown -R nodeuser:nodeuser /app
 USER nodeuser
 ENV HOST=0.0.0.0
