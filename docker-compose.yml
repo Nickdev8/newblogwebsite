@@ -23,3 +23,4 @@ services:
     volumes:
       - ./app/src/posts:/app/src/posts
       - ./app/static:/app/static
+      - ./app/static/blogimages:/app/build/client/blogimages
