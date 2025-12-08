@@ -120,8 +120,64 @@ export const actions: Actions = {
 			return fail(404, { saveError: 'Post not found.' });
 		}
 
-		fs.writeFileSync(filePath, content.replace(/\r\n/g, '\n'), 'utf-8');
+		const cleaned = await normalizeImages(content);
+
+		fs.writeFileSync(filePath, cleaned.replace(/\r\n/g, '\n'), 'utf-8');
 
 		throw redirect(303, `/admin?post=${encodeURIComponent(slug)}&saved=1`);
+	}
+};
+
+const normalizeImages = async (input: string) => {
+	// Strip layout tokens like {hole}, {vertical}, etc.
+	let output = input.replace(/!\[([^\]]*)\]\(([^)]+)\)\{[^}]*\}/g, '![$1]($2)');
+
+	// Resolve Immich share links to direct asset URLs when possible
+	const shareRegex = /https?:\/\/photos\.nickesselman\.nl\/share\/([A-Za-z0-9_-]+)/gi;
+	const shares = new Set<string>();
+	for (const match of output.matchAll(shareRegex)) {
+		if (match[0]) shares.add(match[0]);
+	}
+
+	for (const shareLink of shares) {
+		const direct = await resolveImmichShare(shareLink);
+		if (direct) {
+			output = output.split(shareLink).join(direct);
+		}
+	}
+
+	// Convert bare Immich links on their own line into markdown images
+	output = output.replace(/^\s*(https?:\/\/photos\.nickesselman\.nl[^\s]+)\s*$/gim, (match, url) => {
+		const trimmed = match.trim();
+		if (trimmed.startsWith('![') || trimmed.startsWith('[')) return match;
+		return `![Immich photo](${url})`;
+	});
+
+	return output;
+};
+
+const resolveImmichShare = async (shareLink: string): Promise<string | null> => {
+	try {
+		const url = new URL(shareLink);
+		const key = url.pathname.split('/').filter(Boolean).pop();
+		if (!key) return null;
+
+		// Attempt API to get asset id
+		const apiRes = await fetch(`${url.origin}/api/shared-link/${key}`, {
+			headers: { accept: 'application/json' }
+		});
+		if (!apiRes.ok) return null;
+
+		const data = await apiRes.json();
+		const asset = data?.assets?.[0];
+		const assetId = asset?.id || asset?.assetId;
+		if (!assetId) return null;
+
+		// Direct asset (download) route works for shared links
+		const candidate = `${url.origin}/api/assets/${assetId}?key=${key}`;
+		return candidate;
+	} catch (err) {
+		console.error('Failed to resolve Immich share', err);
+		return null;
 	}
 };

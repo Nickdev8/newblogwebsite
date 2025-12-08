@@ -56,7 +56,8 @@ export const load: PageServerLoad = async ({ params }) => {
 	// Start from the second frontmatter section, skipping the main one
 	for (let i = 1; i < sections.length; i += 2) {
 		const frontmatter = sections[i];
-		const content = sections[i + 1] || '';
+		let content = sections[i + 1] || '';
+		content = await replaceImmichShareLinks(content);
 		const fullPostString = `---\n${frontmatter}\n---\n${content}`;
 		const { data, content: parsedContent } = matter(fullPostString);
 
@@ -153,4 +154,32 @@ const renderMarkdown = (input: string) => {
 		return parsed;
 	}
 	throw new Error('Async markdown rendering is not supported for trip posts.');
+};
+
+const replaceImmichShareLinks = async (input: string): Promise<string> => {
+	const regex = /https?:\/\/photos\.nickesselman\.nl\/share\/([A-Za-z0-9_-]+)/gi;
+	const unique = Array.from(new Set(input.match(regex) || []));
+
+	let output = input;
+	for (const share of unique) {
+		const direct = await resolveImmichShare(share);
+		if (direct) {
+			output = output.split(share).join(`![Immich photo](${direct})`);
+		}
+	}
+
+	return output;
+};
+
+const resolveImmichShare = async (shareLink: string): Promise<string | null> => {
+	try {
+		const url = new URL(shareLink);
+		const key = url.pathname.split('/').filter(Boolean).pop();
+		if (!key) return null;
+
+		return `/api/immich/share/${key}`;
+	} catch (err) {
+		console.error('Failed to resolve Immich share link', err);
+		return null;
+	}
 };
