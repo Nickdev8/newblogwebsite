@@ -2,10 +2,10 @@
 title: "Moonshot"
 description: "Template journal for the Florida launch sprint. Swap the copy and images with the real story."
 coverImage: /blogimages/moonshot/nasaaiteenkoe.webp
-warning: "Draft template — replace text + media when you get back from the Cape."
-warning_type: info
+warning: "This is happening right now! How exciting!"
+warning_type: live
 warning_dismissible: true
-sort_order: 'asc'
+sort_order: 'desc'
 live: true
 timezone: America/New_York
 timezone_label: Florida
@@ -15,7 +15,7 @@ title: "The Start"
 date: "2025-12-10"
 ---
 
-![DiscoPrullenbak](/blogimages/moonshot/nasaaiteenkoe.webp){hole}
+![DiscoPrullenbak](/blogimages/moonshot/nasaaiteenkoe.webp)
 
 ## **What is Moonshot**
 Moonshot is another HackClub event, where is you make a project with 75+ Hours, 
@@ -35,7 +35,7 @@ I've got the tickets, post event accomodation, hotels in Orlando and Miami and a
 
 ---
 title: "where exactly"
-date: "2025-12-11"
+date: "2025-12-10"
 ---
 ## **First Orlando**
 12 Dec. First will arrive in Orlando and meet 100 other HackClubers. In Orlando will go to Universal Studios Park and Kennedy Space Center. And if were lucky we'll witness a rocket launch! 
@@ -51,3 +51,24 @@ After will go to the Titanic museum and just experience Orlando
 *12-16 dec,* **Orlando**
 *16-24 dec,* **Miami**
 *24-25 dec,* **New York**
+
+
+
+---
+title: "Day -2: It Is Getting Real"
+date: "2025-12-10"
+---
+
+## **Almost There**
+
+Today really felt like the beginning of everything. The bags are packed, chargers checked, documents triple-checked. School tomorrow feels almost unreal knowing that right after, **we leave.**
+
+## **Me and Nazli**
+
+Me and Nazli can almost taste it. Just pure excitement. Talking about *Florida, NASA, Miami beaches, and New York lights.* It still does not fully *feel* real that this is actually happening.
+
+## **That Restless Feeling**
+
+It is that mix of excitement and nervous energy. Hard to focus on anything. Hard to sit still. Everything feels like it is on pause until the moment we step on that plane.
+
+*Two more days.*
