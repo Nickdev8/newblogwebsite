@@ -66,7 +66,15 @@
 		return Date.UTC(year, (month || 1) - 1, day || 1);
 	};
 
-	const tripStart = toUTCDate(data.posts[0]?.date);
+	const postsWithDate = data.posts
+		.map((post) => ({ date: post.date, dateValue: toUTCDate(post.date) }))
+		.filter((post) => post.dateValue !== null)
+		.sort((a, b) => (a.dateValue ?? 0) - (b.dateValue ?? 0));
+
+	const tripStart = postsWithDate[0]?.dateValue ?? null;
+	const earliestDate = postsWithDate[0]?.date ?? data.posts[0]?.date;
+	const latestDate =
+		postsWithDate[postsWithDate.length - 1]?.date ?? data.posts[data.posts.length - 1]?.date;
 
 	const getDayNumber = (value?: string, fallback?: number) => {
 		if (!tripStart) return fallback;
@@ -114,8 +122,8 @@
 
 	const heroHighlights = [
 		{ label: 'Entries logged', value: data.posts.length || '—' },
-		{ label: 'First day', value: formatDate(data.posts[0]?.date) },
-		{ label: 'Latest update', value: formatDate(data.posts[data.posts.length - 1]?.date) }
+		{ label: 'First day', value: formatDate(earliestDate) },
+		{ label: 'Latest update', value: formatDate(latestDate) }
 	];
 	let heroHighlightsWithTime = heroHighlights;
 	let localTime = timezone ? '--:--' : '';

@@ -121,8 +121,12 @@ export const load: PageServerLoad = async ({ params }) => {
 		  }))
 		: [];
 
-	const startDate = posts[0]?.date;
-	const endDate = posts[posts.length - 1]?.date;
+	const chronologicalPosts = [...posts].sort(
+		(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+	);
+
+	const startDate = chronologicalPosts[0]?.date;
+	const endDate = chronologicalPosts[chronologicalPosts.length - 1]?.date;
 	const showContributions = Boolean(mainData.show_contributions);
 
 	const envKeyBase = eventName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
