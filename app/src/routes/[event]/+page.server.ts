@@ -6,6 +6,14 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad, EntryGenerator } from './$types';
 import { env } from '$env/dynamic/private';
 
+const CDN_BASE = 'https://cdn.nickesselman.nl';
+const toCdnPath = (src?: string) => {
+	if (!src) return src;
+	if (/^https?:\/\//i.test(src)) return src;
+	if (src.startsWith('/blogimages/')) return `${CDN_BASE}${src}`;
+	return src;
+};
+
 export const entries: EntryGenerator = () => {
 	const postsDir = 'src/posts';
 	const files = fs.readdirSync(postsDir).filter((file) => file.endsWith('.md'));
@@ -77,7 +85,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			blocks.push({
 				type: 'media',
 				media: {
-					src: src.trim(),
+					src: toCdnPath(src.trim()) || '',
 					alt: altRaw.trim(),
 					layout: layoutArr
 				}
@@ -116,7 +124,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const extraImagesDir = path.join('static', 'blogimages', eventName, 'extra');
 	const leftoverImages = fs.existsSync(extraImagesDir)
 		? fs.readdirSync(extraImagesDir).map((file) => ({
-						src: `/blogimages/${eventName}/extra/${file}`,
+						src: toCdnPath(`/blogimages/${eventName}/extra/${file}`) || '',
 						alt: 'Extra image'
 		  }))
 		: [];
@@ -141,13 +149,14 @@ export const load: PageServerLoad = async ({ params }) => {
 		banner,
 		title: mainData.title || '',
 		description: mainData.description || '',
-		coverImage: mainData.coverImage || '',
+		coverImage: toCdnPath(mainData.coverImage) || '',
 		content: '', // or mainData.content if you want
 		images: [], // or mainData.images || []
 		showCommitFeed,
 		tripDateRange: { start: startDate, end: endDate },
 		showContributions,
 		immichAlbum,
+		sortOrder,
 		timezone: mainData.timezone || '',
 		timezoneLabel: mainData.timezone_label || ''
 	};
