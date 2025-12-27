@@ -36,6 +36,7 @@
 		immichAlbum?: string;
 		timezone?: string;
 		timezoneLabel?: string;
+		sortOrder?: 'asc' | 'desc';
 	};
 
 	const readableTitle = data.title || data.event;
@@ -50,6 +51,14 @@
 		day: 'numeric',
 		year: 'numeric'
 	});
+
+	const CDN_BASE = 'https://cdn.nickesselman.nl';
+	const toCdn = (src?: string) => {
+		if (!src) return src;
+		if (/^https?:\/\//i.test(src)) return src;
+		if (src.startsWith('/blogimages/')) return `${CDN_BASE}${src}`;
+		return src;
+	};
 
 	const formatDate = (value?: string) => (value ? dateFormatter.format(new Date(value)) : '—');
 
@@ -84,7 +93,7 @@
 		return Math.max(1, diff + 1);
 	};
 
-	const journalEntries = data.posts.map((post, index) => {
+	const baseEntries = data.posts.map((post, index) => {
 		const dayNumber = getDayNumber(post.date, index + 1) ?? index + 1;
 		return {
 			...post,
@@ -95,8 +104,15 @@
 		};
 	});
 
+	let sortOrder: 'asc' | 'desc' = (data.sortOrder as 'asc' | 'desc') || 'asc';
+
+	$: journalEntries =
+		sortOrder === 'desc'
+			? [...baseEntries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+			: [...baseEntries].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
 	const totalEntriesLabel = data.posts.length === 1 ? 'entry' : 'entries';
-	const firstEntryId = journalEntries[0]?.id;
+	$: firstEntryId = journalEntries[0]?.id;
 	const showCommitFeed = data.showCommitFeed ?? false;
 	const showContributions = data.showContributions ?? false;
 	const tripDateRange = data.tripDateRange ?? {};
@@ -127,6 +143,7 @@
 	];
 	let heroHighlightsWithTime = heroHighlights;
 	let localTime = timezone ? '--:--' : '';
+	let coverImageSrc = toCdn(data.coverImage) || '';
 
 	const timeFormatter: Intl.DateTimeFormat | null = timezone
 		? new Intl.DateTimeFormat('en-US', {
@@ -198,6 +215,7 @@ let fullscreenMedia: FullscreenMedia = null;
 	$: heroHighlightsWithTime = timezoneLabel
 		? [...heroHighlights, { label: `${timezoneLabel} time`, value: localTime || '—' }]
 		: heroHighlights;
+	$: coverImageSrc = toCdn(data.coverImage) || '';
 
 	$: if (browser && typeof document !== 'undefined') {
 		document.body.style.overflow = fullscreenMedia ? 'hidden' : '';
@@ -327,16 +345,16 @@ let fullscreenMedia: FullscreenMedia = null;
 />
 
 {#if showBanner && banner}
-	<div class="mx-auto w-full max-w-[1600px] px-3 sm:px-6 lg:px-10">
+	<div class="mx-auto mt-2 mb-3 w-full max-w-[1600px] px-3 sm:mt-3 sm:mb-4 sm:px-6 lg:px-10">
 		<div
-			class={`flex w-full flex-col items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 ${bannerTypeClasses[banner.type || 'warning']}`}
+			class={`flex w-full flex-col items-start gap-3 rounded-2xl border border-black/5 px-5 py-4 text-sm shadow-[0_16px_30px_rgba(15,23,42,0.08)] ring-1 ring-white/60 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${bannerTypeClasses[banner.type || 'warning']}`}
 			role="alert"
 		>
-			<span class="flex-1">{@html banner.message}</span>
+			<span class="flex-1 font-medium">{@html banner.message}</span>
 			{#if banner.dismissible !== false}
 				<button
 					type="button"
-					class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/40 hover:text-current dark:hover:bg-white/10"
+					class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/50 hover:text-current dark:hover:bg-white/10"
 					on:click={() => (bannerDismissed = true)}
 				>
 					Close
@@ -346,8 +364,8 @@ let fullscreenMedia: FullscreenMedia = null;
 	</div>
 {/if}
 
-<article class="journal-shell mx-auto w-full max-w-[1600px] px-3 pt-0 pb-6 sm:mt-0 sm:px-6 lg:px-10">
-	<section class="mt-2 grid items-center gap-6 rounded-[28px] border border-black/10 bg-gradient-to-br from-white/95 via-slate-50/95 to-white/95 p-6 shadow-[0_22px_40px_rgba(15,23,42,0.12)] dark:border-white/15 dark:from-slate-900/75 dark:via-slate-800/80 dark:to-slate-900/75 dark:shadow-[0_22px_40px_rgba(0,0,0,0.3)] lg:grid-cols-[1.1fr_0.9fr] lg:p-7">
+<article class="journal-shell mx-auto w-full max-w-[1600px] px-3 pt-0 pb-6 -mt-1 sm:mt-0 sm:px-6 lg:-mt-2 lg:px-10">
+	<section class="mt-0 grid items-center gap-6 rounded-[28px] border border-black/10 bg-gradient-to-br from-white/95 via-slate-50/95 to-white/95 p-6 shadow-[0_22px_40px_rgba(15,23,42,0.12)] dark:border-white/15 dark:from-slate-900/75 dark:via-slate-800/80 dark:to-slate-900/75 dark:shadow-[0_22px_40px_rgba(0,0,0,0.3)] lg:grid-cols-[1.1fr_0.9fr] lg:p-7">
 		<div class="space-y-3">
 			<p class="text-xs uppercase tracking-[0.28em] text-slate-600 dark:text-slate-200">Field report · {data.event}</p>
 			<h1 translate="no" class="text-[clamp(2rem,2.6vw,2.75rem)] font-bold leading-tight tracking-[-0.01em]">{readableTitle}</h1>
@@ -378,12 +396,12 @@ let fullscreenMedia: FullscreenMedia = null;
 			{/if}
 		</div>
 
-		{#if data.coverImage}
+		{#if coverImageSrc}
 			<div class="relative ml-auto w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10 dark:border-white/10">
-				{#if isVideo(data.coverImage)}
-					<video src={data.coverImage} muted playsinline loop class="block h-full w-full object-cover" />
+				{#if isVideo(coverImageSrc)}
+					<video src={coverImageSrc} muted playsinline loop class="block h-full w-full object-cover" />
 				{:else}
-					<img src={data.coverImage} alt={readableTitle} class="block h-full w-full object-cover" loading="lazy" />
+					<img src={coverImageSrc} alt={readableTitle} class="block h-full w-full object-cover" loading="lazy" />
 				{/if}
 			</div>
 		{/if}
@@ -497,17 +515,41 @@ let fullscreenMedia: FullscreenMedia = null;
 
 	<section class="mt-10 space-y-5 lg:space-y-0 lg:grid lg:gap-8 lg:grid-cols-[minmax(0,360px)_1fr]">
 		<nav class="jump-panel sticky top-6 hidden max-h-[calc(100vh-3rem)] overflow-y-auto self-start rounded-[28px] border border-black/5 bg-white/90 p-5 shadow-[0_18px_38px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-white/5 lg:block">
-			<div class="flex items-center justify-between gap-3">
-				<div>
-					<p class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Navigator</p>
-					<p class="text-base font-semibold text-gray-900 dark:text-white">{journalEntries.length} day recap</p>
-				</div>
-				<span class="text-xs text-gray-500 dark:text-gray-400">Tap to jump</span>
+		<div class="flex items-center justify-between gap-3">
+			<div>
+				<p class="text-[0.6rem] uppercase tracking-[0.35em] text-gray-500 dark:text-gray-400">Navigator</p>
+				<p class="text-base font-semibold text-gray-900 dark:text-white">Entries</p>
 			</div>
-			{#if journalEntries.length === 0}
-				<p class="mt-6 text-sm text-gray-600 dark:text-gray-300">
-					Entries will appear here once the trip is written up.
-				</p>
+			<span class="text-xs text-gray-500 dark:text-gray-400">Tap to jump</span>
+		</div>
+		<div class="mt-4 flex items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-gray-600 dark:text-gray-300">
+			<button
+				type="button"
+				class={`rounded-full border px-3 py-1 transition ${
+					sortOrder === 'asc'
+						? 'border-gray-900 bg-gray-900 text-white shadow-sm dark:border-white/40 dark:bg-white/15'
+						: 'border-gray-200 text-gray-800 hover:border-gray-400 dark:border-white/15 dark:text-white dark:hover:border-white/40'
+				}`}
+				on:click={() => (sortOrder = 'asc')}
+			>
+				Earliest first
+			</button>
+			<button
+				type="button"
+				class={`rounded-full border px-3 py-1 transition ${
+					sortOrder === 'desc'
+						? 'border-gray-900 bg-gray-900 text-white shadow-sm dark:border-white/40 dark:bg-white/15'
+						: 'border-gray-200 text-gray-800 hover:border-gray-400 dark:border-white/15 dark:text-white dark:hover:border-white/40'
+				}`}
+				on:click={() => (sortOrder = 'desc')}
+			>
+				Latest first
+			</button>
+		</div>
+		{#if journalEntries.length === 0}
+			<p class="mt-6 text-sm text-gray-600 dark:text-gray-300">
+				Entries will appear here once the trip is written up.
+			</p>
 			{:else}
 				<div class="jump-timeline mt-5 space-y-3">
 					{#each journalEntries as entry}
@@ -516,10 +558,7 @@ let fullscreenMedia: FullscreenMedia = null;
 							class="jump-card group w-full rounded-2xl border border-black/5 px-3 py-3 text-left text-sm transition hover:border-black/20 hover:bg-black/5 dark:border-white/10 dark:hover:border-white/30 dark:hover:bg-white/10"
 							on:click={() => jumpToEntry(entry.id)}
 						>
-							<div class="flex items-center justify-between gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-								<span>Day {entry.order}</span>
-								<span>{entry.dateLabel}</span>
-							</div>
+							<p class="text-[0.65rem] uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">{entry.dateLabel}</p>
 							<p class="mt-1 text-base font-semibold text-gray-900 group-hover:text-gray-700 dark:text-white dark:group-hover:text-gray-200">
 								{entry.title}
 							</p>
@@ -556,16 +595,17 @@ let fullscreenMedia: FullscreenMedia = null;
 									</div>
 								{:else}
 									{#if block.media && block.media.src}
+										{@const mediaSrc = toCdn(block.media.src)}
 										<button
 											type="button"
 											class={getLayoutClasses(block.media.layout)}
-											on:click={() => openFullscreen(block.media.src, block.media.alt)}
+											on:click={() => openFullscreen(mediaSrc, block.media.alt)}
 											aria-label={block.media.alt || 'Open media fullscreen'}
 											style="padding:0;border:none;background:none;"
 										>
-											{#if isVideo(block.media.src)}
+											{#if isVideo(mediaSrc)}
 												<video
-													src={block.media.src}
+													src={mediaSrc}
 													autoplay={!hasLayout(block.media.layout, 'dontautostart')}
 													loop={!hasLayout(block.media.layout, 'dontautostart')}
 													muted={!hasLayout(block.media.layout, 'dontautostart')}
@@ -577,7 +617,7 @@ let fullscreenMedia: FullscreenMedia = null;
 													<track kind="captions" />
 												</video>
 											{:else}
-												<img src={block.media.src} alt={block.media.alt} tabindex="-1" class="block w-full rounded-xl object-cover" />
+												<img src={mediaSrc} alt={block.media.alt} tabindex="-1" class="block w-full rounded-xl object-cover" />
 											{/if}
 										</button>
 									{/if}
@@ -602,16 +642,17 @@ let fullscreenMedia: FullscreenMedia = null;
 			</div>
 			<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.leftoverImages as image}
+					{@const imageSrc = toCdn(image.src)}
 					<button
 						type="button"
 						class="group relative w-full overflow-hidden rounded-3xl border border-black/5 bg-white/80 shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-white/10 dark:bg-white/5"
-						on:click={() => openFullscreen(image.src, image.alt)}
+						on:click={() => openFullscreen(imageSrc, image.alt)}
 						aria-label={image.alt || 'Open media fullscreen'}
 						style="padding:0;border:none;background:none;"
 					>
-						{#if isVideo(image.src)}
+						{#if isVideo(imageSrc)}
 							<video
-								src={image.src}
+								src={imageSrc}
 								autoplay
 								muted
 								loop
@@ -626,7 +667,7 @@ let fullscreenMedia: FullscreenMedia = null;
 							</video>
 						{:else}
 							<img
-								src={image.src}
+								src={imageSrc}
 								alt={image.alt}
 								loading="lazy"
 								class="block h-full w-full object-cover"
