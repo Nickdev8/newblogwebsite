@@ -6,9 +6,9 @@ This repo contains Nick’s personal SvelteKit blog. Use it as a journal, not a 
 
 - Everything app-related lives under `app/`; all paths below assume that prefix unless stated otherwise.
 - Framework: SvelteKit (Node 20). Styling lives in `app/src/app.css` via Tailwind.
-- Posts are Markdown files inside `app/src/posts`. The home page pulls them through `app/src/routes/+page.server.ts`.
-- About/contact and other static pages sit under `app/src/routes/...`.
-- Reactions are stored in JSON via helpers in `app/src/lib/server/reactionStore.ts`; avoid breaking that API.
+- Posts are Markdown files inside `app/src/posts`. The home page pulls them through `app/src/routes/+page.server.ts` and sorts them newest-first by entry date.
+- About/contact and other static pages sit under `app/src/routes/...`. The About page carousel now pulls a randomized set of media from all posts (rewritten to the CDN) and the snapshot blocks were removed for a leaner layout.
+- Reactions are stored in JSON via helpers in `app/src/lib/server/reactionStore.ts`; avoid breaking that API. The `/admin` sidebar also sorts posts by most recent entry date.
 
 ## Local workflow
 
@@ -34,7 +34,7 @@ npm run check   # type + a11y lint (currently warns if there are legacy issues)
 
 - Short, human copy beats long explanations.
 - Link out to the main site (`https://nickesselman.nl`) for deep dives.
-- Respect existing Markdown frontmatter fields (`title`, `description`, `coverImage`, `live`, `lat/lng`), as they drive the landing page cards.
+- Respect existing Markdown frontmatter fields (`title`, `description`, `coverImage`, `live`, `lat/lng`, `sort_order`), as they drive the landing page cards. Relative `/blogimages/...` paths are rewritten to `https://cdn.nickesselman.nl/blogimages/...` automatically on post pages and the About carousel, so keep using the short paths in content.
 
 ## Deployment notes
 

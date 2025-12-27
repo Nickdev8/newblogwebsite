@@ -17,6 +17,20 @@ const resolveSlug = (slug: string) => {
 	return path.join(POSTS_DIR, `${slug}.md`);
 };
 
+const extractLatestDate = (fileContent: string) => {
+	const sections = fileContent.split('---').filter((s) => s.trim());
+	const dates: number[] = [];
+	for (let i = 1; i < sections.length; i += 2) {
+		const fm = sections[i];
+		const fmData = matter(`---\n${fm}\n---`).data || {};
+		const ts = fmData.date ? new Date(fmData.date).getTime() : NaN;
+		if (!Number.isNaN(ts)) {
+			dates.push(ts);
+		}
+	}
+	return dates.length ? Math.max(...dates) : 0;
+};
+
 export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.isAdmin) {
 		return {
@@ -34,17 +48,19 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const files = fs
 		.readdirSync(POSTS_DIR)
-		.filter((file) => file.endsWith('.md'))
-		.sort((a, b) => a.localeCompare(b));
+		.filter((file) => file.endsWith('.md'));
 
 	const posts = files.map((filename) => {
 		const filePath = path.join(POSTS_DIR, filename);
-		const { data } = matter.read(filePath);
+		const fileContent = fs.readFileSync(filePath, 'utf-8');
+		const { data } = matter(fileContent);
+		const latestDate = extractLatestDate(fileContent);
 		return {
 			slug: filename.replace(/\.md$/, ''),
-			title: data.title || filename
+			title: data.title || filename,
+			latestDate
 		};
-	});
+	}).sort((a, b) => (b.latestDate || 0) - (a.latestDate || 0));
 
 	const requestedSlug = url.searchParams.get('post');
 	const selectedSlug = requestedSlug && posts.some((post) => post.slug === requestedSlug)

@@ -11,10 +11,6 @@
 	};
 
 	const badges = ['Builder', 'Programmer', 'Nerd'];
-	const nowItems = [
-		{ label: 'Right now', value: 'Making new friends and having the time of my life' },
-		{ label: 'Next trip', value: 'Waiting for the next trip' }
-	];
 
 	const simpleNotes = [
 		'Code meets cameras is my favorite combo.',
@@ -45,16 +41,6 @@
 						<span class="badge-soft">{badge}</span>
 					{/each}
 				</div>
-				<div class="grid gap-4 sm:grid-cols-2">
-					{#each nowItems as item}
-						<div class="rounded-2xl border border-black/5 p-4 dark:border-white/10">
-							<p class="text-[0.6rem] uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">
-								{item.label}
-							</p>
-							<p class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{item.value}</p>
-						</div>
-					{/each}
-				</div>
 			</div>
 			<div class="relative">
 				<div class="absolute -inset-3 rounded-3xl bg-gradient-to-br from-blue-100 via-pink-100 to-yellow-100 blur-2xl opacity-60 dark:from-blue-900/40 dark:via-purple-900/30 dark:to-yellow-900/20"></div>
@@ -74,16 +60,6 @@
 			description="Past two years of GitHub pushes"
 		/>
 	{/if}
-
-	<section class="glass-panel space-y-4">
-		<p class="eyebrow">One-minute snapshot</p>
-		<h2 class="text-2xl font-semibold text-gray-900 dark:text-white">A few truths that keep me moving.</h2>
-		<ul class="space-y-3 text-sm text-gray-700 dark:text-gray-200">
-			{#each simpleNotes as note}
-				<li class="rounded-2xl border border-black/5 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">{note}</li>
-			{/each}
-		</ul>
-	</section>
 
 	{#if data.carouselImages.length > 0}
 		<section class="space-y-4">
