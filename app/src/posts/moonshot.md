@@ -1,12 +1,11 @@
 ---
 title: "Florida | Moonshot"
 description: "this is my trip to Florida with my best friend Nazli"
-coverImage: https://cdn.nickesselman.nl/blogimages/nickontargetsroof.JPG
-warning: "This is happening right now! How exciting!"
-warning_type: live
-warning_dismissible: true
+coverImage: /blogimages/moonshot/nickontargetsroof.JPG
+warning: "This post is Done"
+warning_type: success
+warning_dismissible: false
 sort_order: 'desc'
-live: true
 timezone: America/New_York
 timezone_label: Florida
 ---
@@ -226,7 +225,7 @@ Around 5am, we arrived back at the Cambria Hotel in Orlando.
 
 *Exhausted.* But **glad we went.**
 
-![](https://cdn.nickesselman.nl/blogimages/maga.jpg)
+![](/blogimages/moonshot/maga.jpg)
 
 ---
 title: "Orlando to Miami: Closing One Chapter"
@@ -264,7 +263,7 @@ Check-in took a while, but once we finally got into our room, I laid down and in
 Orlando was officially over.
 Next up: **Miami. Just Nasi and me.**
 
-![](https://cdn.nickesselman.nl/blogimages/lookingatrocketlaunche.jpg)
+![](/blogimages/moonshot/lookingatrocketlaunche.jpg)
 
 ---
 title: "Miami Day 1: The Start of Something Amazing"
@@ -299,7 +298,7 @@ They were driving around on the sidewalks like it was completely normal. Apparen
 
 Miami already feels unreal.
 
-![](https://cdn.nickesselman.nl/blogimages/deliverierobotsatnight.jpg)
+![](/blogimages/moonshot/deliverierobotsatnight.jpg)
 
 ---
 title: "Miami Day 2: Beach Day"
@@ -345,7 +344,7 @@ We ate some chips in bed and just laid there.
 After starting movies on other nights and never finishing them, we actually watched this one all the way through.
 
 A perfect end to a very Miami day.
-![](https://cdn.nickesselman.nl/blogimages/nasiwithmoneyy.jpg)
+![](/blogimages/moonshot/nasiwithmoneyy.jpg)
 
 
 
@@ -377,7 +376,7 @@ After a long day of walking and exploring, we headed back to the hotel and watch
 
 A calm ending to a full day.
 
-![](https://cdn.nickesselman.nl/blogimages/littlehavvana.jpg)
+![](/blogimages/moonshot/littlehavvana.jpg)
 
 ---
 title: "Miami Day 4: Beach, Food, and Music"
@@ -639,5 +638,4 @@ Thank you to everyone who followed along, supported us, and made this trip possi
 
 This was more than a vacation.  
 It was a memory we will carry with us forever.
-
 
