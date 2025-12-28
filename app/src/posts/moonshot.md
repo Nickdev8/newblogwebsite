@@ -94,7 +94,7 @@ Honestly, it went by faster than expected.
 After landing, we looked around for the adult picking us up. That was **Jared**. We talked for a bit until **Moukal** arrived, and then the four of us took an Uber to the hotel.
 ![](/blogimages/moonshot/13decjarred.JPG)
 
-## Food Before Anything Else
+## **Food Before Anything Else**
 First stop after arriving was the dining hall.
 We were not even hungry, but somehow ended up with way too much food anyway. At one point, Nasi had five full plates in front of her. Then someone showed up with cake.
 
@@ -109,9 +109,9 @@ One rule that will be important for tomorrow's blog. We are not allowed to leave
 That night, we each picked three notes. Each note had one word on it. Together, they formed the theme for our project.
 
 We got:
-* Cryptic message
-* Fail
-* Overheated laptop
+* *Cryptic message*
+* *Fail*
+* *Overheated laptop*
 
 ## The Idea
 We decided to make a word game. You unscramble words and sentences.
@@ -176,9 +176,9 @@ They added one more condition. If they did not hear from **Csaba** that we had b
 
 That sat *heavy.*
 
-## **Kennedy Space Center**
 ![](/blogimages/moonshot/14decinthesunprogramming.jpg)
 
+## **Kennedy Space Center**
 After that conversation, we got ready and took the bus to Kennedy Space Center.
 
 Once we arrived, everything shifted. 
@@ -223,13 +223,12 @@ Jetty Park was closed, so we stopped at Banana Creek instead.
 
 ## **Atlas V**
 From there, we had an amazing view of the Atlas V rocket. Seeing it lit up in the dark was surreal. Quiet, massive, and powerful.
-![](/blogimages/moonshot/15decforthespaceshuttle.jpg)
-
 
 Around 5am, we arrived back at the Cambria Hotel in Orlando.
 
 *Exhausted.* But **glad we went.**
 
+![](/blogimages/moonshot/15decforthespaceshuttle.jpg)
 ![](/blogimages/moonshot/maga.jpg)
 
 ---
@@ -394,7 +393,6 @@ The first thing we did was go straight to the beach.
 There is something about just laying there, listening to the waves, and feeling the warmth that never gets old.
 
 ## **Bayside Marketplace**
-![](/blogimages/moonshot/20decbayideshops.jpg)
 
 After the beach, we went to **Bayside Marketplace** in downtown Miami.  
 Lots of small gift shops, souvenirs, and pure tourist chaos.
@@ -402,14 +400,16 @@ Lots of small gift shops, souvenirs, and pure tourist chaos.
 Yes, we bought **MAGA hats**.  
 Purely as a joke. But honestly, I kind of love them.
 
+![](/blogimages/moonshot/20decbayideshops.jpg)
 ## **Chili’s Mission**
 There was a Chili’s nearby, and since a friend told us to go to one together, we did.
 
 We ordered what felt like the entire menu.  
 Chicken, mac and cheese, mozzarella sticks. Everything.
-![](/blogimages/moonshot/20deceatingathebayside.jpg)
 
 We did not finish it.
+
+![](/blogimages/moonshot/20deceatingathebayside.jpg)
 
 ## **Music and Chill**
 After eating, we found a spot with music playing.  
@@ -429,10 +429,9 @@ Today we tried to find a gun range that we could both go to.
 We found one, but once we saw the prices, that idea ended very quickly.
 
 The cheapest option was around **350 euros**.
-![](/blogimages/moonshot/21decthegunrange.JPG)
-
 Hard no.
 
+![](/blogimages/moonshot/21decthegunrange.JPG)
 ## **Walmart Adventure**
 Instead, we went to a nearby **Walmart**.  
 Those places are massive.
