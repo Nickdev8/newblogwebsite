@@ -20,11 +20,12 @@
 		distanceKm={data?.distanceKm ?? null}
 		activeMinutes={data?.activeMinutes ?? null}
 		caloriesOut={data?.caloriesOut ?? null}
-		restingHeartRate={data?.restingHeartRate ?? null}
-		sleepDurationMinutes={data?.sleepDurationMinutes ?? null}
-		sleepScore={data?.sleepScore ?? null}
-		heartRateBpm={data?.heartRateBpm ?? null}
-		stepsWeek={data?.stepsWeek ?? null}
-		floors={data?.floors ?? null}
+	restingHeartRate={data?.restingHeartRate ?? null}
+	sleepDurationMinutes={data?.sleepDurationMinutes ?? null}
+	sleepScore={data?.sleepScore ?? null}
+	heartRateBpm={data?.heartRateBpm ?? null}
+	stepsWeek={data?.stepsWeek ?? null}
+	floors={data?.floors ?? null}
+	errorMessage={data?.errorMessage ?? null}
 	/>
 </div>

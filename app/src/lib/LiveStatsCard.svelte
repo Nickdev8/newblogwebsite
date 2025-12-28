@@ -23,6 +23,7 @@
 	export let heartRateBpm: number | null | undefined;
 	export let stepsWeek: number | null | undefined;
 	export let floors: number | null | undefined;
+	export let errorMessage: string | null | undefined;
 	let expanded = false;
 
 	const numberFormatter = new Intl.NumberFormat('en-US');
@@ -92,6 +93,7 @@
 			? 'No data today'
 			: `${numberFormatter.format(floors)} floors`;
 	$: stepsValueLabel = distanceKm ? `${stepsTodayLabel} · ${distanceLabel}` : stepsTodayLabel;
+	$: authWarning = errorMessage || null;
 	let stats = [];
 	$: stats = [
 		{
@@ -146,6 +148,11 @@
 						<p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-gray-500 dark:text-gray-300">
 							Live stats (24h)
 						</p>
+						{#if authWarning}
+							<p class="text-[11px] font-semibold text-amber-700 dark:text-amber-200">
+								{authWarning}
+							</p>
+						{/if}
 					</div>
 				</div>
 				<button
@@ -181,19 +188,25 @@
 			</p>
 		{:else}
 				<button
-					type="button"
-					on:click={() => (expanded = true)}
-					aria-expanded={expanded}
-					aria-label="Expand live stats"
-					class="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left font-semibold text-gray-800 transition hover:bg-black/5 dark:text-gray-100 dark:hover:bg-white/5"
-				>
-					<span class="flex h-7 w-7 items-center justify-center rounded-md bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200">
-						<Footprints class="h-[15px] w-[15px]" />
-					</span>
-					<span class="truncate">{collapsedLabel}</span>
-					<span class="ml-auto text-[10px] font-semibold text-amber-700 dark:text-amber-200">Open</span>
-					<ChevronDown class="h-[16px] w-[16px]" />
-				</button>
-			{/if}
-		</div>
+			type="button"
+			on:click={() => (expanded = true)}
+			aria-expanded={expanded}
+			aria-label="Expand live stats"
+			class="flex w-full items-center gap-1.5 rounded-lg px-2 py-1 text-left font-semibold text-gray-800 transition hover:bg-black/5 dark:text-gray-100 dark:hover:bg-white/5"
+		>
+			<span class="flex h-7 w-7 items-center justify-center rounded-md bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200">
+				<Footprints class="h-[15px] w-[15px]" />
+			</span>
+			<span class="truncate">
+				{#if authWarning}
+					{authWarning}
+				{:else}
+					{collapsedLabel}
+				{/if}
+			</span>
+			<span class="ml-auto text-[10px] font-semibold text-amber-700 dark:text-amber-200">Open</span>
+			<ChevronDown class="h-[16px] w-[16px]" />
+		</button>
+	{/if}
+</div>
 </div>

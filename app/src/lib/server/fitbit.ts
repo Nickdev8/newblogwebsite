@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import { existsSync, readFileSync } from 'fs';
 import { mkdir, readFile, writeFile, rename } from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 type StatsCache = {
 	steps: number | null; // last 24h steps
@@ -14,6 +15,7 @@ type StatsCache = {
 	heartRateBpm: number | null;
 	stepsWeek: number | null;
 	floors: number | null;
+	errorMessage: string | null;
 	lastUpdated: number | null; // unix seconds
 	nextRefresh: number | null; // unix seconds
 };
@@ -58,12 +60,24 @@ const ensureEnvLoaded = () => {
 	if (envLoaded) return;
 	envLoaded = true;
 	const cwd = process.cwd();
-	const candidates = [path.resolve(cwd, '.env'), path.resolve(cwd, '../.env')];
-	candidates.forEach((file) => {
+
+	// Support running from repo root or /app by checking both locations explicitly
+	const currentFile = fileURLToPath(import.meta.url);
+	const appDir = path.resolve(currentFile, '../../..'); // /app
+	const repoRoot = path.resolve(appDir, '..');
+
+	const candidates = new Set([
+		path.resolve(cwd, '.env'),
+		path.resolve(cwd, '../.env'),
+		path.join(appDir, '.env'),
+		path.join(repoRoot, '.env')
+	]);
+
+	for (const file of candidates) {
 		if (existsSync(file)) {
 			loadEnvFile(file);
 		}
-	});
+	}
 };
 
 const readEnv = (key: string) => process.env[key] ?? env[key];
@@ -98,6 +112,7 @@ let cache: StatsCache = {
 	heartRateBpm: null,
 	stepsWeek: null,
 	floors: null,
+	errorMessage: null,
 	lastUpdated: null,
 	nextRefresh: null
 };
@@ -107,6 +122,7 @@ let tokenState: TokenState = {
 	refreshToken: null,
 	expiresAt: 0
 };
+let tokenInvalid = false;
 
 let inflight: Promise<StatsCache> | null = null;
 let tokenInitPromise: Promise<void> | null = null;
@@ -187,6 +203,20 @@ const initTokens = async () => {
 	return tokenInitPromise;
 };
 
+const applyEnvTokens = async (): Promise<boolean> => {
+	const envTokens = bootstrapTokensFromEnv();
+	if (!envTokens) return false;
+
+	tokenState = {
+		accessToken: envTokens.access_token,
+		refreshToken: envTokens.refresh_token,
+		expiresAt: envTokens.expires_at
+	};
+
+	await writeTokensToFile(envTokens);
+	return true;
+};
+
 const setTokens = (accessToken: string, refreshToken: string | null, expiresInSeconds: number) => {
 	const expiration = nowSeconds() + (Number(expiresInSeconds) || 0);
 	tokenState = {
@@ -206,7 +236,7 @@ const setTokens = (accessToken: string, refreshToken: string | null, expiresInSe
 	});
 };
 
-const refreshAccessToken = async () => {
+const refreshAccessToken = async (allowEnvReset = true): Promise<boolean> => {
 	await initTokens();
 
 	ensureEnvLoaded();
@@ -234,11 +264,33 @@ const refreshAccessToken = async () => {
 
 	if (!response.ok) {
 		const text = await response.text();
+		const isInvalidGrant = response.status === 400 && text.includes('invalid_grant');
+
+		if (isInvalidGrant && allowEnvReset) {
+			// Allow replacing stale tokens with fresh values provided via env vars
+			const reset = await applyEnvTokens();
+			if (reset) {
+				return refreshAccessToken(false);
+			}
+		}
+
+		if (isInvalidGrant) {
+			tokenInvalid = true;
+			tokenState = {
+				accessToken: null,
+				refreshToken: tokenState.refreshToken,
+				expiresAt: 0
+			};
+			return false;
+		}
+
 		throw new Error(`Failed to refresh Fitbit token: ${response.status} ${text}`);
 	}
 
 	const data = await response.json();
 	setTokens(data.access_token, data.refresh_token, data.expires_in);
+	tokenInvalid = false;
+	return true;
 };
 
 const ensureValidAccessToken = async () => {
@@ -247,14 +299,15 @@ const ensureValidAccessToken = async () => {
 	const now = nowSeconds();
 
 	if (!tokenState.accessToken) {
-		await refreshAccessToken();
-		return;
+		return refreshAccessToken();
 	}
 
 	// Refresh a little early to avoid edge expiry
 	if (now >= tokenState.expiresAt - 30) {
-		await refreshAccessToken();
+		return refreshAccessToken();
 	}
+	tokenInvalid = false;
+	return true;
 };
 
 const fetchActivity = async (): Promise<
@@ -263,9 +316,9 @@ const fetchActivity = async (): Promise<
 		'steps' | 'distanceKm' | 'activeMinutes' | 'caloriesOut' | 'restingHeartRate'
 	>
 > => {
-	await ensureValidAccessToken();
+	const ready = await ensureValidAccessToken();
 
-	if (!tokenState.accessToken) {
+	if (!ready || !tokenState.accessToken) {
 		return {
 			steps: null,
 			distanceKm: null,
@@ -324,9 +377,9 @@ const fetchActivity = async (): Promise<
 };
 
 const fetchSleep = async (): Promise<Pick<StatsCache, 'sleepDurationMinutes' | 'sleepScore'>> => {
-	await ensureValidAccessToken();
+	const ready = await ensureValidAccessToken();
 
-	if (!tokenState.accessToken) {
+	if (!ready || !tokenState.accessToken) {
 		return { sleepDurationMinutes: null, sleepScore: null };
 	}
 
@@ -362,9 +415,9 @@ const fetchSleep = async (): Promise<Pick<StatsCache, 'sleepDurationMinutes' | '
 };
 
 const fetchHeartRate = async (): Promise<number | null> => {
-	await ensureValidAccessToken();
+	const ready = await ensureValidAccessToken();
 
-	if (!tokenState.accessToken) return null;
+	if (!ready || !tokenState.accessToken) return null;
 
 	const today = new Date().toISOString().slice(0, 10);
 
@@ -416,8 +469,8 @@ const fetchHeartRate = async (): Promise<number | null> => {
 };
 
 const fetchStepsWeek = async (): Promise<number | null> => {
-	await ensureValidAccessToken();
-	if (!tokenState.accessToken) return null;
+	const ready = await ensureValidAccessToken();
+	if (!ready || !tokenState.accessToken) return null;
 
 	const response = await fetch(
 		`${FITBIT_API_BASE}/1/user/-/activities/steps/date/today/7d.json`,
@@ -443,8 +496,8 @@ const fetchStepsWeek = async (): Promise<number | null> => {
 };
 
 const fetchFloors = async (): Promise<number | null> => {
-	await ensureValidAccessToken();
-	if (!tokenState.accessToken) return null;
+	const ready = await ensureValidAccessToken();
+	if (!ready || !tokenState.accessToken) return null;
 
 	const today = new Date().toISOString().slice(0, 10);
 	const response = await fetch(
@@ -470,8 +523,8 @@ const fetchFloors = async (): Promise<number | null> => {
 };
 
 const fetchStepsLast24h = async (): Promise<number | null> => {
-	await ensureValidAccessToken();
-	if (!tokenState.accessToken) return null;
+	const ready = await ensureValidAccessToken();
+	if (!ready || !tokenState.accessToken) return null;
 
 	const now = new Date();
 	const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -568,52 +621,55 @@ export const getSteps = async (): Promise<StatsCache> => {
 		const previous = cache;
 		let activity: Awaited<ReturnType<typeof fetchActivity>> | null = null;
 		let sleep: Awaited<ReturnType<typeof fetchSleep>> | null = null;
-		let heartRate: number | null = null;
-		let stepsWeek: number | null = null;
-		let floors: number | null = null;
-		let steps24h: number | null = null;
+	let heartRate: number | null = null;
+	let stepsWeek: number | null = null;
+	let floors: number | null = null;
+	let steps24h: number | null = null;
+	let authError = false;
+
+	try {
+		try {
+			activity = await fetchActivity();
+		} catch (error) {
+			if (!tokenInvalid) console.error('Fitbit activity fetch error:', error);
+		}
 
 		try {
-			try {
-				activity = await fetchActivity();
-			} catch (error) {
-				console.error('Fitbit activity fetch error:', error);
-			}
+			sleep = await fetchSleep();
+		} catch (error) {
+			if (!tokenInvalid) console.error('Fitbit sleep fetch error:', error);
+		}
 
-			try {
-				sleep = await fetchSleep();
-			} catch (error) {
-				console.error('Fitbit sleep fetch error:', error);
-			}
+		try {
+			heartRate = await fetchHeartRate();
+		} catch (error) {
+			if (!tokenInvalid) console.error('Fitbit heart rate fetch error:', error);
+		}
 
-			try {
-				heartRate = await fetchHeartRate();
-			} catch (error) {
-				console.error('Fitbit heart rate fetch error:', error);
-			}
+		try {
+			stepsWeek = await fetchStepsWeek();
+		} catch (error) {
+			if (!tokenInvalid) console.error('Fitbit weekly steps fetch error:', error);
+		}
 
-			try {
-				stepsWeek = await fetchStepsWeek();
-			} catch (error) {
-				console.error('Fitbit weekly steps fetch error:', error);
-			}
+		try {
+			floors = await fetchFloors();
+		} catch (error) {
+			if (!tokenInvalid) console.error('Fitbit floors fetch error:', error);
+		}
 
-			try {
-				floors = await fetchFloors();
-			} catch (error) {
-				console.error('Fitbit floors fetch error:', error);
-			}
+		try {
+			steps24h = await fetchStepsLast24h();
+		} catch (error) {
+			if (!tokenInvalid) console.error('Fitbit steps 24h fetch error:', error);
+		}
 
-			try {
-				steps24h = await fetchStepsLast24h();
-			} catch (error) {
-				console.error('Fitbit steps 24h fetch error:', error);
-			}
+		authError = tokenInvalid;
 
-			const timestamp = nowSeconds();
-			const hasUpdate =
-				(activity &&
-					(Object.values(activity).some((v) => v !== null && v !== undefined))) ||
+		const timestamp = nowSeconds();
+		const hasUpdate =
+			(activity &&
+				(Object.values(activity).some((v) => v !== null && v !== undefined))) ||
 				heartRate !== null ||
 				stepsWeek !== null ||
 				floors !== null ||
@@ -633,6 +689,7 @@ export const getSteps = async (): Promise<StatsCache> => {
 				heartRateBpm: heartRate ?? previous.heartRateBpm,
 				stepsWeek: stepsWeek ?? previous.stepsWeek,
 				floors: floors ?? previous.floors,
+				errorMessage: authError ? 'Please refresh the Fitbit token on the site.' : null,
 				lastUpdated,
 				nextRefresh: timestamp + MIN_REFRESH_SECONDS
 			};
