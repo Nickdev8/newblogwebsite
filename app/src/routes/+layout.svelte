@@ -1,6 +1,9 @@
 <script>
 	import Header from '$lib/Header.svelte';
+	import LiveStatsCard from '$lib/LiveStatsCard.svelte';
 	import '../app.css';
+
+	export let data;
 </script>
 
 <div class="page-shell min-h-screen">
@@ -10,4 +13,18 @@
 			<slot />
 		</div>
 	</main>
+	<LiveStatsCard
+		steps={data?.steps ?? null}
+		lastUpdated={data?.lastUpdated ?? null}
+		nextRefresh={data?.nextRefresh ?? null}
+		distanceKm={data?.distanceKm ?? null}
+		activeMinutes={data?.activeMinutes ?? null}
+		caloriesOut={data?.caloriesOut ?? null}
+		restingHeartRate={data?.restingHeartRate ?? null}
+		sleepDurationMinutes={data?.sleepDurationMinutes ?? null}
+		sleepScore={data?.sleepScore ?? null}
+		heartRateBpm={data?.heartRateBpm ?? null}
+		stepsWeek={data?.stepsWeek ?? null}
+		floors={data?.floors ?? null}
+	/>
 </div>

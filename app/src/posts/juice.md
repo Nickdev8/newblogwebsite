@@ -1,5 +1,5 @@
 ---
-title: "China | Juice"
+title: "China"
 description: "Lightning recap of Hack Club’s Juice game jam finale in Shanghai."
 coverImage: /blogimages/juice/main.webp
 warning: "Ultra-short recap—just the highlights."

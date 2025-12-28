@@ -26,6 +26,7 @@ app/static/blogimages/*/extra/*.*
 app/temp.txt
 app/buildcommandlist.txt
 app/+page.js
+app/data/fitbit/tokens.json
 
 app/*/*.webp
 app/*/*.png
