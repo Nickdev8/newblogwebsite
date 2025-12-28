@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+      - ./.env.prod
     environment:
       NODE_ENV: production
       PORT: "3000"
@@ -23,3 +24,4 @@ services:
     volumes:
       - ./app/src/posts:/app/src/posts
       - ./app/static/blogimages:/app/static/blogimages
+      - /srv/webapps/blog.nickesselman.nl/app/data/fitbit:/app/data/fitbit
