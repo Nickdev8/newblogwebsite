@@ -53,8 +53,8 @@
 	});
 
 	const CDN_BASE = 'https://cdn.nickesselman.nl';
-	const toCdn = (src?: string) => {
-		if (!src) return src;
+	const toCdn = (src?: string): string => {
+		if (!src) return '';
 		if (/^https?:\/\//i.test(src)) return src;
 		if (src.startsWith('/blogimages/')) return `${CDN_BASE}${src}`;
 		return src;
