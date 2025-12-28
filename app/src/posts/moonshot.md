@@ -1,5 +1,5 @@
 ---
-title: "Florida | Moonshot"
+title: "Florida"
 description: "this is my trip to Florida with my best friend Nazli"
 coverImage: /blogimages/moonshot/nickontargetsroof.JPG
 warning: "This post is Done"
