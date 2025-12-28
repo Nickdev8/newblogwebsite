@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile, rename } from 'fs/promises';
 import path from 'path';
 
 type StatsCache = {
-	steps: number | null;
+	steps: number | null; // last 24h steps
 	distanceKm: number | null;
 	activeMinutes: number | null;
 	caloriesOut: number | null;
@@ -469,6 +469,90 @@ const fetchFloors = async (): Promise<number | null> => {
 	return Number.isFinite(val) ? val : null;
 };
 
+const fetchStepsLast24h = async (): Promise<number | null> => {
+	await ensureValidAccessToken();
+	if (!tokenState.accessToken) return null;
+
+	const now = new Date();
+	const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+	const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+
+	const fetchDay = async (dateStr: string) => {
+		const res = await fetch(
+			`${FITBIT_API_BASE}/1/user/-/activities/steps/date/${dateStr}/1d/1min.json`,
+			{
+				headers: { Authorization: `Bearer ${tokenState.accessToken}` }
+			}
+		);
+		if (!res.ok) {
+			const text = await res.text();
+			throw new Error(`Failed to fetch intraday steps (${dateStr}): ${res.status} ${text}`);
+		}
+		const payload = (await res.json()) as {
+			'activities-steps-intraday'?: { dataset?: { time?: string; value?: number }[] };
+			activities?: { dateTime?: string; value?: string | number }[];
+		};
+		return payload['activities-steps-intraday']?.dataset || [];
+	};
+
+	let intradayTotal: number | null = null;
+
+	try {
+		const [yData, tData] = await Promise.all([fetchDay(formatDate(yesterday)), fetchDay(formatDate(now))]);
+		const datasets = [
+			...yData.map((entry) => ({ ...entry, dateStr: formatDate(yesterday) })),
+			...tData.map((entry) => ({ ...entry, dateStr: formatDate(now) }))
+		];
+		if (datasets.length === 0) {
+			intradayTotal = null;
+		} else {
+			const boundary = now.getTime() - 24 * 60 * 60 * 1000;
+			const total = datasets.reduce((sum, entry) => {
+				if (!entry.time || typeof entry.value !== 'number' || !entry.dateStr) return sum;
+				// Combine date with time; assume local server timezone
+				const ts = new Date(`${entry.dateStr}T${entry.time}`).getTime();
+				if (Number.isNaN(ts) || ts < boundary || ts > now.getTime()) return sum;
+				return sum + entry.value;
+			}, 0);
+			intradayTotal = Number.isFinite(total) ? total : null;
+		}
+	} catch (error) {
+		console.error('Fitbit steps 24h fetch error:', error);
+	}
+
+	if (intradayTotal !== null) {
+		return intradayTotal;
+	}
+
+	// Fallback: if intraday is unavailable, approximate last 24h as today + yesterday totals
+	try {
+		const start = formatDate(yesterday);
+		const end = formatDate(now);
+		const res = await fetch(
+			`${FITBIT_API_BASE}/1/user/-/activities/steps/date/${start}/${end}.json`,
+			{
+				headers: { Authorization: `Bearer ${tokenState.accessToken}` }
+			}
+		);
+		if (!res.ok) {
+			const text = await res.text();
+			throw new Error(`Failed to fetch daily steps fallback: ${res.status} ${text}`);
+		}
+		const payload = (await res.json()) as { 'activities-steps'?: { value?: string | number }[] };
+		const series = payload['activities-steps'] || [];
+		const lastTwo = series.slice(-2);
+		const total = lastTwo.reduce((sum, entry) => {
+			const val =
+				typeof entry?.value === 'string' ? Number.parseInt(entry.value, 10) : entry?.value;
+			return sum + (Number.isFinite(val as number) ? Number(val) : 0);
+		}, 0);
+		return Number.isFinite(total) ? total : null;
+	} catch (error) {
+		console.error('Fitbit steps daily fallback error:', error);
+		return null;
+	}
+};
+
 export const getSteps = async (): Promise<StatsCache> => {
 	const now = nowSeconds();
 
@@ -487,6 +571,7 @@ export const getSteps = async (): Promise<StatsCache> => {
 		let heartRate: number | null = null;
 		let stepsWeek: number | null = null;
 		let floors: number | null = null;
+		let steps24h: number | null = null;
 
 		try {
 			try {
@@ -519,6 +604,12 @@ export const getSteps = async (): Promise<StatsCache> => {
 				console.error('Fitbit floors fetch error:', error);
 			}
 
+			try {
+				steps24h = await fetchStepsLast24h();
+			} catch (error) {
+				console.error('Fitbit steps 24h fetch error:', error);
+			}
+
 			const timestamp = nowSeconds();
 			const hasUpdate =
 				(activity &&
@@ -526,12 +617,13 @@ export const getSteps = async (): Promise<StatsCache> => {
 				heartRate !== null ||
 				stepsWeek !== null ||
 				floors !== null ||
+				steps24h !== null ||
 				(sleep &&
 					(sleep.sleepDurationMinutes !== null || sleep.sleepScore !== null));
 			const lastUpdated = hasUpdate ? timestamp : previous.lastUpdated;
 
 			cache = {
-				steps: activity?.steps ?? previous.steps,
+				steps: steps24h ?? activity?.steps ?? previous.steps,
 				distanceKm: activity?.distanceKm ?? previous.distanceKm,
 				activeMinutes: activity?.activeMinutes ?? previous.activeMinutes,
 				caloriesOut: activity?.caloriesOut ?? previous.caloriesOut,
