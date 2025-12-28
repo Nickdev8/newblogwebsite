@@ -92,6 +92,7 @@ Honestly, it went by faster than expected.
 
 ## **We Landed**
 After landing, we looked around for the adult picking us up. That was **Jared**. We talked for a bit until **Moukal** arrived, and then the four of us took an Uber to the hotel.
+![](/blogimages/moonshot/13decjarred.JPG)
 
 ## Food Before Anything Else
 First stop after arriving was the dining hall.
@@ -176,6 +177,8 @@ They added one more condition. If they did not hear from **Csaba** that we had b
 That sat *heavy.*
 
 ## **Kennedy Space Center**
+![](/blogimages/moonshot/14decinthesunprogramming.jpg)
+
 After that conversation, we got ready and took the bus to Kennedy Space Center.
 
 Once we arrived, everything shifted. 
@@ -220,6 +223,8 @@ Jetty Park was closed, so we stopped at Banana Creek instead.
 
 ## **Atlas V**
 From there, we had an amazing view of the Atlas V rocket. Seeing it lit up in the dark was surreal. Quiet, massive, and powerful.
+![](/blogimages/moonshot/15decforthespaceshuttle.jpg)
+
 
 Around 5am, we arrived back at the Cambria Hotel in Orlando.
 
@@ -389,6 +394,8 @@ The first thing we did was go straight to the beach.
 There is something about just laying there, listening to the waves, and feeling the warmth that never gets old.
 
 ## **Bayside Marketplace**
+![](/blogimages/moonshot/20decbayideshops.jpg)
+
 After the beach, we went to **Bayside Marketplace** in downtown Miami.  
 Lots of small gift shops, souvenirs, and pure tourist chaos.
 
@@ -400,6 +407,7 @@ There was a Chili’s nearby, and since a friend told us to go to one together, 
 
 We ordered what felt like the entire menu.  
 Chicken, mac and cheese, mozzarella sticks. Everything.
+![](/blogimages/moonshot/20deceatingathebayside.jpg)
 
 We did not finish it.
 
@@ -421,6 +429,7 @@ Today we tried to find a gun range that we could both go to.
 We found one, but once we saw the prices, that idea ended very quickly.
 
 The cheapest option was around **350 euros**.
+![](/blogimages/moonshot/21decthegunrange.JPG)
 
 Hard no.
 
@@ -442,13 +451,16 @@ date: "2025-12-22T12:00:00"
 ---
 ## *Late Start*
 We started the day around 11am. After a really nice, calm morning together, we decided to go to the beach again. One more time. Just to feel the waves and be there.
+![](/blogimages/moonshot/21deconthebeaches.JPG)
 
 ## *Solo Walk*
 At some point, I walked by myself along the entire stretch of the beach. Past the **Art Deco** buildings, along that long road next to the sand. Just looking around, taking it in.
 
 After a while, I found *Nasi* again, laying near the water. I laid down next to her for a bit before going into the ocean.
+![](/blogimages/moonshot/22deconthebeach.jpg)
 
 I **loved”* it.
+
 
 ## Cheesecake Factory
 After the beach, we went to **The Cheesecake Factory**. It was actually really good, but also very filling, very fast. We had mac and cheese and walked around a bit more afterward.
@@ -481,6 +493,8 @@ date: "2025-12-23T12:00:00"
 This was my favorite day of the entire trip.
 
 We started as early as possible and headed to **Wynwood** to pick up our analog film. Holding the developed photos felt special. Seeing the negatives was especially cool. I could even take a picture of them, invert the colors, and actually see the image appear. Really interesting.
+![](/blogimages/moonshot/23decnickwithcamera.jpg)
+
 
 ## **Brickell Bound**
 After that, we made our way downtown to **Brickell City Centre**, the biggest mall in Miami. We walked around for hours, tried on clothes, and just enjoyed being there.
@@ -524,11 +538,14 @@ date: "2025-12-24T12:00:00"
 ---
 ## **Thrown Into It**
 We landed in New York after a short flight from Miami, running on almost no sleep. The difference hit instantly. Cold air. Faster pace. No soft landing.
+![](/blogimages/moonshot/24decairplanetojfk.JPG)
 
 From the airport it was straight into movement. Trains, transfers, walking, following signs, dragging bags. We were awake, but barely present.
+![](/blogimages/moonshot/24inmetrojfk.JPG)
 
 ## **Accidental Landmarks**
 As soon as we exited the metro, we accidentally walked straight into **Rockefeller Center**.
+![](/blogimages/moonshot/24decrockefeller.jpg)
 
 Crowds everywhere. People stacked on top of each other. Lights, noise, cameras, the Christmas tree. Impressive, yes. But overwhelming. Way too much as a first impression.
 
@@ -550,6 +567,8 @@ And somehow, without planning it at all, we ended up on **Broadway**. Right in f
 After all that stimulus, we stopped at a **McDonald’s**. Nothing special. Just warmth, food, and somewhere to sit.
 
 Exhaustion caught up fast, so we went to a movie theater just to rest. Darkness, seats, quiet. Exactly what we needed.
+![](/blogimages/moonshot/24lastdayaftermovie.JPG)
+
 
 ## **Cold Streets and a Closed City**
 After the movie, we went back outside. It was colder. We walked south for a bit to see the **Empire State Building**, but the cold kept creeping in.
@@ -611,6 +630,7 @@ date: "2025-12-26"
 ---
 
 ## **The End of This Chapter**
+![](/blogimages/moonshot/24decsantabeforeflight.jpg)
 This trip has been the best vacation I have ever had.  
 For me and for Nazli.
 

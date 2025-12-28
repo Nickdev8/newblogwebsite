@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { existsSync } from 'fs';
 import { mkdir, readFile, writeFile, rename } from 'fs/promises';
 import path from 'path';
 
@@ -32,7 +33,19 @@ type StoredTokens = {
 const MIN_REFRESH_SECONDS = 10 * 60;
 const FITBIT_API_BASE = 'https://api.fitbit.com';
 // Store tokens inside the project workspace for durability across restarts
-const TOKEN_DIR = path.resolve('data/fitbit');
+const resolveTokenDir = () => {
+	if (env.FITBIT_TOKEN_DIR) {
+		return path.resolve(env.FITBIT_TOKEN_DIR);
+	}
+
+	// Support running from either /app or the repo root containing /app
+	const cwd = process.cwd();
+	const candidates = [path.resolve(cwd, 'data/fitbit'), path.resolve(cwd, 'app/data/fitbit')];
+	const existing = candidates.find((dir) => existsSync(dir) || existsSync(path.dirname(dir)));
+	return existing ?? candidates[0];
+};
+
+const TOKEN_DIR = resolveTokenDir();
 const TOKEN_FILE = path.join(TOKEN_DIR, 'tokens.json');
 
 let cache: StatsCache = {
@@ -242,7 +255,7 @@ const fetchActivity = async (): Promise<
 	const activeMinutes =
 		(summary.fairlyActiveMinutes || 0) + (summary.veryActiveMinutes || 0) || null;
 
-	const distances =
+	const distances: { activity?: string; distance?: number }[] =
 		Array.isArray(payload.distances)
 			? payload.distances
 			: Array.isArray((payload as any).summary?.distances)
