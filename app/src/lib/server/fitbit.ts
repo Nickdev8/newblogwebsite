@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/private';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { mkdir, readFile, writeFile, rename } from 'fs/promises';
 import path from 'path';
 
@@ -32,10 +32,49 @@ type StoredTokens = {
 
 const MIN_REFRESH_SECONDS = 10 * 60;
 const FITBIT_API_BASE = 'https://api.fitbit.com';
+let envLoaded = false;
+const loadEnvFile = (filePath: string) => {
+	try {
+		const contents = readFileSync(filePath, 'utf-8');
+		contents
+			.split('\n')
+			.map((line) => line.trim())
+			.filter((line) => line && !line.startsWith('#'))
+			.forEach((line) => {
+				const match = line.match(/^([\w.-]+)\s*=\s*(.*)$/);
+				if (!match) return;
+				const [, key, rawValue] = match;
+				const value = rawValue.replace(/^['"]|['"]$/g, '');
+				if (process.env[key] === undefined) {
+					process.env[key] = value;
+				}
+			});
+	} catch {
+		// ignore missing/invalid env file
+	}
+};
+
+const ensureEnvLoaded = () => {
+	if (envLoaded) return;
+	envLoaded = true;
+	const cwd = process.cwd();
+	const candidates = [path.resolve(cwd, '.env'), path.resolve(cwd, '../.env')];
+	candidates.forEach((file) => {
+		if (existsSync(file)) {
+			loadEnvFile(file);
+		}
+	});
+};
+
+const readEnv = (key: string) => process.env[key] ?? env[key];
+
 // Store tokens inside the project workspace for durability across restarts
 const resolveTokenDir = () => {
-	if (env.FITBIT_TOKEN_DIR) {
-		return path.resolve(env.FITBIT_TOKEN_DIR);
+	ensureEnvLoaded();
+
+	const tokenDirEnv = readEnv('FITBIT_TOKEN_DIR');
+	if (tokenDirEnv) {
+		return path.resolve(tokenDirEnv);
 	}
 
 	// Support running from either /app or the repo root containing /app
@@ -96,14 +135,19 @@ const loadTokensFromFile = async (): Promise<StoredTokens | null> => {
 };
 
 const bootstrapTokensFromEnv = (): StoredTokens | null => {
-	if (!env.FITBIT_ACCESS_TOKEN || !env.FITBIT_REFRESH_TOKEN || !env.FITBIT_EXPIRES_AT) {
+	ensureEnvLoaded();
+	const accessToken = readEnv('FITBIT_ACCESS_TOKEN');
+	const refreshToken = readEnv('FITBIT_REFRESH_TOKEN');
+	const expiresAt = readEnv('FITBIT_EXPIRES_AT');
+
+	if (!accessToken || !refreshToken || !expiresAt) {
 		return null;
 	}
-	const expires_at = Number(env.FITBIT_EXPIRES_AT);
+	const expires_at = Number(expiresAt);
 	if (!Number.isFinite(expires_at)) return null;
 	return {
-		access_token: env.FITBIT_ACCESS_TOKEN,
-		refresh_token: env.FITBIT_REFRESH_TOKEN,
+		access_token: accessToken,
+		refresh_token: refreshToken,
 		expires_at
 	};
 };
@@ -165,11 +209,15 @@ const setTokens = (accessToken: string, refreshToken: string | null, expiresInSe
 const refreshAccessToken = async () => {
 	await initTokens();
 
-	if (!env.FITBIT_CLIENT_ID || !env.FITBIT_CLIENT_SECRET || !tokenState.refreshToken) {
+	ensureEnvLoaded();
+	const clientId = readEnv('FITBIT_CLIENT_ID');
+	const clientSecret = readEnv('FITBIT_CLIENT_SECRET');
+
+	if (!clientId || !clientSecret || !tokenState.refreshToken) {
 		throw new Error('Fitbit credentials are missing');
 	}
 
-	const basicAuth = Buffer.from(`${env.FITBIT_CLIENT_ID}:${env.FITBIT_CLIENT_SECRET}`).toString('base64');
+	const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 	const body = new URLSearchParams({
 		grant_type: 'refresh_token',
 		refresh_token: tokenState.refreshToken
