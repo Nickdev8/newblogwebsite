@@ -27,6 +27,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	let heartRateBpm = null;
 	let stepsWeek = null;
 	let floors = null;
+	let errorMessage: string | null = null;
 
 	try {
 		const response = await fetch('/api/steps');
@@ -44,6 +45,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 				heartRateBpm?: number | null;
 				stepsWeek?: number | null;
 				floors?: number | null;
+				errorMessage?: string | null;
 			};
 			steps = typeof payload.steps === 'number' ? payload.steps : null;
 			lastUpdated = typeof payload.lastUpdated === 'number' ? payload.lastUpdated : null;
@@ -59,6 +61,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			heartRateBpm = typeof payload.heartRateBpm === 'number' ? payload.heartRateBpm : null;
 			stepsWeek = typeof payload.stepsWeek === 'number' ? payload.stepsWeek : null;
 			floors = typeof payload.floors === 'number' ? payload.floors : null;
+			errorMessage =
+				typeof payload.errorMessage === 'string' && payload.errorMessage
+					? payload.errorMessage
+					: null;
 		}
 	} catch (error) {
 		console.error('Failed to fetch steps in page load', error);
@@ -109,6 +115,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		sleepScore,
 		heartRateBpm,
 		stepsWeek,
-		floors
+		floors,
+		errorMessage
 	};
 };

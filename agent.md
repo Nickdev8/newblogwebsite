@@ -10,7 +10,8 @@ This repo contains Nick’s personal SvelteKit blog. Use it as a journal, not a 
 - About/contact and other static pages sit under `app/src/routes/...`. The About page carousel now pulls a randomized set of media from all posts (rewritten to the CDN) and the snapshot blocks were removed for a leaner layout.
 - Reactions are stored in JSON via helpers in `app/src/lib/server/reactionStore.ts`; avoid breaking that API. The `/admin` sidebar also sorts posts by most recent entry date.
 - Live stats card lives at `app/src/lib/LiveStatsCard.svelte`, is fixed bottom-left on all pages, and shows the full metrics list on mobile too (closed state is a tiny steps pill).
-- Fitbit integration is server-only, cached in-memory with a 10-minute throttle, and persists tokens in `app/data/fitbit/tokens.json` (bootstrap from env only if that file is missing). Tokens are refreshed and rewritten atomically; do not read tokens from `.env` after bootstrap. Service returns steps/distance/calories/active minutes/resting HR/sleep/heartRateBpm/stepsWeek/floors plus timestamps via `/api/steps`.
+- Fitbit integration is server-only, cached in-memory with a 10-minute throttle, and persists tokens in `app/data/fitbit/tokens.json` (bootstrap from env only if that file is missing). Tokens are refreshed and rewritten atomically; do not read tokens from `.env` after bootstrap. Service returns steps/distance/calories/active minutes/resting HR/sleep/heartRateBpm/stepsWeek/floors plus timestamps via `/api/steps`. Env loading checks `.env` in the current CWD, its parent, `app/.env`, and repo-root `.env` so dev and docker both work.
+- If Fitbit rejects the refresh token (`invalid_grant`), the server suppresses console spam and the live stats card surfaces a warning: “Please refresh the Fitbit token on the site.”
 
 ## Fitbit Re-Authorization Runbook (Scopes, Tokens, Recovery)
 

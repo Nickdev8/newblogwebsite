@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import TripCommitTimeline from '$lib/TripCommitTimeline.svelte';
 	import ImmichGallery from '$lib/ImmichGallery.svelte';
 	import ContributionGrid from '$lib/ContributionGrid.svelte';
@@ -144,6 +144,102 @@
 	let heroHighlightsWithTime = heroHighlights;
 	let localTime = timezone ? '--:--' : '';
 	let coverImageSrc = toCdn(data.coverImage) || '';
+	let activeEntryId: string | null = null;
+	let navigatorList: HTMLElement | null = null;
+	const entryNodes = new Map<string, HTMLElement>();
+	let scrollTicking = false;
+	let navigatorScrollTick: number | null = null;
+
+	const updateActiveEntryByPosition = () => {
+		if (!browser) return;
+		const anchor = 140;
+		let inViewId: string | null = null;
+		let inViewTop = -Infinity;
+		let nextBelow: { id: string; top: number } | null = null;
+		let closestAbove: { id: string; top: number } | null = null;
+
+		entryNodes.forEach((node, id) => {
+			const rect = node.getBoundingClientRect();
+			if (rect.top <= anchor && rect.bottom >= anchor) {
+				if (rect.top > inViewTop) {
+					inViewTop = rect.top;
+					inViewId = id;
+				}
+			} else if (rect.top > anchor) {
+				if (!nextBelow || rect.top < nextBelow.top) {
+					nextBelow = { id, top: rect.top };
+				}
+			} else if (rect.bottom < anchor) {
+				if (!closestAbove || rect.top > closestAbove.top) {
+					closestAbove = { id, top: rect.top };
+				}
+			}
+		});
+
+		const nextActive = inViewId || nextBelow?.id || closestAbove?.id || null;
+		if (nextActive && nextActive !== activeEntryId) {
+			activeEntryId = nextActive;
+		}
+	};
+
+	const trackEntry = (node: HTMLElement, entryId: string) => {
+		let currentId = entryId;
+		entryNodes.set(currentId, node);
+		updateActiveEntryByPosition();
+
+		return {
+			update(newId: string) {
+				if (newId === currentId) return;
+				entryNodes.delete(currentId);
+				currentId = newId;
+				entryNodes.set(currentId, node);
+				updateActiveEntryByPosition();
+			},
+			destroy() {
+				entryNodes.delete(currentId);
+			}
+		};
+	};
+
+	const setInitialActiveEntry = async () => {
+		if (!browser) return;
+		await tick();
+		const firstEntry = document.querySelector<HTMLElement>('.journal-entry');
+		if (firstEntry) {
+			activeEntryId = firstEntry.id;
+		}
+		updateActiveEntryByPosition();
+	};
+
+	const scrollActiveNavigator = () => {
+		if (!browser || !navigatorList) return;
+		if (navigatorScrollTick) {
+			cancelAnimationFrame(navigatorScrollTick);
+		}
+		navigatorScrollTick = requestAnimationFrame(() => {
+			if (!navigatorList) return;
+			const doc = document.documentElement;
+			const scrollable = Math.max(1, doc.scrollHeight - doc.clientHeight);
+			const ratio = Math.min(1, Math.max(0, window.scrollY / scrollable));
+			const navScrollable = navigatorList.scrollHeight - navigatorList.clientHeight;
+			if (navScrollable <= 0) return;
+			const targetTop = navScrollable * ratio;
+			navigatorList.scrollTo({
+				top: Math.max(0, targetTop),
+				behavior: 'auto'
+			});
+		});
+	};
+
+	const handleScroll = () => {
+		if (scrollTicking) return;
+		scrollTicking = true;
+		requestAnimationFrame(() => {
+			updateActiveEntryByPosition();
+			scrollActiveNavigator();
+			scrollTicking = false;
+		});
+	};
 
 	const timeFormatter: Intl.DateTimeFormat | null = timezone
 		? new Intl.DateTimeFormat('en-US', {
@@ -216,6 +312,7 @@ let fullscreenMedia: FullscreenMedia = null;
 		? [...heroHighlights, { label: `${timezoneLabel} time`, value: localTime || '—' }]
 		: heroHighlights;
 	$: coverImageSrc = toCdn(data.coverImage) || '';
+	$: scrollActiveNavigator();
 
 	$: if (browser && typeof document !== 'undefined') {
 		document.body.style.overflow = fullscreenMedia ? 'hidden' : '';
@@ -320,6 +417,7 @@ let fullscreenMedia: FullscreenMedia = null;
 	};
 
 	onMount(() => {
+		setInitialActiveEntry();
 		const cleanups: (() => void)[] = [];
 		if (timeFormatter) {
 			refreshLocalTime();
@@ -331,6 +429,14 @@ let fullscreenMedia: FullscreenMedia = null;
 		}
 		if (shouldLoadTripContributions) {
 			cleanups.push(setupLazyTrigger(() => tripContributionsSection, () => triggerTripContributionsLoad()));
+		}
+		if (browser) {
+			window.addEventListener('scroll', handleScroll, { passive: true });
+			window.addEventListener('resize', handleScroll, { passive: true });
+			cleanups.push(() => {
+				window.removeEventListener('scroll', handleScroll);
+				window.removeEventListener('resize', handleScroll);
+			});
 		}
 		return () => cleanups.forEach((cleanup) => cleanup());
 	});
@@ -551,12 +657,19 @@ let fullscreenMedia: FullscreenMedia = null;
 				Entries will appear here once the trip is written up.
 			</p>
 			{:else}
-				<div class="jump-timeline mt-5 space-y-3">
+				<div class="jump-timeline mt-5 space-y-3" bind:this={navigatorList}>
 					{#each journalEntries as entry}
+						{@const isActive = activeEntryId === entry.id}
 						<button
 							type="button"
-							class="jump-card group w-full rounded-2xl border border-black/5 px-3 py-3 text-left text-sm transition hover:border-black/20 hover:bg-black/5 dark:border-white/10 dark:hover:border-white/30 dark:hover:bg-white/10"
+							class={`jump-card group w-full rounded-2xl border px-3 py-3 text-left text-sm transition ${
+								isActive
+									? 'border-gray-300 bg-gray-50 ring-1 ring-gray-200/60 dark:border-white/15 dark:bg-white/10 dark:ring-white/10'
+								: 'border-black/5 hover:border-black/20 hover:bg-black/5 dark:border-white/10 dark:hover:border-white/30 dark:hover:bg-white/10'
+							}`}
 							on:click={() => jumpToEntry(entry.id)}
+							aria-current={isActive ? 'true' : undefined}
+							data-entry-id={entry.id}
 						>
 							<p class="text-[0.65rem] uppercase tracking-[0.3em] text-gray-500 dark:text-gray-400">{entry.dateLabel}</p>
 							<p class="mt-1 text-base font-semibold text-gray-900 group-hover:text-gray-700 dark:text-white dark:group-hover:text-gray-200">
@@ -575,8 +688,12 @@ let fullscreenMedia: FullscreenMedia = null;
 					<p class="mt-2 text-sm">Check back soon for the full travel journal.</p>
 				</div>
 			{:else}
-				{#each journalEntries as entry}
-					<article id={entry.id} class="journal-entry scroll-mt-20 rounded-[32px] border border-black/5 bg-white/95 p-5 shadow-[0_28px_55px_rgba(15,23,42,0.12)] transition dark:border-white/10 dark:bg-white/5 sm:p-8">
+				{#each journalEntries as entry (entry.id)}
+					<article
+						id={entry.id}
+						class="journal-entry scroll-mt-20 rounded-[32px] border border-black/5 bg-white/95 p-5 shadow-[0_28px_55px_rgba(15,23,42,0.12)] transition dark:border-white/10 dark:bg-white/5 sm:p-8"
+						use:trackEntry={entry.id}
+					>
 						<header class="flex flex-col gap-4 border-b border-black/5 pb-4 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p class="text-[0.65rem] uppercase tracking-[0.4em] text-gray-500 dark:text-gray-400">Day {entry.order}</p>
