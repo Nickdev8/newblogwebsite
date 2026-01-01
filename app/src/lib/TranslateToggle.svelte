@@ -23,10 +23,21 @@
 		document.cookie = `${COOKIE_KEY}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}`;
 	};
 
+	const clearCookie = () => {
+		const host = window.location.hostname;
+		document.cookie = `${COOKIE_KEY}=; path=/; max-age=0`;
+		document.cookie = `${COOKIE_KEY}=; path=/; domain=${host}; max-age=0`;
+		document.cookie = `${COOKIE_KEY}=; path=/; domain=.${host}; max-age=0`;
+	};
+
 	const applyLanguage = async (nextIsDutch: boolean) => {
 		isDutch = nextIsDutch;
 		localStorage.setItem(LANG_KEY, nextIsDutch ? 'nl' : 'en');
-		setCookie(nextIsDutch ? '/en/nl' : '/auto/en', 60 * 60 * 24 * 365);
+		if (nextIsDutch) {
+			setCookie('/en/nl', 60 * 60 * 24 * 365);
+		} else {
+			clearCookie();
+		}
 		await trackReaderEvent({ kind: 'language', language: nextIsDutch ? 'nl' : 'en' });
 		open = false;
 		window.location.reload();
@@ -35,8 +46,14 @@
 	onMount(() => {
 		const stored = localStorage.getItem(LANG_KEY);
 		const cookie = getCookieValue(COOKIE_KEY);
+		if (stored === 'en') {
+			clearCookie();
+			isDutch = false;
+			return;
+		}
 		if (stored === 'nl' || cookie === '/en/nl') {
 			isDutch = true;
+			setCookie('/en/nl', 60 * 60 * 24 * 365);
 			return;
 		}
 		isDutch = false;
