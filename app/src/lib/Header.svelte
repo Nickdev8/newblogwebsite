@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { isDark } from '$lib/stores/theme';
 	import { Menu, Moon, Sun, X } from 'lucide-svelte';
+	import TranslateToggle from '$lib/TranslateToggle.svelte';
 
 	let dark = false;
 	let isMobileMenuOpen = false;
@@ -37,7 +38,7 @@
 	}
 </script>
 
-<header class="px-3 sm:px-6 lg:px-10">
+<header class="relative z-40 px-3 sm:px-6 lg:px-10">
 	<nav class="glass-panel mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-5 sm:px-6 sm:py-4">
 		<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 			<a href="/" class="group grid gap-0.5 text-left md:max-w-md md:flex-1">
@@ -62,22 +63,28 @@
 				</div>
 
 				<div class="flex items-center gap-3">
-					<button
-						type="button"
-						on:click={toggleTheme}
-						aria-pressed={dark}
-						aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-						class="inline-flex items-center gap-2 rounded-full border border-black/10 px-3 py-1.5 text-sm font-semibold text-gray-700 transition hover:-translate-y-0.5 hover:border-black/40 dark:border-white/10 dark:text-gray-100"
-					>
-						{#if dark}
-							<Moon class="h-4 w-4" />
-							<span class="hidden sm:inline">Night</span>
-						{:else}
-							<Sun class="h-4 w-4" />
-							<span class="hidden sm:inline">Day</span>
-						{/if}
-					</button>
-
+					<div class="flex items-center gap-1 rounded-full border border-black/10 bg-white/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
+						<TranslateToggle />
+						<button
+							type="button"
+							on:click={toggleTheme}
+							aria-pressed={dark}
+							aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+							class={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
+								dark
+									? 'bg-slate-900 text-white shadow-sm dark:bg-white/20'
+									: 'text-gray-700 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white'
+							}`}
+						>
+							{#if dark}
+								<Moon class="h-4 w-4" />
+								<span class="hidden sm:inline">Night</span>
+							{:else}
+								<Sun class="h-4 w-4" />
+								<span class="hidden sm:inline">Day</span>
+							{/if}
+						</button>
+					</div>
 					<button
 						type="button"
 						on:click={toggleMobileMenu}
