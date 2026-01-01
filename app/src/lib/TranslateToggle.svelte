@@ -26,7 +26,7 @@
 	const applyLanguage = async (nextIsDutch: boolean) => {
 		isDutch = nextIsDutch;
 		localStorage.setItem(LANG_KEY, nextIsDutch ? 'nl' : 'en');
-		setCookie(nextIsDutch ? '/en/nl' : '/en/en', 60 * 60 * 24 * 365);
+		setCookie(nextIsDutch ? '/en/nl' : '/auto/en', 60 * 60 * 24 * 365);
 		await trackReaderEvent({ kind: 'language', language: nextIsDutch ? 'nl' : 'en' });
 		open = false;
 		window.location.reload();

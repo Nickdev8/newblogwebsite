@@ -96,19 +96,25 @@
 </script>
 
 <svelte:head>
-	<script>
-		function googleTranslateElementInit() {
-			if (!window.google || !window.google.translate) return;
-			new window.google.translate.TranslateElement(
-				{ pageLanguage: 'en', includedLanguages: 'nl', autoDisplay: false },
-				'google_translate_element'
-			);
-		}
-	</script>
-	<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	{#if !isAdminRoute}
+		<script>
+			function googleTranslateElementInit() {
+				if (!window.google || !window.google.translate) return;
+				new window.google.translate.TranslateElement(
+					{ pageLanguage: 'en', includedLanguages: 'nl', autoDisplay: false },
+					'google_translate_element'
+				);
+			}
+		</script>
+		<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	{:else}
+		<meta name="google" content="notranslate" />
+	{/if}
 </svelte:head>
 
-<div id="google_translate_element" class="sr-only" aria-hidden="true"></div>
+{#if !isAdminRoute}
+	<div id="google_translate_element" class="sr-only" aria-hidden="true"></div>
+{/if}
 
 <div class="page-shell min-h-screen">
 	{#if !isAdminRoute}

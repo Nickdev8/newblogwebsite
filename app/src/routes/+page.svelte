@@ -122,7 +122,7 @@
 			</p>
 			<h1 class="text-4xl font-semibold leading-tight">Stories from the road</h1>
 			<p class="max-w-2xl text-sm text-gray-600 dark:text-gray-300">
-				Everything I'm doing lands here—quick scraps, day-by-day play-by-plays, and the longer stories from what I'm building and wandering through.
+				Everything I'm doing lands here. quick scraps, day-by-day play-by-plays, and the longer stories from what I'm building and wandering through.
 			</p>
 			{#if livePost}
 				<a
