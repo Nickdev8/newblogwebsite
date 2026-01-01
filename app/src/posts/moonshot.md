@@ -1,6 +1,6 @@
 ---
 title: "Florida"
-description: "this is my trip to Florida with my best friend Nazli"
+description: "This is my trip to Florida with my best friend Nazli, This was easaly the best vacation of my live. so much fun we had together"
 coverImage: /blogimages/moonshot/nickontargetsroof.JPG
 warning: "This post is Done"
 warning_type: success

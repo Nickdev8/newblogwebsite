@@ -193,3 +193,9 @@ body {
 .VIpgJd-ZVi9od-aZ2wEe-OiiCO {
 	display: none !important;
 }
+
+/* Hide Google Translate top banner/iframe. */
+.skiptranslate,
+iframe.VIpgJd-ZVi9od-ORHb-OEVmcd {
+	display: none !important;
+}
