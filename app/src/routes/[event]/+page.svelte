@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { onMount, tick } from 'svelte';
+	import { navigating } from '$app/stores';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import TripCommitTimeline from '$lib/TripCommitTimeline.svelte';
 	import ImmichGallery from '$lib/ImmichGallery.svelte';
 	import ContributionGrid from '$lib/ContributionGrid.svelte';
 	import { wrapNoTranslateWords } from '$lib/noTranslate';
+	import { lockBodyScroll, unlockBodyScroll } from '$lib/bodyScrollLock';
+	import { trackReaderEvent } from '$lib/readerTracking';
 	import type { GithubCommit } from '$lib/server/github';
 	import type { ContributionCalendar } from '$lib/server/githubContributions';
 
@@ -149,6 +152,9 @@
 	const entryNodes = new Map<string, HTMLElement>();
 	let scrollTicking = false;
 	let navigatorScrollTick: number | null = null;
+	let fullscreenLocked = false;
+	let maxScrollPercent = 0;
+	let scrollMeasureTicking = false;
 
 	const updateActiveEntryByPosition = () => {
 		if (!browser) return;
@@ -241,6 +247,29 @@
 		});
 	};
 
+	const updateScrollPercent = () => {
+		if (!browser) return;
+		const doc = document.documentElement;
+		const scrollable = doc.scrollHeight - doc.clientHeight;
+		if (scrollable <= 0) {
+			maxScrollPercent = 100;
+			return;
+		}
+		const percent = Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100));
+		if (percent > maxScrollPercent) {
+			maxScrollPercent = percent;
+		}
+	};
+
+	const handleScrollDepth = () => {
+		if (scrollMeasureTicking) return;
+		scrollMeasureTicking = true;
+		requestAnimationFrame(() => {
+			updateScrollPercent();
+			scrollMeasureTicking = false;
+		});
+	};
+
 	const timeFormatter: Intl.DateTimeFormat | null = timezone
 		? new Intl.DateTimeFormat('en-US', {
 				timeZone: timezone,
@@ -314,8 +343,12 @@ let fullscreenMedia: FullscreenMedia = null;
 	$: coverImageSrc = toCdn(data.coverImage) || '';
 	$: scrollActiveNavigator();
 
-	$: if (browser && typeof document !== 'undefined') {
-		document.body.style.overflow = fullscreenMedia ? 'hidden' : '';
+	$: if (fullscreenMedia && !fullscreenLocked) {
+		lockBodyScroll();
+		fullscreenLocked = true;
+	} else if (!fullscreenMedia && fullscreenLocked) {
+		unlockBodyScroll();
+		fullscreenLocked = false;
 	}
 
 	const loadTripCommits = async () => {
@@ -418,6 +451,10 @@ let fullscreenMedia: FullscreenMedia = null;
 
 	onMount(() => {
 		setInitialActiveEntry();
+		if (browser) {
+			trackReaderEvent({ kind: 'post_view', event: data.event, path: window.location.pathname });
+			updateScrollPercent();
+		}
 		const cleanups: (() => void)[] = [];
 		if (timeFormatter) {
 			refreshLocalTime();
@@ -433,12 +470,32 @@ let fullscreenMedia: FullscreenMedia = null;
 		if (browser) {
 			window.addEventListener('scroll', handleScroll, { passive: true });
 			window.addEventListener('resize', handleScroll, { passive: true });
+			window.addEventListener('scroll', handleScrollDepth, { passive: true });
+			window.addEventListener('resize', handleScrollDepth, { passive: true });
 			cleanups.push(() => {
 				window.removeEventListener('scroll', handleScroll);
 				window.removeEventListener('resize', handleScroll);
+				window.removeEventListener('scroll', handleScrollDepth);
+				window.removeEventListener('resize', handleScrollDepth);
 			});
 		}
 		return () => cleanups.forEach((cleanup) => cleanup());
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			updateScrollPercent();
+			trackReaderEvent({
+				kind: 'scroll',
+				event: data.event,
+				path: window.location.pathname,
+				percent: maxScrollPercent
+			});
+		}
+		if (fullscreenLocked) {
+			unlockBodyScroll();
+			fullscreenLocked = false;
+		}
 	});
 </script>
 
@@ -450,31 +507,72 @@ let fullscreenMedia: FullscreenMedia = null;
 	}}
 />
 
-{#if showBanner && banner}
-	<div class="mx-auto mt-2 mb-3 w-full max-w-[1600px] px-3 sm:mt-3 sm:mb-4 sm:px-6 lg:px-10">
-		<div
-			class={`flex w-full flex-col items-start gap-3 rounded-2xl border border-black/5 px-5 py-4 text-sm shadow-[0_16px_30px_rgba(15,23,42,0.08)] ring-1 ring-white/60 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${bannerTypeClasses[banner.type || 'warning']}`}
-			role="alert"
-		>
-			<span class="flex-1 font-medium">{@html banner.message}</span>
-			{#if banner.dismissible !== false}
-				<button
-					type="button"
-					class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/50 hover:text-current dark:hover:bg-white/10"
-					on:click={() => (bannerDismissed = true)}
-				>
-					Close
-				</button>
-			{/if}
-		</div>
-	</div>
-{/if}
+{#if $navigating}
+	<article class="journal-shell mx-auto w-full max-w-[1600px] px-3 pt-0 pb-6 -mt-1 sm:mt-0 sm:px-6 lg:-mt-2 lg:px-10">
+		<section class="mt-0 grid items-center gap-6 rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-[0_22px_40px_rgba(15,23,42,0.08)] dark:border-white/15 dark:bg-white/5 lg:grid-cols-[1.1fr_0.9fr] lg:p-7">
+			<div class="space-y-3">
+				<div class="h-3 w-40 rounded-full bg-gray-200/70 dark:bg-white/10 animate-pulse"></div>
+				<div class="h-8 w-3/5 rounded-full bg-gray-200/80 dark:bg-white/10 animate-pulse"></div>
+				<div class="h-4 w-2/3 rounded-full bg-gray-200/70 dark:bg-white/10 animate-pulse"></div>
+				<div class="mt-3 flex flex-wrap items-center gap-3">
+					<div class="h-8 w-32 rounded-full bg-gray-200/70 dark:bg-white/10 animate-pulse"></div>
+					<div class="h-4 w-28 rounded-full bg-gray-200/60 dark:bg-white/10 animate-pulse"></div>
+				</div>
+			</div>
+			<div class="h-56 w-full rounded-2xl bg-gray-200/70 dark:bg-white/10 animate-pulse"></div>
+		</section>
 
+		<section class="mt-6 rounded-3xl border border-black/10 bg-white/80 px-4 py-5 dark:border-white/10 dark:bg-white/5 sm:px-5 lg:px-6">
+			<div class="h-4 w-40 rounded-full bg-gray-200/70 dark:bg-white/10 animate-pulse"></div>
+			<div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+				{#each Array(3) as _}
+					<div class="h-24 rounded-2xl bg-gray-200/60 dark:bg-white/10 animate-pulse"></div>
+				{/each}
+			</div>
+		</section>
+
+		<section class="mt-10 space-y-5">
+			{#each Array(3) as _}
+				<div class="rounded-[32px] border border-black/5 bg-white/90 p-6 shadow-[0_28px_55px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-white/5">
+					<div class="h-4 w-24 rounded-full bg-gray-200/70 dark:bg-white/10 animate-pulse"></div>
+					<div class="mt-3 h-6 w-2/3 rounded-full bg-gray-200/80 dark:bg-white/10 animate-pulse"></div>
+					<div class="mt-4 space-y-2">
+						<div class="h-3 w-full rounded-full bg-gray-200/60 dark:bg-white/10 animate-pulse"></div>
+						<div class="h-3 w-5/6 rounded-full bg-gray-200/60 dark:bg-white/10 animate-pulse"></div>
+						<div class="h-3 w-2/3 rounded-full bg-gray-200/60 dark:bg-white/10 animate-pulse"></div>
+					</div>
+				</div>
+			{/each}
+		</section>
+	</article>
+{:else}
 <article class="journal-shell mx-auto w-full max-w-[1600px] px-3 pt-0 pb-6 -mt-1 sm:mt-0 sm:px-6 lg:-mt-2 lg:px-10">
+	{#if showBanner && banner}
+		<div class="mt-2 mb-4">
+			<div
+				class={`flex w-full flex-col items-start gap-3 rounded-2xl border border-black/5 px-5 py-4 text-sm shadow-[0_16px_30px_rgba(15,23,42,0.08)] ring-1 ring-white/60 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${bannerTypeClasses[banner.type || 'warning']}`}
+				role="alert"
+			>
+				<span class="flex-1 font-medium">{@html banner.message}</span>
+				{#if banner.dismissible !== false}
+					<button
+						type="button"
+						class="rounded-full border border-current px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] transition hover:-translate-y-0.5 hover:bg-white/50 hover:text-current dark:hover:bg-white/10"
+						on:click={() => (bannerDismissed = true)}
+					>
+						Close
+					</button>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
 	<section class="mt-0 grid items-center gap-6 rounded-[28px] border border-black/10 bg-gradient-to-br from-white/95 via-slate-50/95 to-white/95 p-6 shadow-[0_22px_40px_rgba(15,23,42,0.12)] dark:border-white/15 dark:from-slate-900/75 dark:via-slate-800/80 dark:to-slate-900/75 dark:shadow-[0_22px_40px_rgba(0,0,0,0.3)] lg:grid-cols-[1.1fr_0.9fr] lg:p-7">
 		<div class="space-y-3">
 			<p class="text-xs uppercase tracking-[0.28em] text-slate-600 dark:text-slate-200">Field report · {data.event}</p>
-			<h1 translate="no" class="text-[clamp(2rem,2.6vw,2.75rem)] font-bold leading-tight tracking-[-0.01em]">{readableTitle}</h1>
+			<h1 class="text-[clamp(2rem,2.6vw,2.75rem)] font-bold leading-tight tracking-[-0.01em]">
+				{@html wrapNoTranslateWords(readableTitle)}
+			</h1>
 			<p class="max-w-3xl text-sm leading-relaxed text-slate-700 dark:text-slate-200 sm:text-base">{heroDescription}</p>
 
 			<div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
@@ -697,7 +795,9 @@ let fullscreenMedia: FullscreenMedia = null;
 						<header class="flex flex-col gap-4 border-b border-black/5 pb-4 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
 							<div>
 								<p class="text-[0.65rem] uppercase tracking-[0.4em] text-gray-500 dark:text-gray-400">Day {entry.order}</p>
-								<h2 class="text-3xl font-semibold text-gray-900 dark:text-white">{entry.title}</h2>
+								<h2 class="text-3xl font-semibold text-gray-900 dark:text-white">
+									{@html wrapNoTranslateWords(entry.title)}
+								</h2>
 							</div>
 							<div class="text-sm text-gray-600 dark:text-gray-300">
 								<span>{entry.dateLabel}</span>
@@ -799,6 +899,7 @@ let fullscreenMedia: FullscreenMedia = null;
 
 	<ImmichGallery shareUrl={immichAlbum} title={`Story reel from ${readableTitle}`} description="Live Immich album embed" />
 </article>
+{/if}
 
 {#if fullscreenMedia}
 	<div

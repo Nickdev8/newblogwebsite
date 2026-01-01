@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { navigating } from '$app/stores';
 	import type { ActionData, PageData } from './$types';
 
 	export let data: PageData;
@@ -12,78 +13,118 @@
 	<title>Markdown Admin</title>
 </svelte:head>
 
-{#if !data.loggedIn}
-	<main class="admin auth">
-		<section class="panel">
-			<h1>Markdown Admin</h1>
-			<p>Enter the shared password to start editing posts.</p>
-			{#if loginError}
-				<p class="status error">{loginError}</p>
-			{/if}
-			<form method="post" action="/admin?/login">
-				<label for="password">Password</label>
-				<input id="password" name="password" type="password" required />
-				<button type="submit">Unlock editor</button>
-			</form>
-		</section>
-	</main>
-{:else}
+{#if $navigating}
 	<main class="admin shell">
 		<aside class="sidebar">
 			<div class="sidebar__header">
-				<h2>Posts</h2>
-				<p class="hint">Tap a post to load it below.</p>
+				<div class="skeleton-line wide"></div>
+				<div class="skeleton-line"></div>
 			</div>
-			<ul>
-				{#if data.posts.length === 0}
-					<li class="empty">No markdown files found in <code>src/posts</code>.</li>
-				{:else}
-					{#each data.posts as post}
-						<li class:selected={post.slug === data.selectedSlug}>
-							<a href={`/admin?post=${encodeURIComponent(post.slug)}`}>
-								<span class="post-title">{post.title}</span>
-								<span class="post-slug">{post.slug}.md</span>
-							</a>
-						</li>
-					{/each}
-				{/if}
+			<ul class="skeleton-list">
+				{#each Array(6) as _}
+					<li>
+						<div class="skeleton-line wide"></div>
+						<div class="skeleton-line small"></div>
+					</li>
+				{/each}
 			</ul>
-			<form method="post" action="/admin?/logout">
-				<button type="submit" class="ghost">Log out</button>
-			</form>
+			<div class="sidebar__actions">
+				<div class="skeleton-pill"></div>
+			</div>
 		</aside>
 		<section class="editor">
-			{#if data.selectedSlug}
-				<header class="editor__header">
-					<div>
-						<h1>{data.posts.find((p) => p.slug === data.selectedSlug)?.title ?? data.selectedSlug}</h1>
-						<p class="file-label">{data.selectedSlug}.md</p>
-					</div>
-					<div class="editor__status">
-						{#if data.saved}
-							<p class="status success">Saved.</p>
-						{/if}
-						{#if saveError}
-							<p class="status error">{saveError}</p>
-						{/if}
-					</div>
-				</header>
-				<form method="post" action="/admin?/save" class="editor__form">
-					<input type="hidden" name="slug" value={data.selectedSlug} />
-					<label for="content">Markdown</label>
-					<textarea id="content" name="content" rows="24" required>{data.content}</textarea>
-					<div class="editor__actions">
-						<button type="submit">Save changes</button>
-					</div>
-				</form>
-			{:else}
-				<div class="empty-state">
-					<h1>Select a post</h1>
-					<p>Pick a markdown file from the list to begin editing.</p>
-				</div>
-			{/if}
+			<header class="editor__header">
+				<div class="skeleton-line wide"></div>
+				<div class="skeleton-line small"></div>
+			</header>
+			<div class="skeleton-block tall"></div>
 		</section>
 	</main>
+{:else}
+	{#if !data.loggedIn}
+		<main class="admin auth">
+			<section class="panel">
+				<h1>Markdown Admin</h1>
+				<p>Enter the shared password to start editing posts.</p>
+				{#if loginError}
+					<p class="status error">{loginError}</p>
+				{/if}
+				<form method="post" action="/admin?/login">
+					<label for="password">Password</label>
+					<input id="password" name="password" type="password" required />
+					<button type="submit">Unlock editor</button>
+				</form>
+			</section>
+		</main>
+	{:else}
+		<main class="admin shell">
+			<aside class="sidebar">
+				<div class="sidebar__header">
+					<h2>Posts</h2>
+					<p class="hint">Tap a post to load it below.</p>
+				</div>
+				<ul>
+					{#if data.posts.length === 0}
+						<li class="empty">No markdown files found in <code>src/posts</code>.</li>
+					{:else}
+						{#each data.posts as post}
+							<li class:selected={post.slug === data.selectedSlug}>
+								<a href={`/admin?post=${encodeURIComponent(post.slug)}`}>
+									<span class="post-title">{post.title}</span>
+									<span class="post-slug">{post.slug}.md</span>
+								</a>
+							</li>
+						{/each}
+					{/if}
+				</ul>
+				<div class="sidebar__actions">
+					<a class="ghost-link" href="/admin/analytics">View analytics</a>
+				</div>
+				<form method="post" action="/admin?/logout">
+					<button type="submit" class="ghost">Log out</button>
+				</form>
+			</aside>
+			<section class="editor">
+				{#if data.selectedSlug}
+					<header class="editor__header">
+						<div>
+							<h1>{data.posts.find((p) => p.slug === data.selectedSlug)?.title ?? data.selectedSlug}</h1>
+							<p class="file-label">{data.selectedSlug}.md</p>
+						</div>
+						<div class="editor__status">
+							<a
+								class="ghost-link"
+								href={`/${data.selectedSlug}`}
+								target="_blank"
+								rel="noreferrer"
+							>
+								Open post
+							</a>
+							{#if data.saved}
+								<p class="status success">Saved.</p>
+							{/if}
+							{#if saveError}
+								<p class="status error">{saveError}</p>
+							{/if}
+						</div>
+					</header>
+					<form method="post" action="/admin?/save" class="editor__form">
+						<input type="hidden" name="slug" value={data.selectedSlug} />
+						<label for="content">Markdown</label>
+						<textarea id="content" name="content" rows="24" required>{data.content}</textarea>
+						<div class="editor__actions">
+							<button type="submit">Save changes</button>
+						</div>
+					</form>
+				{:else}
+					<div class="empty-state">
+						<h1>Select a post</h1>
+						<p>Pick a markdown file from the list to begin editing.</p>
+					</div>
+				{/if}
+			</section>
+		</main>
+	{/if}
 {/if}
 
 <style>
@@ -205,6 +246,80 @@
 		padding: 0;
 		flex: 1;
 		overflow-y: auto;
+	}
+
+	.sidebar__actions {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.ghost-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 0.65rem;
+		padding: 0.6rem 0.75rem;
+		font-weight: 600;
+		color: inherit;
+		text-decoration: none;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		transition: transform 120ms ease, box-shadow 120ms ease;
+	}
+
+	.ghost-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+	}
+
+	.skeleton-line {
+		height: 0.8rem;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.12);
+		animation: pulse 1.6s ease-in-out infinite;
+	}
+
+	.skeleton-line.wide {
+		width: 80%;
+	}
+
+	.skeleton-line.small {
+		width: 45%;
+	}
+
+	.skeleton-block {
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.08);
+		animation: pulse 1.6s ease-in-out infinite;
+	}
+
+	.skeleton-block.tall {
+		height: 60vh;
+	}
+
+	.skeleton-list li {
+		display: grid;
+		gap: 0.4rem;
+		padding: 0.6rem 0.75rem;
+		border-radius: 0.65rem;
+		background: rgba(255, 255, 255, 0.03);
+	}
+
+	.skeleton-pill {
+		height: 2.2rem;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.1);
+		animation: pulse 1.6s ease-in-out infinite;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 0.4;
+		}
+		50% {
+			opacity: 1;
+		}
 	}
 
 	.sidebar li {

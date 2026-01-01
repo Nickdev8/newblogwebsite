@@ -27,6 +27,7 @@ app/temp.txt
 app/buildcommandlist.txt
 app/+page.js
 app/data/fitbit/tokens.json
+app/data/readers.json
 
 app/*/*.webp
 app/*/*.png
