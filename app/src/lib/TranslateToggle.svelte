@@ -76,6 +76,7 @@
 <div class="relative" bind:this={root}>
 	<button
 		type="button"
+		translate="no"
 		class={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
 			isDutch
 				? 'bg-amber-100 text-amber-900 shadow-sm dark:bg-amber-500/20 dark:text-amber-100'
