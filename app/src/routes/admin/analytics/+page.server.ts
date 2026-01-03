@@ -10,6 +10,42 @@ type PostSummary = {
 };
 
 const POSTS_DIR = path.join(process.cwd(), 'src', 'posts');
+const VISIT_WINDOW_DAYS = 30;
+
+const toDateKey = (value: Date) => {
+	const year = value.getFullYear();
+	const month = String(value.getMonth() + 1).padStart(2, '0');
+	const day = String(value.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
+
+const buildVisitSeries = (rows: { created_at: number }[], days: number) => {
+	const dayMs = 24 * 60 * 60 * 1000;
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	const start = new Date(today.getTime() - (days - 1) * dayMs);
+	const startTime = start.getTime();
+	const counts = new Map<string, number>();
+
+	for (const row of rows) {
+		if (row.created_at < startTime) continue;
+		const date = new Date(row.created_at);
+		date.setHours(0, 0, 0, 0);
+		if (date < start) continue;
+		const key = toDateKey(date);
+		counts.set(key, (counts.get(key) || 0) + 1);
+	}
+
+	return Array.from({ length: days }, (_, index) => {
+		const date = new Date(start.getTime() + index * dayMs);
+		const key = toDateKey(date);
+		return {
+			date: key,
+			timestamp: date.getTime(),
+			count: counts.get(key) || 0
+		};
+	});
+};
 
 const readPosts = (): PostSummary[] => {
 	if (!fs.existsSync(POSTS_DIR)) return [];
@@ -27,43 +63,41 @@ const readPosts = (): PostSummary[] => {
 		});
 };
 
-const bucketReferrer = (referrer: string) => {
-	const value = referrer.toLowerCase();
-	if (!value || value === 'direct') return 'direct';
+const normalizeHost = (value: string) => value.replace(/^www\./, '');
+
+const bucketReferrer = (referrer: string, siteOrigin: string) => {
+	const value = referrer.trim();
+	if (!value || value.toLowerCase() === 'direct') return 'direct';
 	if (value.startsWith('/')) return 'internal';
-	if (
-		value.includes('google.') ||
-		value.includes('bing.') ||
-		value.includes('duckduckgo.') ||
-		value.includes('yahoo.')
-	) {
-		return 'search';
+
+	try {
+		const parsed = new URL(value);
+		if (parsed.origin === siteOrigin) return 'internal';
+		return normalizeHost(parsed.hostname.toLowerCase());
+	} catch {
+		if (value.startsWith('http://') || value.startsWith('https://')) {
+			const host = value.replace(/^https?:\/\//, '').split('/')[0] || '';
+			return host ? normalizeHost(host.toLowerCase()) : 'external';
+		}
+		return 'external';
 	}
-	if (
-		value.includes('twitter.') ||
-		value.includes('t.co') ||
-		value.includes('facebook.') ||
-		value.includes('instagram.') ||
-		value.includes('linkedin.') ||
-		value.includes('reddit.')
-	) {
-		return 'social';
-	}
-	return 'external';
 };
 
-export const load: PageServerLoad = async ({ locals }) => {
+const isPublicPath = (value: string) => !value.startsWith('/admin');
+
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.isAdmin) {
 		return {
 			loggedIn: false,
 			totals: null,
-		perPost: [],
-		deviceCounts: [],
-		referrerCounts: [],
-		languageCounts: [],
-		names: [],
-		readerBreakdown: []
-	};
+			perPost: [],
+			deviceCounts: [],
+			referrerCounts: [],
+			languageCounts: [],
+			names: [],
+			readerBreakdown: [],
+			visitSeries: []
+		};
 	}
 
 	const posts = readPosts();
@@ -72,7 +106,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const db = await readReaderDB();
 	const rows = db.rows ?? [];
 
-	const visitRows = rows.filter((row) => row.kind === 'visit');
+	const visitRows = rows.filter((row) => row.kind === 'visit' && isPublicPath(row.path));
 	const postRows = rows.filter((row) => row.kind === 'post_view');
 	const nameRows = rows.filter((row) => row.kind === 'name');
 	const languageRows = rows.filter((row) => row.kind === 'language');
@@ -87,8 +121,21 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	const referrerMap = new Map<string, number>();
-	for (const row of visitRows) {
-		const bucket = bucketReferrer(row.referrer);
+	const firstReferrer = new Map<string, { created_at: number; referrer: string }>();
+	const devicesByReader = new Map<string, Set<string>>();
+	const sortedVisitRows = [...visitRows].sort((a, b) => a.created_at - b.created_at);
+
+	for (const row of sortedVisitRows) {
+		if (!firstReferrer.has(row.anon_id)) {
+			firstReferrer.set(row.anon_id, { created_at: row.created_at, referrer: row.referrer });
+		}
+		const deviceSet = devicesByReader.get(row.anon_id) ?? new Set<string>();
+		deviceSet.add(row.device);
+		devicesByReader.set(row.anon_id, deviceSet);
+	}
+
+	for (const entry of firstReferrer.values()) {
+		const bucket = bucketReferrer(entry.referrer, url.origin);
 		referrerMap.set(bucket, (referrerMap.get(bucket) || 0) + 1);
 	}
 
@@ -115,7 +162,62 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}
 	}
 
-	const names = Array.from(nameLatest.values()).sort((a, b) => b.created_at - a.created_at);
+	const visitCountsByReader = new Map<string, number>();
+	for (const row of visitRows) {
+		visitCountsByReader.set(row.anon_id, (visitCountsByReader.get(row.anon_id) || 0) + 1);
+	}
+
+	const namesByLabel = new Map<
+		string,
+		{
+			name: string;
+			created_at: number;
+			visitCount: number;
+			nameCount: number;
+			devices: Set<string>;
+			firstReferrers: Set<string>;
+		}
+	>();
+
+	for (const [anonId, entry] of nameLatest.entries()) {
+		const aggregate =
+			namesByLabel.get(entry.name) ?? {
+				name: entry.name,
+				created_at: 0,
+				visitCount: 0,
+				nameCount: 0,
+				devices: new Set<string>(),
+				firstReferrers: new Set<string>()
+			};
+		aggregate.created_at = Math.max(aggregate.created_at, entry.created_at);
+		aggregate.visitCount += visitCountsByReader.get(anonId) || 0;
+		aggregate.nameCount += 1;
+		const devices = devicesByReader.get(anonId);
+		if (devices) {
+			for (const device of devices) aggregate.devices.add(device);
+		}
+		aggregate.firstReferrers.add(
+			bucketReferrer(firstReferrer.get(anonId)?.referrer || 'direct', url.origin)
+		);
+		namesByLabel.set(entry.name, aggregate);
+	}
+
+	const names = Array.from(namesByLabel.values())
+		.map((entry) => ({
+			name: entry.name,
+			created_at: entry.created_at,
+			visitCount: entry.visitCount,
+			nameCount: entry.nameCount,
+			devices: Array.from(entry.devices),
+			firstReferrer:
+				entry.firstReferrers.size === 1
+					? Array.from(entry.firstReferrers)[0]
+					: 'mixed'
+		}))
+		.sort((a, b) => {
+			if (b.visitCount !== a.visitCount) return b.visitCount - a.visitCount;
+			return b.created_at - a.created_at;
+		});
 
 	const perPostMap = new Map<
 		string,
@@ -140,21 +242,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const readerBreakdownMap = new Map<
 		string,
-		{ name: string; posts: Map<string, { event: string; title: string }> }
+		{ name: string; posts: Map<string, { event: string; title: string; lastSeen: number }> }
 	>();
 
 	for (const row of postRows) {
 		const nameEntry = nameLatest.get(row.anon_id);
 		if (!nameEntry) continue;
 		const existing =
-			readerBreakdownMap.get(row.anon_id) ?? { name: nameEntry.name, posts: new Map() };
-		if (!existing.posts.has(row.event)) {
+			readerBreakdownMap.get(nameEntry.name) ?? { name: nameEntry.name, posts: new Map() };
+		const currentPost = existing.posts.get(row.event);
+		if (!currentPost || row.created_at > currentPost.lastSeen) {
 			existing.posts.set(row.event, {
 				event: row.event,
-				title: titleMap.get(row.event) || row.event
+				title: titleMap.get(row.event) || row.event,
+				lastSeen: row.created_at
 			});
 		}
-		readerBreakdownMap.set(row.anon_id, existing);
+		readerBreakdownMap.set(nameEntry.name, existing);
 	}
 
 	const perPost = Array.from(perPostMap.values())
@@ -182,8 +286,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		readerBreakdown: Array.from(readerBreakdownMap.values())
 			.map((reader) => ({
 				name: reader.name,
-				posts: Array.from(reader.posts.values()).sort((a, b) => b.percent - a.percent)
+				posts: Array.from(reader.posts.values()).sort((a, b) => b.lastSeen - a.lastSeen)
 			}))
-			.sort((a, b) => a.name.localeCompare(b.name))
+			.sort((a, b) => a.name.localeCompare(b.name)),
+		visitSeries: buildVisitSeries(visitRows, VISIT_WINDOW_DAYS)
 	};
 };

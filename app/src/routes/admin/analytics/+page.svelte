@@ -1,9 +1,74 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	const formatDate = (value: number) => new Date(value).toLocaleString();
+	const formatShortDate = (value: number) =>
+		new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+	const formatLongDate = (value: number) =>
+		new Date(value).toLocaleDateString(undefined, {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric'
+		});
+
+	const refreshIntervalMs = 30000;
+
+	onMount(() => {
+		if (!data.loggedIn) return;
+		const timer = window.setInterval(() => {
+			void invalidateAll();
+		}, refreshIntervalMs);
+
+		return () => window.clearInterval(timer);
+	});
+
+	const chartWidth = 640;
+	const chartHeight = 220;
+	const chartPadding = { x: 24, y: 24 };
+	let hoverIndex = -1;
+
+	const getVisitPoints = (series: { count: number }[], maxValue: number) => {
+		if (series.length === 0) return '';
+		const innerWidth = chartWidth - chartPadding.x * 2;
+		const innerHeight = chartHeight - chartPadding.y * 2;
+		const step = series.length > 1 ? innerWidth / (series.length - 1) : 0;
+		return series
+			.map((entry, index) => {
+				const x = chartPadding.x + index * step;
+				const y =
+					chartPadding.y + innerHeight - (entry.count / maxValue) * innerHeight;
+				return `${x},${y}`;
+			})
+			.join(' ');
+	};
+
+	$: visitSeries = data?.visitSeries ?? [];
+	$: maxVisits = Math.max(1, ...visitSeries.map((entry) => entry.count));
+	$: visitPoints = getVisitPoints(visitSeries, maxVisits);
+	$: visitPointData = visitSeries.map((entry, index) => {
+		const innerWidth = chartWidth - chartPadding.x * 2;
+		const innerHeight = chartHeight - chartPadding.y * 2;
+		const step = visitSeries.length > 1 ? innerWidth / (visitSeries.length - 1) : 0;
+		const x = chartPadding.x + index * step;
+		const y = chartPadding.y + innerHeight - (entry.count / maxVisits) * innerHeight;
+		return { x, y, entry };
+	});
+	$: lastIndex = visitSeries.length - 1;
+	$: lastPoint = lastIndex >= 0 ? visitSeries[lastIndex] : null;
+	$: lastX =
+		chartPadding.x +
+		(lastIndex > 0 ? (chartWidth - chartPadding.x * 2) / lastIndex : 0) * lastIndex;
+	$: lastY =
+		lastPoint
+			? chartPadding.y +
+				(chartHeight - chartPadding.y * 2) -
+				(lastPoint.count / maxVisits) * (chartHeight - chartPadding.y * 2)
+			: chartHeight - chartPadding.y;
+	$: hoverPoint = hoverIndex >= 0 ? visitPointData[hoverIndex] : null;
 </script>
 
 <svelte:head>
@@ -45,6 +110,71 @@
 				<p class="label">Named readers</p>
 				<p class="value">{data.totals?.uniqueNamedReaders ?? 0}</p>
 			</div>
+		</section>
+
+		<section class="section">
+			<h2>Visits over time</h2>
+			{#if visitSeries.length === 0}
+				<p class="muted">No visits yet.</p>
+			{:else}
+				<div class="chart">
+					<svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-label="Visits over time">
+						<defs>
+							<linearGradient id="visitFill" x1="0" x2="0" y1="0" y2="1">
+								<stop offset="0%" stop-color="rgba(248, 223, 114, 0.5)" />
+								<stop offset="100%" stop-color="rgba(248, 223, 114, 0)" />
+							</linearGradient>
+						</defs>
+						<polyline
+							points={visitPoints}
+							fill="none"
+							stroke="rgba(248, 223, 114, 0.95)"
+							stroke-width="3"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+						<polyline
+							points={`${visitPoints} ${chartWidth - chartPadding.x},${chartHeight - chartPadding.y} ${chartPadding.x},${chartHeight - chartPadding.y}`}
+							fill="url(#visitFill)"
+							stroke="none"
+						/>
+						<circle cx={lastX} cy={lastY} r="5" fill="#f8df72" />
+						<circle cx={lastX} cy={lastY} r="9" fill="rgba(248, 223, 114, 0.2)" />
+						{#each visitPointData as point, index}
+							<circle
+								cx={point.x}
+								cy={point.y}
+								r={index === hoverIndex ? 6 : 4}
+								fill={index === hoverIndex ? '#f8df72' : 'rgba(248, 223, 114, 0.5)'}
+							/>
+							<circle
+								cx={point.x}
+								cy={point.y}
+								r="12"
+								fill="transparent"
+								class="chart-hit"
+								on:mouseenter={() => (hoverIndex = index)}
+								on:focus={() => (hoverIndex = index)}
+								on:mouseleave={() => (hoverIndex = -1)}
+								tabindex="0"
+							/>
+						{/each}
+					</svg>
+					{#if hoverPoint}
+						<div
+							class="chart__tooltip"
+							style={`left: ${(hoverPoint.x / chartWidth) * 100}%; top: ${(hoverPoint.y / chartHeight) * 100}%;`}
+						>
+							<span>{formatLongDate(hoverPoint.entry.timestamp)}</span>
+							<strong>{hoverPoint.entry.count} visits</strong>
+						</div>
+					{/if}
+					<div class="chart__footer">
+						<span>{formatShortDate(visitSeries[0].timestamp)}</span>
+						<span>{formatShortDate(visitSeries[visitSeries.length - 1].timestamp)}</span>
+					</div>
+				</div>
+			{/if}
 		</section>
 
 		<section class="section">
@@ -128,15 +258,24 @@
 				<p class="muted">No names submitted yet.</p>
 			{:else}
 				<div class="table readers-table">
-					<div class="row row--three head">
+					<div class="row row--four head">
 						<span>Name</span>
+						<span>Visits</span>
 						<span>Last seen</span>
 						<span>Posts visited</span>
 					</div>
 					{#each data.names as entry}
 						{@const reader = data.readerBreakdown.find((item) => item.name === entry.name)}
-						<div class="row row--three">
-							<span class="row-title">{entry.name}</span>
+						<div class="row row--four">
+							<span class="row-title">
+								{entry.name}
+								{#if entry.nameCount > 1}
+									<span class="row-sub name-meta">
+										({entry.nameCount}x · {entry.devices.join('/')})
+									</span>
+								{/if}
+							</span>
+							<span>{entry.visitCount}</span>
 							<span>{formatDate(entry.created_at)}</span>
 							<div class="visited-tags">
 								{#if reader && reader.posts.length > 0}
@@ -200,6 +339,56 @@
 	.analytics h1 {
 		margin: 0.35rem 0 0;
 		font-size: clamp(1.8rem, 3vw, 2.4rem);
+	}
+
+	.chart {
+		border-radius: 1.25rem;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: rgba(255, 255, 255, 0.03);
+		padding: 1.25rem 1.5rem;
+		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+		position: relative;
+	}
+
+	.chart svg {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+	.chart__footer {
+		margin-top: 0.75rem;
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.75rem;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.45);
+	}
+
+	.chart__tooltip {
+		position: absolute;
+		transform: translate(-50%, -120%);
+		padding: 0.4rem 0.7rem;
+		border-radius: 0.75rem;
+		background: rgba(10, 10, 10, 0.9);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		font-size: 0.75rem;
+		color: #f8f7f3;
+		display: grid;
+		gap: 0.1rem;
+		pointer-events: none;
+		text-align: center;
+		box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+	}
+
+	.chart__tooltip strong {
+		font-weight: 600;
+		color: #f8df72;
+	}
+
+	.chart-hit {
+		cursor: pointer;
 	}
 
 	.eyebrow {
@@ -292,6 +481,11 @@
 		align-items: start;
 	}
 
+	.row.row--four {
+		grid-template-columns: minmax(0, 0.9fr) 0.4fr 0.7fr minmax(0, 1.4fr);
+		align-items: start;
+	}
+
 	.row-title {
 		font-weight: 600;
 		margin: 0;
@@ -301,6 +495,11 @@
 		margin: 0.2rem 0 0;
 		font-size: 0.8rem;
 		opacity: 0.7;
+	}
+
+	.name-meta {
+		font-size: 0.7rem;
+		letter-spacing: 0.02em;
 	}
 
 	.split {

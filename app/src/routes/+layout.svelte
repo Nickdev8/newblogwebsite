@@ -158,7 +158,8 @@
 			<p class="text-xs uppercase tracking-[0.3em] text-slate-400">Quick hello</p>
 			<h2 id="intro-title" class="mt-2 text-3xl font-semibold text-white">Before you read</h2>
 			<p class="mt-3 text-sm text-slate-200">
-				Optional: share your name so I can see who found this blog.
+				Optional: share a first name if you want it to show up in my private reader analytics.
+				Skipping won’t change your experience.
 			</p>
 
 			<div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
