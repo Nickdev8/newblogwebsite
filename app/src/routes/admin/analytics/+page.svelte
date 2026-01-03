@@ -276,7 +276,7 @@
 								{/if}
 							</span>
 							<span>{entry.visitCount}</span>
-							<span>{formatDate(entry.created_at)}</span>
+							<span>{formatDate(entry.lastSeen)}</span>
 							<div class="visited-tags">
 								{#if reader && reader.posts.length > 0}
 									{#each reader.posts as post}

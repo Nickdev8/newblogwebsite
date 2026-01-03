@@ -163,15 +163,20 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	const visitCountsByReader = new Map<string, number>();
+	const lastSeenByReader = new Map<string, number>();
 	for (const row of visitRows) {
 		visitCountsByReader.set(row.anon_id, (visitCountsByReader.get(row.anon_id) || 0) + 1);
+		const currentLastSeen = lastSeenByReader.get(row.anon_id) || 0;
+		if (row.created_at > currentLastSeen) {
+			lastSeenByReader.set(row.anon_id, row.created_at);
+		}
 	}
 
 	const namesByLabel = new Map<
 		string,
 		{
 			name: string;
-			created_at: number;
+			lastSeen: number;
 			visitCount: number;
 			nameCount: number;
 			devices: Set<string>;
@@ -183,13 +188,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const aggregate =
 			namesByLabel.get(entry.name) ?? {
 				name: entry.name,
-				created_at: 0,
+				lastSeen: 0,
 				visitCount: 0,
 				nameCount: 0,
 				devices: new Set<string>(),
 				firstReferrers: new Set<string>()
 			};
-		aggregate.created_at = Math.max(aggregate.created_at, entry.created_at);
+		const lastSeen = lastSeenByReader.get(anonId) || entry.created_at;
+		aggregate.lastSeen = Math.max(aggregate.lastSeen, lastSeen);
 		aggregate.visitCount += visitCountsByReader.get(anonId) || 0;
 		aggregate.nameCount += 1;
 		const devices = devicesByReader.get(anonId);
@@ -205,7 +211,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const names = Array.from(namesByLabel.values())
 		.map((entry) => ({
 			name: entry.name,
-			created_at: entry.created_at,
+			lastSeen: entry.lastSeen,
 			visitCount: entry.visitCount,
 			nameCount: entry.nameCount,
 			devices: Array.from(entry.devices),
@@ -216,7 +222,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		}))
 		.sort((a, b) => {
 			if (b.visitCount !== a.visitCount) return b.visitCount - a.visitCount;
-			return b.created_at - a.created_at;
+			return b.lastSeen - a.lastSeen;
 		});
 
 	const perPostMap = new Map<
