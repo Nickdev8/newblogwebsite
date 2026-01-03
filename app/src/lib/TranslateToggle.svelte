@@ -19,15 +19,32 @@
 		return match ? decodeURIComponent(match.split('=')[1] || '') : '';
 	};
 
+	const getBaseDomain = (host: string) => {
+		const parts = host.split('.');
+		if (parts.length <= 2) return host;
+		return parts.slice(-2).join('.');
+	};
+
 	const setCookie = (value: string, maxAgeSeconds: number) => {
-		document.cookie = `${COOKIE_KEY}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}`;
+		const encoded = encodeURIComponent(value);
+		const host = window.location.hostname;
+		const base = getBaseDomain(host);
+		document.cookie = `${COOKIE_KEY}=${encoded}; path=/; max-age=${maxAgeSeconds}`;
+		if (base !== host && host.includes('.')) {
+			document.cookie = `${COOKIE_KEY}=${encoded}; path=/; max-age=${maxAgeSeconds}; domain=.${base}`;
+		}
 	};
 
 	const clearCookie = () => {
 		const host = window.location.hostname;
+		const base = getBaseDomain(host);
 		document.cookie = `${COOKIE_KEY}=; path=/; max-age=0`;
 		document.cookie = `${COOKIE_KEY}=; path=/; domain=${host}; max-age=0`;
 		document.cookie = `${COOKIE_KEY}=; path=/; domain=.${host}; max-age=0`;
+		if (base !== host && host.includes('.')) {
+			document.cookie = `${COOKIE_KEY}=; path=/; domain=${base}; max-age=0`;
+			document.cookie = `${COOKIE_KEY}=; path=/; domain=.${base}; max-age=0`;
+		}
 	};
 
 	const applyLanguage = async (nextIsDutch: boolean) => {
@@ -36,7 +53,8 @@
 		if (nextIsDutch) {
 			setCookie('/en/nl', 60 * 60 * 24 * 365);
 		} else {
-			clearCookie();
+			// Force original language across subdomains in production.
+			setCookie('/en/en', 60 * 60 * 24 * 365);
 		}
 		await trackReaderEvent({ kind: 'language', language: nextIsDutch ? 'nl' : 'en' });
 		open = false;
@@ -47,7 +65,7 @@
 		const stored = localStorage.getItem(LANG_KEY);
 		const cookie = getCookieValue(COOKIE_KEY);
 		if (stored === 'en') {
-			clearCookie();
+			setCookie('/en/en', 60 * 60 * 24 * 365);
 			isDutch = false;
 			return;
 		}
