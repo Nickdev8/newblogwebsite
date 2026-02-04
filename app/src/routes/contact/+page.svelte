@@ -50,19 +50,7 @@
     A Simple Hi is good eneugh
   </h4>
 
-  {#if isSubmitting}
-    <div class="rounded-lg border border-blue-200 bg-blue-50 p-8 shadow-lg dark:border-blue-900/60 dark:bg-blue-900/30" role="status" aria-live="polite">
-      <div class="flex items-start gap-4">
-        <span class="mt-1 h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-blue-500 border-t-transparent dark:border-blue-300"></span>
-        <div>
-          <p class="text-lg font-semibold text-blue-900 dark:text-blue-100">Sending your message…</p>
-          <p class="mt-1 text-sm text-blue-800/80 dark:text-blue-200/80">
-            This can take a few seconds. Please keep this tab open.
-          </p>
-        </div>
-      </div>
-    </div>
-  {:else if formResult.success}
+  {#if formResult.success}
     <div class="rounded-lg border border-green-300 bg-green-50 p-8 shadow-lg dark:border-green-700 dark:bg-green-900/30">
       <h2 class="text-2xl font-semibold text-green-900 dark:text-green-100">Message sent</h2>
       <p class="mt-2 text-sm text-green-800/90 dark:text-green-200/80">
@@ -84,7 +72,30 @@
       </div>
     </div>
   {:else}
-    <form method="POST" action="/contact" use:enhance={handleEnhance} class="space-y-6 rounded-lg bg-white p-8 shadow-lg transition-colors duration-300 dark:bg-gray-800">
+    <div class="relative">
+      {#if isSubmitting}
+        <div class="absolute inset-0 z-10 flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50/95 p-8 shadow-lg dark:border-blue-900/60 dark:bg-blue-900/40" role="status" aria-live="polite">
+          <div class="flex items-start gap-4">
+            <span class="mt-1 h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-blue-500 border-t-transparent dark:border-blue-300"></span>
+            <div>
+              <p class="text-lg font-semibold text-blue-900 dark:text-blue-100">Sending your message…</p>
+              <p class="mt-1 text-sm text-blue-800/80 dark:text-blue-200/80">
+                This can take a few seconds. Please keep this tab open.
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      <form
+        method="POST"
+        action="/contact"
+        use:enhance={handleEnhance}
+        aria-busy={isSubmitting}
+        class="space-y-6 rounded-lg bg-white p-8 shadow-lg transition-colors duration-300 dark:bg-gray-800"
+        class:opacity-60={isSubmitting}
+        class:pointer-events-none={isSubmitting}
+      >
       <div>
         <label for="name" class="block mb-2 font-medium text-gray-800 dark:text-gray-200">Name</label>
         <input
@@ -180,11 +191,13 @@
 
       <button
         type="submit"
-        class="w-full rounded-md bg-blue-600 py-3 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+        disabled={isSubmitting}
+        class="w-full rounded-md bg-blue-600 py-3 font-semibold text-white shadow-md transition-colors duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
-        Send Message
+        {#if isSubmitting}Sending…{:else}Send Message{/if}
       </button>
-    </form>
+      </form>
+    </div>
 
     {#if formResult.error}
       <div class="mt-6 flex items-start gap-3 rounded-lg border border-red-300 bg-red-50 p-4 text-red-900 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200" role="alert">
