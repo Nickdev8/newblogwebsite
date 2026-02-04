@@ -28,7 +28,7 @@ They host events where you get prizes for shipping personal projects.
 For Moonshot, me and Nasi made a project for school. A Disco Prullenbak (trash bin).  
 It is a big blue bin where, as soon as you throw something in, music starts playing, LEDs start dancing, a smoke machine goes off, and a disco ball spins.
 
-Along with some other smaller projects, we both got enough hours to come.
+Along with some other projects, we both got enough hours to come.
 
 ## **It’s official!**
 I have got the tickets, post-event accommodation, hotels in Orlando and Miami, and a nice layover in New York during Christmas.  
