@@ -31,3 +31,4 @@ app/*/*.jpg
 app/*/*.jpeg
 app/*/*.svg
 .env
+.env.prod
