@@ -31,5 +31,5 @@ app/*/*.jpg
 app/*/*.jpeg
 app/*/*.svg
 .env
-.env.prod
-.env.prod
+.env.*
+!.env.example
