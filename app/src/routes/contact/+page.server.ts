@@ -6,12 +6,12 @@ import { env } from '$env/dynamic/private';
 export const prerender = false;
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.hostinger.com',
-  port: 465,           // SSL
-  secure: true,        // true for 465, false for 587
+  host: env.SMTP_HOST,
+  port: Number(env.SMTP_PORT),
+  secure: env.SMTP_SECURE === 'true',
   auth: {
-    user: env.EMAIL_APP_USER,
-    pass: env.EMAIL_APP_PASSWORD
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASSWORD
   }
 });
 
@@ -77,8 +77,8 @@ Sender name: ${name}
 
     try {
       await transporter.sendMail({
-        from: `"blog.nickesselman.nl" <${env.EMAIL_APP_USER}>`,
-        to: env.EMAIL_APP_TO_ADDRESS,
+        from: env.EMAIL_FROM,
+        to: env.EMAIL_TO,
         ...(replyTo ? { replyTo } : {}),
         subject: `New message (${method}) from ${name}`,
         text: fullText
