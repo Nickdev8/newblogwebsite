@@ -1,9 +1,12 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import { enhance } from '$app/forms';
 
-  let formResult: { success?: boolean; message?: string; error?: string } = {};
-  $: formResult = $page.form ?? {};
+  type FormResult = { success?: boolean; message?: string; error?: string };
+  let clientResult: FormResult | null = null;
+  let formResult: FormResult = {};
+  $: formResult = clientResult ?? ($page.form ?? {});
 
   let name = '';
   let email = '';
@@ -12,11 +15,27 @@
   let contactDetail: string = '';
   let isSubmitting = false;
 
+  const resetFormView = () => {
+    clientResult = null;
+  };
+
   const handleEnhance = () => {
     isSubmitting = true;
-    return async ({ update }) => {
+    return async ({ result }) => {
       try {
-        await update();
+        if (result.type === 'redirect') {
+          await goto(result.location);
+          return;
+        }
+
+        if (result.type === 'error') {
+          clientResult = { error: 'Failed to send message. Please try again.' };
+          return;
+        }
+
+        if (result.type === 'success' || result.type === 'failure') {
+          clientResult = result.data as FormResult;
+        }
       } finally {
         isSubmitting = false;
       }
@@ -57,12 +76,13 @@
         {formResult.message ?? 'Your message was sent successfully.'}
       </p>
       <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-        <a
-          href="/contact"
+        <button
+          type="button"
+          on:click={resetFormView}
           class="inline-flex items-center justify-center rounded-md border border-green-600 bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition-colors hover:bg-green-700"
         >
           Send another message
-        </a>
+        </button>
         <a
           href="/"
           class="inline-flex items-center justify-center rounded-md border border-green-600 px-5 py-2.5 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100 dark:border-green-500 dark:text-green-200 dark:hover:bg-green-900/40"
