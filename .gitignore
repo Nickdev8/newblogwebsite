@@ -32,3 +32,4 @@ app/*/*.jpeg
 app/*/*.svg
 .env
 .env.prod
+.env.prod
