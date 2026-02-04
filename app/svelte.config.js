@@ -1,5 +1,5 @@
 import adapter from '@sveltejs/adapter-node';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'; // <- for Svelte 4
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
 
 const config = {
@@ -17,7 +17,6 @@ const config = {
 				throw new Error(`Error ${status} while prerendering ${path}`);
 			}
 		}
-		// no prerender.default in v2
 	}
 };
 

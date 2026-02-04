@@ -40,7 +40,6 @@
   </h4>
 
   <form method="POST" action="/contact" use:enhance class="space-y-6 rounded-lg bg-white shadow-lg p-8 transition-colors duration-300 dark:bg-gray-800">
-    <!-- Name -->
     <div>
       <label for="name" class="block mb-2 font-medium text-gray-800 dark:text-gray-200">Name</label>
       <input
@@ -54,7 +53,6 @@
       />
     </div>
 
-    <!-- Preferred Contact Method -->
     <div>
       <label for="contactMethod" class="block mb-2 font-medium text-gray-800 dark:text-gray-200">
         How should I get back to you?
@@ -76,7 +74,6 @@
       </select>
     </div>
 
-    <!-- Conditional Contact Detail -->
     {#if contactMethod === 'email'}
       <div>
         <label for="email" class="block mb-2 font-medium text-gray-800 dark:text-gray-200">Email</label>
@@ -121,7 +118,6 @@
       </div>
     {/if}
 
-    <!-- Message -->
     <div>
       <label for="message" class="block mb-2 font-medium text-gray-800 dark:text-gray-200">Message</label>
       <textarea
@@ -135,7 +131,6 @@
       ></textarea>
     </div>
 
-    <!-- Honeypot -->
     <input type="text" name="subject" class="hidden" />
 
     <button
@@ -148,7 +143,6 @@
 
   {#if formResult.success}
     <div class="mt-6 flex items-start gap-3 rounded-lg border border-green-300 bg-green-50 p-4 text-green-900 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200" role="alert">
-      <!-- success icon... -->
       <p class="text-sm font-medium">{formResult.message}</p>
     </div>
   {/if}
@@ -159,5 +153,4 @@
     </div>
   {/if}
 </div>
-
 

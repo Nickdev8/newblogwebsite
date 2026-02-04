@@ -14,7 +14,6 @@
 		setTimeout(() => map?.invalidateSize(), 200);
 	};
 
-	// Switch tile layers dynamically
 	function updateMapTiles(dark: boolean, L: any) {
 		const tileUrl = dark
 			? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
@@ -38,7 +37,6 @@
 			errorTileUrl: 'https://tile.openstreetmap.org/10/511/340.png'
 		};
 
-		// Only provide subdomains if using {s} in the URL
 		if (tileUrl.includes('{s}')) {
 			options.subdomains = 'abc';
 		}

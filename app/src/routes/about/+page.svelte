@@ -21,7 +21,6 @@
 	function playMuted(node: HTMLVideoElement) {
 		node.muted = true;
 		node.play().catch(() => {
-			// autoplay might get blocked
 		});
 	}
 </script>

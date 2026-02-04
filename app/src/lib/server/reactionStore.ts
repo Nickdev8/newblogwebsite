@@ -8,7 +8,7 @@ export type DB = { rows: Row[] };
 
 const FILE = process.env.REACTIONS_FILE || path.resolve('data/reactions.json');
 
-// serialize all mutations
+// Serialize mutations to avoid concurrent writes.
 let queue: Promise<void> = Promise.resolve();
 
 async function readSafe(): Promise<DB> {

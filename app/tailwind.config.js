@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
@@ -9,6 +8,5 @@ export default {
     },
   },
   plugins: [],
-  darkMode: 'class', // add this line
+  darkMode: 'class',
 }
-

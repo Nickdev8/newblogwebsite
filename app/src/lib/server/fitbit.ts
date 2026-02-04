@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 type StatsCache = {
-	steps: number | null; // last 24h steps
+	steps: number | null;
 	distanceKm: number | null;
 	activeMinutes: number | null;
 	caloriesOut: number | null;
@@ -16,14 +16,14 @@ type StatsCache = {
 	stepsWeek: number | null;
 	floors: number | null;
 	errorMessage: string | null;
-	lastUpdated: number | null; // unix seconds
-	nextRefresh: number | null; // unix seconds
+	lastUpdated: number | null;
+	nextRefresh: number | null;
 };
 
 type TokenState = {
 	accessToken: string | null;
 	refreshToken: string | null;
-	expiresAt: number; // unix seconds
+	expiresAt: number;
 };
 
 type StoredTokens = {
@@ -52,7 +52,6 @@ const loadEnvFile = (filePath: string) => {
 				}
 			});
 	} catch {
-		// ignore missing/invalid env file
 	}
 };
 
@@ -61,9 +60,9 @@ const ensureEnvLoaded = () => {
 	envLoaded = true;
 	const cwd = process.cwd();
 
-	// Support running from repo root or /app by checking both locations explicitly
+	// Check both repo root and app dir for local env files.
 	const currentFile = fileURLToPath(import.meta.url);
-	const appDir = path.resolve(currentFile, '../../..'); // /app
+	const appDir = path.resolve(currentFile, '../../..');
 	const repoRoot = path.resolve(appDir, '..');
 
 	const candidates = new Set([
@@ -82,7 +81,7 @@ const ensureEnvLoaded = () => {
 
 const readEnv = (key: string) => process.env[key] ?? env[key];
 
-// Store tokens inside the project workspace for durability across restarts
+// Persist tokens under the workspace to survive restarts.
 const resolveTokenDir = () => {
 	ensureEnvLoaded();
 
@@ -91,7 +90,6 @@ const resolveTokenDir = () => {
 		return path.resolve(tokenDirEnv);
 	}
 
-	// Support running from either /app or the repo root containing /app
 	const cwd = process.cwd();
 	const candidates = [path.resolve(cwd, 'data/fitbit'), path.resolve(cwd, 'app/data/fitbit')];
 	const existing = candidates.find((dir) => existsSync(dir) || existsSync(path.dirname(dir)));
@@ -133,7 +131,6 @@ const ensureTokenDir = async () => {
 	try {
 		await mkdir(TOKEN_DIR, { recursive: true });
 	} catch {
-		// ignore if already exists or cannot create; downstream read/write will surface errors
 	}
 };
 
@@ -267,8 +264,7 @@ const refreshAccessToken = async (allowEnvReset = true): Promise<boolean> => {
 		const isInvalidGrant = response.status === 400 && text.includes('invalid_grant');
 
 		if (isInvalidGrant && allowEnvReset) {
-			// Allow replacing stale tokens with fresh values provided via env vars
-			const reset = await applyEnvTokens();
+		const reset = await applyEnvTokens();
 			if (reset) {
 				return refreshAccessToken(false);
 			}
@@ -302,7 +298,7 @@ const ensureValidAccessToken = async () => {
 		return refreshAccessToken();
 	}
 
-	// Refresh a little early to avoid edge expiry
+	// Refresh slightly early to avoid expiry races.
 	if (now >= tokenState.expiresAt - 30) {
 		return refreshAccessToken();
 	}
@@ -421,7 +417,6 @@ const fetchHeartRate = async (): Promise<number | null> => {
 
 	const today = new Date().toISOString().slice(0, 10);
 
-	// Try intraday first (requires intraday scope)
 	try {
 		const response = await fetch(
 			`${FITBIT_API_BASE}/1/user/-/activities/heart/date/${today}/1d/1min.json`,
@@ -444,7 +439,6 @@ const fetchHeartRate = async (): Promise<number | null> => {
 		console.error('Fitbit heart intraday fetch error:', error);
 	}
 
-	// Fallback to summary
 	try {
 		const response = await fetch(`${FITBIT_API_BASE}/1/user/-/activities/heart/date/${today}/1d.json`, {
 			headers: { Authorization: `Bearer ${tokenState.accessToken}` }
@@ -562,7 +556,7 @@ const fetchStepsLast24h = async (): Promise<number | null> => {
 			const boundary = now.getTime() - 24 * 60 * 60 * 1000;
 			const total = datasets.reduce((sum, entry) => {
 				if (!entry.time || typeof entry.value !== 'number' || !entry.dateStr) return sum;
-				// Combine date with time; assume local server timezone
+				// Combine date + time in the server timezone.
 				const ts = new Date(`${entry.dateStr}T${entry.time}`).getTime();
 				if (Number.isNaN(ts) || ts < boundary || ts > now.getTime()) return sum;
 				return sum + entry.value;
@@ -577,7 +571,7 @@ const fetchStepsLast24h = async (): Promise<number | null> => {
 		return intradayTotal;
 	}
 
-	// Fallback: if intraday is unavailable, approximate last 24h as today + yesterday totals
+	// Approximate last 24h if intraday is unavailable.
 	try {
 		const start = formatDate(yesterday);
 		const end = formatDate(now);

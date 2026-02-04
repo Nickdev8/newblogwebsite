@@ -14,7 +14,6 @@ RUN npm ci --omit=dev
 COPY --from=builder /work/build ./build
 COPY app/src/posts ./src/posts
 COPY app/static ./static
-# ensure token directory exists; bind mount will overlay in compose
 RUN mkdir -p /app/data/fitbit
 ENV HOST=0.0.0.0
 ENV PORT=3000

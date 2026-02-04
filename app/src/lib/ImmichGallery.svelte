@@ -3,11 +3,10 @@
 	import { onDestroy } from 'svelte';
 
 	export let shareUrl: string = '';
-	// Retain legacy props so existing usages remain valid even though we no longer render them.
+	// Legacy props kept for older embeds.
 	export let title: string | undefined = undefined;
 	export let description: string | undefined = undefined;
 	$: if (title || description) {
-		// Legacy props are acknowledged silently to avoid breaking embeddings that still pass them.
 	}
 
 	type GalleryAsset = {

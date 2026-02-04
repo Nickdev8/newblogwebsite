@@ -152,7 +152,6 @@
 	}
 }
 
-/* Optional: dark mode for prose (markdown content) */
 :global(.dark .prose) {
 	--tw-prose-body: #d1d5db;
 	--tw-prose-headings: #fff;
@@ -175,7 +174,6 @@
 	filter: brightness(0.7) contrast(0.85) hue-rotate(180deg) saturate(0.9);
 }
 
-/* Hide Google Translate attribution banner + tooltips. */
 .goog-te-banner-frame.skiptranslate,
 .goog-te-banner-frame,
 .goog-te-balloon-frame,
@@ -188,13 +186,11 @@ body {
 	top: 0 !important;
 }
 
-/* Hide Google Translate loading spinner overlay. */
 .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
 .VIpgJd-ZVi9od-aZ2wEe-OiiCO {
 	display: none !important;
 }
 
-/* Hide Google Translate top banner/iframe. */
 .skiptranslate,
 iframe.VIpgJd-ZVi9od-ORHb-OEVmcd {
 	display: none !important;

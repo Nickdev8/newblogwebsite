@@ -62,7 +62,7 @@ const buildWeeksFromDays = (days: ContributionDay[]): ContributionWeek[] => {
 };
 
 const fallbackCache = new Map<string, { data: ContributionCalendar; timestamp: number }>();
-const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
+const CACHE_DURATION = 1000 * 60 * 30;
 
 const fetchFallbackCalendar = async ({ from, to }: { from?: string; to?: string }): Promise<ContributionCalendar | null> => {
 	if (!owner || !from || !to) return null;

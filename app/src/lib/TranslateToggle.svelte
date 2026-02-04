@@ -53,7 +53,6 @@
 		if (nextIsDutch) {
 			setCookie('/en/nl', 60 * 60 * 24 * 365);
 		} else {
-			// Force original language across subdomains in production.
 			setCookie('/en/en', 60 * 60 * 24 * 365);
 		}
 		await trackReaderEvent({ kind: 'language', language: nextIsDutch ? 'nl' : 'en' });

@@ -99,7 +99,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		};
 	});
 
-	// Newest entries first on the home page
 	events.sort((a, b) => (b.latestDate || 0) - (a.latestDate || 0));
 
 	return {

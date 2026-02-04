@@ -1,7 +1,6 @@
 <script>
   import { onMount } from 'svelte';
 
-  // Random jokes for the 404 page
   const jokes = [
     "Oops—looks like you fell into the void 🕳️",
     "This isn’t the page you’re looking for… (★_★)",
@@ -18,7 +17,6 @@
   let joke = '';
 
   onMount(() => {
-    // Pick a random joke once mounted
     joke = jokes[Math.floor(Math.random() * jokes.length)];
   });
 
@@ -31,21 +29,17 @@
   <title>404 — Page Not Found</title>
 </svelte:head>
 
-<!-- Use <main> with calculated height (subtract header height) to avoid overlap -->
 <main class="relative flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4"
       style="min-height: calc(100vh - 4rem);">
   <div class="text-center max-w-md w-full">
-    <!-- Static 404 code with subtle bounce -->
     <div class="font-extrabold text-indigo-600 dark:text-indigo-400 text-5xl sm:text-7xl lg:text-9xl leading-tight">
       404
     </div>
 
-    <!-- Display random joke -->
     <p class="mt-4 text-gray-700 dark:text-gray-300 text-base sm:text-lg">
       {joke}
     </p>
 
-    <!-- Responsive home button -->
     <button
       class="mt-6 inline-block px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
       on:click={goHome}
@@ -56,14 +50,12 @@
 
 
   
-  <!-- Footer credit -->
   <div class="absolute bottom-2 right-2 text-gray-500 dark:text-gray-400 text-xs">
     yes. chatgpt made this 404 page
   </div>
 </main>
 
 <style>
-  /* Subtle bounce on load for fun effect */
   .font-extrabold {
     animation: bounce 1s ease-out;
   }

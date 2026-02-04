@@ -47,11 +47,11 @@ type PushEvent = {
 	};
 };
 
-const RECENT_CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
+const RECENT_CACHE_DURATION = 1000 * 60 * 5;
 const recentCache: { timestamp: number; data: GithubCommit[] } = { timestamp: 0, data: [] };
 
 const rangeCache = new Map<string, { timestamp: number; data: GithubCommit[] }>();
-const RANGE_CACHE_DURATION = 1000 * 60 * 10; // 10 minutes
+const RANGE_CACHE_DURATION = 1000 * 60 * 10;
 
 async function gatherPushCommits(maxCommits: number, maxPages = 4): Promise<GithubCommit[]> {
 	if (!ownerConfigured()) return [];

@@ -145,10 +145,8 @@ export const actions: Actions = {
 };
 
 const normalizeImages = async (input: string) => {
-	// Strip layout tokens like {hole}, {vertical}, etc.
 	let output = input.replace(/!\[([^\]]*)\]\(([^)]+)\)\{[^}]*\}/g, '![$1]($2)');
 
-	// Resolve Immich share links to direct asset URLs when possible
 	const shareRegex = /https?:\/\/photos\.nickesselman\.nl\/share\/([A-Za-z0-9_-]+)/gi;
 	const shares = new Set<string>();
 	for (const match of output.matchAll(shareRegex)) {
@@ -162,7 +160,6 @@ const normalizeImages = async (input: string) => {
 		}
 	}
 
-	// Convert bare Immich links on their own line into markdown images
 	output = output.replace(/^\s*(https?:\/\/photos\.nickesselman\.nl[^\s]+)\s*$/gim, (match, url) => {
 		const trimmed = match.trim();
 		if (trimmed.startsWith('![') || trimmed.startsWith('[')) return match;
@@ -178,7 +175,6 @@ const resolveImmichShare = async (shareLink: string): Promise<string | null> => 
 		const key = url.pathname.split('/').filter(Boolean).pop();
 		if (!key) return null;
 
-		// Attempt API to get asset id
 		const apiRes = await fetch(`${url.origin}/api/shared-link/${key}`, {
 			headers: { accept: 'application/json' }
 		});
@@ -189,7 +185,6 @@ const resolveImmichShare = async (shareLink: string): Promise<string | null> => 
 		const assetId = asset?.id || asset?.assetId;
 		if (!assetId) return null;
 
-		// Direct asset (download) route works for shared links
 		const candidate = `${url.origin}/api/assets/${assetId}?key=${key}`;
 		return candidate;
 	} catch (err) {

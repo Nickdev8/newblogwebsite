@@ -35,7 +35,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	const eventName = event;
 	const sections = fileContent.split('---').filter((s) => s.trim());
 
-	// Parse the MAIN frontmatter (first block)
 	const mainFMRaw = sections[0] || '';
 	const mainData = matter(`---\n${mainFMRaw}\n---`).data || {};
 	const banner = mainData.warning
@@ -61,7 +60,6 @@ export const load: PageServerLoad = async ({ params }) => {
 	const posts: EventPost[] = [];
 	const showCommitFeed = Boolean(mainData.show_commits);
 
-	// Start from the second frontmatter section, skipping the main one
 	for (let i = 1; i < sections.length; i += 2) {
 		const frontmatter = sections[i];
 		let content = sections[i + 1] || '';
@@ -150,8 +148,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		title: mainData.title || '',
 		description: mainData.description || '',
 		coverImage: toCdnPath(mainData.coverImage) || '',
-		content: '', // or mainData.content if you want
-		images: [], // or mainData.images || []
+		content: '',
+		images: [],
 		showCommitFeed,
 		tripDateRange: { start: startDate, end: endDate },
 		showContributions,

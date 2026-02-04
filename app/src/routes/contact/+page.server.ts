@@ -24,7 +24,6 @@ export const actions: Actions = {
     const method = data.get('contactMethod')?.toString();
     const detail = data.get('contactDetail')?.toString()?.trim() || '';
 
-    // Validate contact method + detail
     if (!method) {
       return fail(400, { error: 'Please select a contact method.' });
     }
@@ -49,7 +48,6 @@ export const actions: Actions = {
         if (!detail) {
           return fail(400, { error: 'Please provide your phone number.' });
         }
-        // no replyTo for non-email; we'll see in the body
         contactSummary = `Contact via ${method.toUpperCase()}: ${detail}`;
         break;
 
@@ -61,7 +59,6 @@ export const actions: Actions = {
         return fail(400, { error: 'Unknown contact method.' });
     }
 
-    // Build full email text
     const timestamp = new Date().toLocaleString('en-GB', { timeZone: 'Europe/Amsterdam' });
     const fullText = `
 Preferred contact method:
