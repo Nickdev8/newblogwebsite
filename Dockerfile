@@ -14,7 +14,7 @@ COPY --from=builder /work/node_modules ./node_modules
 COPY --from=builder /work/build ./build
 COPY app/src/posts ./src/posts
 COPY app/static ./static
-RUN mkdir -p /app/data/fitbit
+RUN mkdir -p /app/data
 ENV HOST=0.0.0.0
 ENV PORT=3000
 EXPOSE 3000

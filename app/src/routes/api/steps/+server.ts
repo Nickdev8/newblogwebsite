@@ -1,8 +1,7 @@
-import { json } from '@sveltejs/kit';
-import { getSteps } from '$lib/server/fitbit';
+import { redirect } from '@sveltejs/kit';
+import { getLiveStatsApiUrl } from '$lib/server/liveStats';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async () => {
-	const data = await getSteps();
-	return json(data);
+	throw redirect(308, getLiveStatsApiUrl());
 };

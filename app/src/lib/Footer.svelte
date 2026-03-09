@@ -4,7 +4,7 @@
 	const links = [
 		{ href: '/', label: 'Posts' },
 		{ href: '/about', label: 'About' },
-		{ href: '/contact', label: 'Contact' }
+		{ href: 'https://contact.nickesselman.nl/?from=nickesselman.nl', label: 'Contact' }
 	];
 </script>
 

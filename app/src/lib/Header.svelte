@@ -10,7 +10,7 @@
 	const navLinks = [
 		{ href: '/', label: 'Posts' },
 		{ href: '/about', label: 'About' },
-		{ href: '/contact', label: 'Contact' }
+		{ href: 'https://contact.nickesselman.nl/?from=nickesselman.nl', label: 'Contact' }
 	];
 
 	function toggleMobileMenu() {
