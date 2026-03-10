@@ -10,12 +10,12 @@ This repo contains Nick’s personal SvelteKit blog. Use it as a journal, not a 
 - About/contact and other static pages sit under `app/src/routes/...`. The About page carousel now pulls a randomized set of media from all posts (rewritten to the CDN) and the snapshot blocks were removed for a leaner layout.
 - Reactions are stored in JSON via helpers in `app/src/lib/server/reactionStore.ts`; avoid breaking that API. The `/admin` sidebar also sorts posts by most recent entry date.
 - Live stats card lives at `app/src/lib/LiveStatsCard.svelte`, is fixed bottom-left on all pages, and shows the full metrics list on mobile too (closed state is a tiny steps pill).
-- Live stats now come from an external API configured with `LIVE_STATS_API_URL` (default `https://api.nickesselman.nl/stats`). This repo should only consume that payload; it no longer owns Fitbit auth, token storage, or refresh logic.
+- Live stats now come from an external API configured with `LIVE_STATS_API_URL` (default `https://api.nickesselman.nl/stats`). This repo should only consume that payload; it no longer owns external stats auth, token storage, or refresh logic.
 - `/api/steps` remains only as a compatibility redirect to the external stats API.
 
 ## Live Stats Ownership
 
-For Fitbit scope changes, token refresh issues, or new stats endpoints, work in the sibling project `../api.nickesselman.nl` instead. Keep blog-side changes limited to payload consumption and presentation.
+For live stats source or auth changes, work in the sibling project `../api.nickesselman.nl` instead. Keep blog-side changes limited to payload consumption and presentation.
 
 ## Local workflow
 

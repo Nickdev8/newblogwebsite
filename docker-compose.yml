@@ -7,6 +7,7 @@ services:
     image: blog.nickesselman.nl:prod
     restart: unless-stopped
     env_file:
+      - ./.env
       - ./.env.prod
     environment:
       NODE_ENV: production
