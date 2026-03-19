@@ -5,6 +5,12 @@ import { marked } from 'marked';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad, EntryGenerator } from './$types';
 import { env } from '$env/dynamic/private';
+import {
+	buildSeo,
+	createArticleSchema,
+	createBreadcrumbSchema,
+	humanizeSlug
+} from '$lib/seo';
 
 const CDN_BASE = 'https://cdn.nickesselman.nl';
 const toCdnPath = (src?: string) => {
@@ -134,6 +140,15 @@ export const load: PageServerLoad = async ({ params }) => {
 	const startDate = chronologicalPosts[0]?.date;
 	const endDate = chronologicalPosts[chronologicalPosts.length - 1]?.date;
 	const showContributions = Boolean(mainData.show_contributions);
+	const eventLabel = humanizeSlug(eventName);
+	const titleBase = mainData.title || eventLabel;
+	const seoTitle = titleBase.toLowerCase().includes(eventLabel.toLowerCase())
+		? titleBase
+		: `${eventLabel}: ${titleBase}`;
+	const entryCountLabel = posts.length === 1 ? 'entry' : 'entries';
+	const seoDescription =
+		mainData.description ||
+		`${eventLabel} travel journal with ${posts.length || 'multiple'} ${entryCountLabel} by Nick Esselman.`;
 
 	const envKeyBase = eventName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
 	const scopedImmichEnvKey = `${envKeyBase}_IMMICH_ALBUM_URL`;
@@ -156,7 +171,31 @@ export const load: PageServerLoad = async ({ params }) => {
 		immichAlbum,
 		sortOrder,
 		timezone: mainData.timezone || '',
-		timezoneLabel: mainData.timezone_label || ''
+		timezoneLabel: mainData.timezone_label || '',
+		seo: buildSeo({
+			title: seoTitle,
+			description: seoDescription,
+			pathname: `/${eventName}`,
+			ogType: 'article',
+			image: toCdnPath(mainData.coverImage),
+			imageAlt: `Cover image for ${seoTitle}`,
+			publishedTime: startDate ? new Date(startDate).toISOString() : undefined,
+			modifiedTime: endDate ? new Date(endDate).toISOString() : undefined,
+			structuredData: [
+				createArticleSchema({
+					headline: seoTitle,
+					description: seoDescription,
+					pathname: `/${eventName}`,
+					image: toCdnPath(mainData.coverImage),
+					datePublished: startDate ? new Date(startDate).toISOString() : undefined,
+					dateModified: endDate ? new Date(endDate).toISOString() : undefined
+				}),
+				createBreadcrumbSchema([
+					{ name: 'Home', pathname: '/' },
+					{ name: titleBase, pathname: `/${eventName}` }
+				])
+			]
+		})
 	};
 };
 const renderMarkdown = (input: string) => {

@@ -14,7 +14,8 @@ type IncomingPayload = {
 	percent?: number;
 };
 
-const isNonEmpty = (value?: string) => typeof value === 'string' && value.trim().length > 0;
+const isNonEmpty = (value: unknown): value is string =>
+	typeof value === 'string' && value.trim().length > 0;
 
 export const POST: RequestHandler = async ({ request }) => {
 	let payload: IncomingPayload = {};
@@ -24,42 +25,48 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ ok: false }, { status: 400 });
 	}
 
-	if (!isNonEmpty(payload.anonId) || !payload.kind) {
+	const anonId = payload.anonId;
+	if (!isNonEmpty(anonId) || !payload.kind) {
 		return json({ ok: false }, { status: 400 });
 	}
 
 	const created_at = Date.now();
-	const anon_id = payload.anonId.trim();
+	const anon_id = anonId.trim();
 	const base = { anon_id, created_at } as const;
 
 	let row: ReaderRow | null = null;
 
 	switch (payload.kind) {
 		case 'visit':
-			if (!isNonEmpty(payload.path) || !isNonEmpty(payload.referrer) || !payload.device) break;
+			const visitPath = payload.path;
+			const visitReferrer = payload.referrer;
+			if (!isNonEmpty(visitPath) || !isNonEmpty(visitReferrer) || !payload.device) break;
 			row = {
 				kind: 'visit',
 				...base,
-				path: payload.path.trim(),
-				referrer: payload.referrer.trim(),
+				path: visitPath,
+				referrer: visitReferrer,
 				device: payload.device
 			};
 			break;
 		case 'post_view':
-			if (!isNonEmpty(payload.event) || !isNonEmpty(payload.path)) break;
+			const postEvent = payload.event;
+			const postPath = payload.path;
+			if (!isNonEmpty(postEvent) || !isNonEmpty(postPath)) break;
 			row = {
 				kind: 'post_view',
 				...base,
-				event: payload.event.trim(),
-				path: payload.path.trim()
+				event: postEvent,
+				path: postPath
 			};
 			break;
 		case 'name':
-			if (!isNonEmpty(payload.name)) break;
+			const readerName = payload.name;
+			if (!isNonEmpty(readerName)) break;
 			row = {
 				kind: 'name',
 				...base,
-				name: payload.name.trim().slice(0, 80)
+				name: readerName.slice(0, 80)
 			};
 			break;
 		case 'language':
@@ -71,13 +78,15 @@ export const POST: RequestHandler = async ({ request }) => {
 			};
 			break;
 		case 'scroll':
-			if (!isNonEmpty(payload.event) || !isNonEmpty(payload.path)) break;
+			const scrollEvent = payload.event;
+			const scrollPath = payload.path;
+			if (!isNonEmpty(scrollEvent) || !isNonEmpty(scrollPath)) break;
 			if (typeof payload.percent !== 'number' || Number.isNaN(payload.percent)) break;
 			row = {
 				kind: 'scroll',
 				...base,
-				event: payload.event.trim(),
-				path: payload.path.trim(),
+				event: scrollEvent,
+				path: scrollPath,
 				percent: Math.max(0, Math.min(100, Math.round(payload.percent)))
 			};
 			break;

@@ -161,8 +161,10 @@
 		const anchor = 140;
 		let inViewId: string | null = null;
 		let inViewTop = -Infinity;
-		let nextBelow: { id: string; top: number } | null = null;
-		let closestAbove: { id: string; top: number } | null = null;
+		let nextBelowId: string | null = null;
+		let nextBelowTop = Infinity;
+		let closestAboveId: string | null = null;
+		let closestAboveTop = -Infinity;
 
 		entryNodes.forEach((node, id) => {
 			const rect = node.getBoundingClientRect();
@@ -172,17 +174,19 @@
 					inViewId = id;
 				}
 			} else if (rect.top > anchor) {
-				if (!nextBelow || rect.top < nextBelow.top) {
-					nextBelow = { id, top: rect.top };
+				if (rect.top < nextBelowTop) {
+					nextBelowTop = rect.top;
+					nextBelowId = id;
 				}
 			} else if (rect.bottom < anchor) {
-				if (!closestAbove || rect.top > closestAbove.top) {
-					closestAbove = { id, top: rect.top };
+				if (rect.top > closestAboveTop) {
+					closestAboveTop = rect.top;
+					closestAboveId = id;
 				}
 			}
 		});
 
-		const nextActive = inViewId || nextBelow?.id || closestAbove?.id || null;
+		const nextActive = inViewId || nextBelowId || closestAboveId;
 		if (nextActive && nextActive !== activeEntryId) {
 			activeEntryId = nextActive;
 		}

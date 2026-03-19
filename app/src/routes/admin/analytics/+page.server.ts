@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import type { PageServerLoad } from './$types';
-import { readReaderDB } from '$lib/server/readerStore';
+import { readReaderDB, type ReaderRow } from '$lib/server/readerStore';
+import { buildSeo } from '$lib/seo';
 
 type PostSummary = {
 	slug: string;
@@ -64,6 +65,13 @@ const readPosts = (): PostSummary[] => {
 };
 
 const normalizeHost = (value: string) => value.replace(/^www\./, '');
+const isVisitRow = (row: ReaderRow): row is Extract<ReaderRow, { kind: 'visit' }> =>
+	row.kind === 'visit';
+const isPostViewRow = (row: ReaderRow): row is Extract<ReaderRow, { kind: 'post_view' }> =>
+	row.kind === 'post_view';
+const isNameRow = (row: ReaderRow): row is Extract<ReaderRow, { kind: 'name' }> => row.kind === 'name';
+const isLanguageRow = (row: ReaderRow): row is Extract<ReaderRow, { kind: 'language' }> =>
+	row.kind === 'language';
 
 const bucketReferrer = (referrer: string, siteOrigin: string) => {
 	const value = referrer.trim();
@@ -86,8 +94,16 @@ const bucketReferrer = (referrer: string, siteOrigin: string) => {
 const isPublicPath = (value: string) => !value.startsWith('/admin');
 
 export const load: PageServerLoad = async ({ locals, url }) => {
+	const seo = buildSeo({
+		title: 'Reader Analytics',
+		description: 'Private analytics dashboard for the blog.',
+		pathname: '/admin/analytics',
+		robots: 'noindex,nofollow,noarchive'
+	});
+
 	if (!locals.isAdmin) {
 		return {
+			seo,
 			loggedIn: false,
 			totals: null,
 			perPost: [],
@@ -106,10 +122,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const db = await readReaderDB();
 	const rows = db.rows ?? [];
 
-	const visitRows = rows.filter((row) => row.kind === 'visit' && isPublicPath(row.path));
-	const postRows = rows.filter((row) => row.kind === 'post_view');
-	const nameRows = rows.filter((row) => row.kind === 'name');
-	const languageRows = rows.filter((row) => row.kind === 'language');
+	const visitRows = rows.filter(isVisitRow).filter((row) => isPublicPath(row.path));
+	const postRows = rows.filter(isPostViewRow);
+	const nameRows = rows.filter(isNameRow);
+	const languageRows = rows.filter(isLanguageRow);
 
 	const uniqueReaders = new Set(visitRows.map((row) => row.anon_id));
 	const totalVisits = visitRows.length;
@@ -277,6 +293,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		.sort((a, b) => b.totalViews - a.totalViews);
 
 	return {
+		seo,
 		loggedIn: true,
 		totals: {
 			totalVisits,

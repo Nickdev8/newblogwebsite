@@ -25,10 +25,6 @@
   }
 </script>
 
-<svelte:head>
-  <title>404 — Page Not Found</title>
-</svelte:head>
-
 <main class="relative flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4"
       style="min-height: calc(100vh - 4rem);">
   <div class="text-center max-w-md w-full">

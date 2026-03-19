@@ -5,6 +5,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { COOKIE_NAME, computeSignature } from '$lib/server/session';
+import { buildSeo } from '$lib/seo';
 
 const POSTS_DIR = path.join(process.cwd(), 'src', 'posts');
 const SLUG_REGEX = /^[a-zA-Z0-9-_]+$/;
@@ -32,8 +33,16 @@ const extractLatestDate = (fileContent: string) => {
 };
 
 export const load: PageServerLoad = async ({ locals, url }) => {
+	const seo = buildSeo({
+		title: 'Markdown Admin',
+		description: 'Private admin interface for blog content.',
+		pathname: '/admin',
+		robots: 'noindex,nofollow,noarchive'
+	});
+
 	if (!locals.isAdmin) {
 		return {
+			seo,
 			loggedIn: false,
 			posts: [],
 			selectedSlug: null,
@@ -73,6 +82,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			: '';
 
 	return {
+		seo,
 		loggedIn: true,
 		posts,
 		selectedSlug: selectedSlug ?? null,

@@ -2,6 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { fetchContributionCalendar } from '$lib/server/githubContributions';
+import {
+	buildSeo,
+	createAboutPageSchema,
+	createBreadcrumbSchema,
+	createPersonSchema
+} from '$lib/seo';
 
 const CDN_BASE = 'https://cdn.nickesselman.nl';
 const toCdnPath = (src: string) => {
@@ -76,6 +82,35 @@ export async function load() {
 	const from = new Date(now);
 	from.setFullYear(from.getFullYear() - 2);
 	const contributions = await fetchContributionCalendar({ from: from.toISOString(), to: now.toISOString() });
+	const seoDescription =
+		'About Nick Esselman: builder, programmer, and photographer sharing projects, trips, and notes from the road.';
 
-	return { carouselImages, aboutMeImage, contributions };
+	return {
+		carouselImages,
+		aboutMeImage,
+		contributions,
+		seo: buildSeo({
+			title: 'About Nick',
+			description: seoDescription,
+			pathname: '/about',
+			ogType: 'profile',
+			image: '/mainme.webp',
+			imageAlt: 'Portrait of Nick Esselman',
+			structuredData: [
+				createAboutPageSchema({
+					description: seoDescription,
+					pathname: '/about',
+					image: '/mainme.webp'
+				}),
+				createPersonSchema({
+					description: seoDescription,
+					image: '/mainme.webp'
+				}),
+				createBreadcrumbSchema([
+					{ name: 'Home', pathname: '/' },
+					{ name: 'About', pathname: '/about' }
+				])
+			]
+		})
+	};
 }

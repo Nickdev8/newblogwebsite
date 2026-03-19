@@ -71,10 +71,6 @@
 	$: hoverPoint = hoverIndex >= 0 ? visitPointData[hoverIndex] : null;
 </script>
 
-<svelte:head>
-	<title>Reader Analytics</title>
-</svelte:head>
-
 {#if !data.loggedIn}
 	<main class="analytics auth">
 		<section class="panel">

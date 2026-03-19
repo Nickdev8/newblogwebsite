@@ -9,6 +9,7 @@
 	import { introModalOpen } from '$lib/stores/introModal';
 	import { lockBodyScroll, unlockBodyScroll } from '$lib/bodyScrollLock';
 	import { getOrCreateReaderId, trackReaderEvent } from '$lib/readerTracking';
+	import { SITE_AUTHOR, SITE_NAME, buildSeo, defaultSeo, serializeJsonLd, type SeoData } from '$lib/seo';
 	import '../app.css';
 
 	export let data;
@@ -19,6 +20,18 @@
 	let introName = '';
 	let introSubmitting = false;
 	let isAdminRoute = false;
+	let seo: SeoData = defaultSeo;
+
+	const getErrorSeo = (status: number, pathname: string) =>
+		buildSeo({
+			title: status === 404 ? 'Page Not Found' : 'Page Unavailable',
+			description:
+				status === 404
+					? 'The page you were looking for could not be found.'
+					: 'Something went wrong while loading this page.',
+			pathname,
+			robots: 'noindex,nofollow'
+		});
 
 	const openIntro = (force = false) => {
 		showIntro = true;
@@ -64,6 +77,10 @@
 	}
 
 	$: isAdminRoute = $page.url.pathname.startsWith('/admin');
+	$: seo =
+		$page.status >= 400
+			? getErrorSeo($page.status, $page.url.pathname)
+			: (($page.data as { seo?: SeoData })?.seo ?? defaultSeo);
 
 	onMount(() => {
 		getOrCreateReaderId();
@@ -80,14 +97,13 @@
 			introModalOpen.set(false);
 		});
 
-		const stopNavigate = afterNavigate(({ from, to }) => {
+		afterNavigate(({ from, to }) => {
 			if (!from || !to) return;
 			trackVisit(to.url.pathname, from.url.pathname);
 		});
 
 		return () => {
 			unsubscribe();
-			stopNavigate();
 			if (introLocked) {
 				unlockBodyScroll();
 			}
@@ -96,6 +112,39 @@
 </script>
 
 <svelte:head>
+	<title>{seo.title}</title>
+	<meta name="description" content={seo.description} />
+	<meta name="author" content={SITE_AUTHOR} />
+	<meta name="robots" content={seo.robots} />
+	<link rel="canonical" href={seo.canonical} />
+	<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+	<meta property="og:site_name" content={SITE_NAME} />
+	<meta property="og:type" content={seo.ogType} />
+	<meta property="og:url" content={seo.canonical} />
+	<meta property="og:title" content={seo.title} />
+	<meta property="og:description" content={seo.description} />
+	<meta property="og:image" content={seo.image} />
+	<meta property="og:image:alt" content={seo.imageAlt} />
+	<meta property="og:locale" content="en_US" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content={seo.title} />
+	<meta name="twitter:description" content={seo.description} />
+	<meta name="twitter:image" content={seo.image} />
+
+	{#if seo.publishedTime}
+		<meta property="article:published_time" content={seo.publishedTime} />
+	{/if}
+	{#if seo.modifiedTime}
+		<meta property="article:modified_time" content={seo.modifiedTime} />
+	{/if}
+	{#each seo.structuredData as item}
+		<script type="application/ld+json">
+			{@html serializeJsonLd(item)}
+		</script>
+	{/each}
+
 	{#if !isAdminRoute}
 		<script>
 			function googleTranslateElementInit() {

@@ -9,10 +9,6 @@
 	const saveError = form?.saveError;
 </script>
 
-<svelte:head>
-	<title>Markdown Admin</title>
-</svelte:head>
-
 {#if $navigating}
 	<main class="admin shell">
 		<aside class="sidebar">

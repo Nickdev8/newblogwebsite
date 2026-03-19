@@ -2,6 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import type { PageServerLoad } from './$types';
+import {
+	DEFAULT_OG_IMAGE_PATH,
+	buildSeo,
+	createCollectionPageSchema,
+	createItemListSchema,
+	createWebsiteSchema
+} from '$lib/seo';
 
 const CDN_BASE = 'https://cdn.nickesselman.nl';
 const toCdnPath = (src?: string) => {
@@ -38,15 +45,43 @@ export const load: PageServerLoad = async () => {
 			slug,
 			title: data.title || slug,
 			description: data.description || 'No description available.',
-			coverImage: toCdnPath(data.coverImage) || '/placeholder.png',
+			coverImage: toCdnPath(data.coverImage) || DEFAULT_OG_IMAGE_PATH,
 			live: data.live || false,
 			latestDate
 		};
 	});
 
 	events.sort((a, b) => (b.latestDate || 0) - (a.latestDate || 0));
+	const liveEvent = events.find((event) => event.live);
+	const seoDescription =
+		'Trip journals, build notes, and long-form travel stories from Nick Esselman.';
+	const seoImage = liveEvent?.coverImage || events[0]?.coverImage || DEFAULT_OG_IMAGE_PATH;
 
 	return {
-		events
+		events,
+		seo: buildSeo({
+			description: seoDescription,
+			pathname: '/',
+			image: seoImage,
+			imageAlt: liveEvent
+				? `Cover image for ${liveEvent.title}`
+				: "Cover image for Nick's Blogs & Adventures",
+			structuredData: [
+				createWebsiteSchema(),
+				createCollectionPageSchema({
+					name: 'Stories from the road',
+					description: seoDescription,
+					pathname: '/',
+					image: seoImage
+				}),
+				createItemListSchema(
+					events.slice(0, 12).map((event) => ({
+						name: event.title,
+						pathname: `/${event.slug}`,
+						description: event.description
+					}))
+				)
+			]
+		})
 	};
 };
