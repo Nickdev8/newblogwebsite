@@ -138,25 +138,25 @@ That part is on me.
 ## **Back at the Hotel**
 We returned as soon as we were asked to and spoke with the organizers. Because we had left the venue, we were told we could not join the Universal Studios outing and needed to stay in our room and remain reachable.
 
-What bothered me was not just the consequence, but how it was handled.
+What bothered me was not just the consequence, but how it felt in the moment.
 
 ## **Where the Frustration Set In**
-Even though Nasi and I were together the entire time, all the frustration and blame was directed at me. I was told I needed to change my behavior. I was told that if it were Graham’s decision alone, I would have been sent home that same day.
+Even though Nasi and I were together the entire time, it felt like most of the frustration landed on me. I was told I needed to be more careful about following the rules. I was told that if it were Graham’s decision alone, I would have been sent home that same day.
 
 That hit **hard.**
 
-It did not feel like a shared mistake anymore. It felt personal.
+In that moment it stopped feeling like a shared mistake and started feeling personal to me.
 
 ## **How It Felt**
-I could not shake the feeling that this was not just about today. That my past issues within Hack Club played a role in how quickly things escalated, and how easily the focus landed on me.
+I could not shake the feeling that this might not have been just about that day. At the time I wondered whether my past issues within Hack Club played a role in how quickly things escalated.
 
-I owned the mistake. But being singled out like that felt unfair.
+I owned the mistake. But in that moment, being the focus of the conversation felt unfair to me.
 
 ## **Reflection**
 Rules matter. I understand that.
 But so does fairness.
 
-This day left me angry, confused, and honestly pretty hurt.
+This day left me frustrated, confused, and honestly pretty hurt.
 Not because of Universal Studios.
 But because of how fast trust seemed to disappear.
 
@@ -170,7 +170,7 @@ date: "2025-12-14"
 We woke up to a DM from Graham saying he wanted to talk after breakfast. That already set the tone for the day.
 
 Downstairs, he explained that Zach had given Graham and Emma full authority to decide consequences after yesterday. 
-We were told that the only reason we were still here was because they did not want to leave our third teammate, Csaba, alone for the hackathon.
+We were told the situation had been taken very seriously, and that several factors played into the decision to let us stay for the hackathon.
 
 They added one more condition. If they did not hear from **Csaba** that we had been good teammates by the end, we would be sent home.
 
@@ -194,7 +194,7 @@ Of course, we exited through the gift shop. And of course, we bought way too muc
 ## **Back and Confused**
 After heading back with Hack Club, we found a place to eat near the hotel. After that, we were told we were allowed to walk back on our own.
 
-That part felt strange. Earlier we were not allowed to leave the hotel for fifteen minutes with an Uber in the middle of the day. Now we were allowed to walk back alone at night.
+That part felt a bit confusing at the time. Earlier we were not allowed to leave the hotel briefly during the day, yet now we were allowed to walk back alone at night.
 
 It did **not** make much sense.
 
