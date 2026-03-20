@@ -400,7 +400,6 @@ Lots of small gift shops, souvenirs, and pure tourist chaos.
 Yes, we bought **MAGA hats**.  
 Purely as a joke. But honestly, I kind of love them.
 
-![](/blogimages/moonshot/20decbayideshops.jpg)
 ## **Chili’s Mission**
 There was a Chili’s nearby, and since a friend told us to go to one together, we did.
 
