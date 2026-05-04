@@ -27,3 +27,4 @@ buildcommandlist.txt
 */*.png
 */*.jpg
 */*.jpeg
+/data/
