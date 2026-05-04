@@ -5,7 +5,7 @@ coverImage: /blogimages/moonshot/cover.png
 warning: "This post is Done"
 warning_type: success
 warning_dismissible: false
-sort_order: 'desc'
+sort_order: 'asc'
 timezone: America/New_York
 timezone_label: Florida
 ---
