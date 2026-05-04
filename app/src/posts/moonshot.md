@@ -1,7 +1,7 @@
 ---
 title: "Florida"
 description: "A chaotic, unforgettable trip to Florida for Hack Club Moonshot. From Orlando and Kennedy Space Center to Miami, New York, and way too many strange little adventures along the way."
-coverImage: /blogimages/moonshot/nickontargetsroof.JPG
+coverImage: /blogimages/moonshot/cover.png
 warning: "This post is Done"
 warning_type: success
 warning_dismissible: false
@@ -14,7 +14,7 @@ title: "The Start"
 date: "2025-12-9"
 ---
 
-![DiscoPrullenbak](/blogimages/moonshot/nasaaiteenkoe.webp)
+![DiscoPrullenbak](nas aaide de koe)
 
 ## **What is Moonshot**
 Moonshot is another HackClub event, where you make a project with 75+ hours.  
@@ -93,7 +93,8 @@ Honestly, it went by faster than expected.
 
 ## **We Landed**
 After landing, we looked around for the adult picking us up. That was **Jared**. We talked for a bit until **Moukal** arrived, and then the four of us took an Uber to the hotel.
-![](/blogimages/moonshot/13decjarred.JPG)
+
+![](selfie met nas en jarrod)
 
 ## **Food Before Anything Else**
 First stop after arriving was the dining hall.
@@ -231,8 +232,7 @@ Around 5am, we arrived back at the Cambria Hotel in Orlando.
 
 *Exhausted.* But **glad we went.**
 
-![](/blogimages/moonshot/15decforthespaceshuttle.jpg)
-![](/blogimages/moonshot/maga.jpg)
+![](/blogimages/moonshot/ikbijraket.png)
 
 ---
 title: "Orlando to Miami: Closing One Chapter"
@@ -270,7 +270,8 @@ Check-in took a while, but once I finally got into my room, I laid down and inst
 Orlando was officially over.
 Next up: **Miami. Alone this time.**
 
-![](/blogimages/moonshot/lookingatrocketlaunche.jpg)
+![](/blogimages/moonshot/rocketlaunch.png)
+
 
 ---
 title: "Miami Day 1: The Start of Something Amazing"
@@ -378,7 +379,7 @@ After a long day of walking and exploring, I headed back to the hotel and watche
 
 A calm ending to a full day.
 
-![](/blogimages/moonshot/littlehavvana.jpg)
+![](/blogimages/moonshot/littlehavaana.png)
 
 ---
 title: "Miami Day 4: Beach, Food, and Music"
@@ -398,7 +399,7 @@ Lots of small gift shops, souvenirs, and pure tourist chaos.
 Yes, I bought a **MAGA hat**.  
 Purely as a joke. And to show my friends that its real. I dont want to talk politcs in my blog
 
-![](/blogimages/moonshot/20decbayideshops.jpg)
+![](/blogimages/moonshot/shoproof.png)
 
 ## **Chili’s Mission**
 There was a Chili’s nearby, and since someone had told me I should try it while in America, I did.
@@ -408,7 +409,7 @@ Chicken, mac and cheese, mozzarella sticks. Everything.
 
 I did not finish it.
 
-![](/blogimages/moonshot/20deceatingathebayside.jpg)
+![](/blogimages/moonshot/20deceatingathebayside)
 
 ## **Music and Chill**
 After eating, I found a spot with music playing.  
@@ -430,19 +431,21 @@ I found one, but once I saw the prices, that idea ended very quickly.
 The cheapest option was around **350 euros**.
 Hard no.
 
-![](/blogimages/moonshot/21decthegunrange.JPG)
+![](/blogimages/moonshot/walkingonrails.png)
 
-## **Walmart Adventure**
-Instead, I went to a nearby **Walmart**.  
+On the way there we took an sidequest to walk over what we tought were unused rails. but after some time we quickly relized that they were infact not out of use. as we saw a train pass on the other track.
+
+## **Store Adventure**
+Instead, I went to a nearby **Walmart and Home Depot**.  
 Those places are massive.
+![](/blogimages/moonshot/homedepot.png)
 
-They sell everything. Toys, clothes, food, electronics.  
+They sell everything. Toys, clothes, food, electronics. And even more guns!
 And the chips section alone was insane. Entire aisles full of absurdly large bags from every brand imaginable.
 
 It was overwhelming, but also kind of fun.
 
 A strange, very American way to end the day.
-
 ---
 title: "Miami Day 6: One More Beach"
 date: "2025-12-22T12:00:00"
@@ -549,7 +552,7 @@ From the airport it was straight into movement. Trains, transfers, walking, foll
 ## **Accidental Landmarks**
 As soon as I exited the metro, I accidentally walked straight into **Rockefeller Center**.
 
-![](/blogimages/moonshot/24decrockefeller.jpg)
+![](/blogimages/moonshot/newyork.png)
 
 Crowds everywhere. People stacked on top of each other. Lights, noise, cameras, the Christmas tree. Impressive, yes. But overwhelming. Way too much as a first impression.
 
@@ -628,8 +631,6 @@ date: "2025-12-26"
 ---
 
 ## **The End of This Chapter**
-![](/blogimages/moonshot/24decsantabeforeflight.jpg)
-
 This trip has been the best vacation I have ever had.
 
 It was full of laughter, stress, strange moments, beautiful places, and memories I will not forget. I saw incredible things. I had calm days on the beach. I had chaotic nights in New York. I had moments where everything felt easy, and moments where I just wanted to sit down somewhere warm and disappear for a bit.

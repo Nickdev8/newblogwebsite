@@ -33,3 +33,4 @@ app/*/*.svg
 .env
 .env.*
 !.env.example
+blogimages/*/*.*
