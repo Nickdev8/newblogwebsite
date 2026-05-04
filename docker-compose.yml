@@ -9,9 +9,10 @@ services:
     env_file:
       - ./.env
       - ./.env.prod
+    network_mode: host
     environment:
       NODE_ENV: production
-      PORT: "3000"
+      PORT: "3011"
       HOST: "0.0.0.0"
       GITHUB_OWNER: "${GITHUB_OWNER}"
       GITHUB_TOKEN: "${GITHUB_TOKEN}"
@@ -22,8 +23,6 @@ services:
       SMTP_PASSWORD: "${SMTP_PASSWORD}"
       EMAIL_FROM: "${EMAIL_FROM}"
       EMAIL_TO: "${EMAIL_TO}"
-    ports:
-      - "127.0.0.1:3011:3000"
     working_dir: /app
     volumes:
       - ./app/src/posts:/app/src/posts
