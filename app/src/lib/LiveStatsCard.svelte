@@ -65,7 +65,10 @@
 	$: stepsTodayLabel = formatDailyNumber(steps);
 	$: updatedLabel = formatAgo(lastUpdated);
 	$: nextUpdateLabel = formatUntil(nextRefresh);
-	$: distanceLabel = distanceKm ? `${formatNumber(distanceKm, 1)} km` : 'No data today';
+	$: distanceLabel =
+		distanceKm === null || distanceKm === undefined || !Number.isFinite(distanceKm)
+			? 'No data today'
+			: `${formatNumber(distanceKm, 1)} km`;
 	$: activeMinutesLabel =
 		activeMinutes === null || activeMinutes === undefined || !Number.isFinite(activeMinutes)
 			? 'Just sat today'
@@ -92,7 +95,10 @@
 		floors === null || floors === undefined
 			? 'No data today'
 			: `${numberFormatter.format(floors)} floors`;
-	$: stepsValueLabel = distanceKm ? `${stepsTodayLabel} · ${distanceLabel}` : stepsTodayLabel;
+	$: stepsValueLabel =
+		distanceKm === null || distanceKm === undefined || !Number.isFinite(distanceKm)
+			? stepsTodayLabel
+			: `${stepsTodayLabel} · ${distanceLabel}`;
 	$: authWarning = errorMessage || null;
 	let stats = [];
 	$: stats = [

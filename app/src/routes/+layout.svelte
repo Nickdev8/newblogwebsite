@@ -9,6 +9,7 @@
 	import { introModalOpen } from '$lib/stores/introModal';
 	import { lockBodyScroll, unlockBodyScroll } from '$lib/bodyScrollLock';
 	import { getOrCreateReaderId, trackReaderEvent } from '$lib/readerTracking';
+	import { EMPTY_LIVE_STATS, type LiveStatsPayload } from '$lib/liveStats';
 	import { SITE_AUTHOR, SITE_NAME, buildSeo, defaultSeo, serializeJsonLd, type SeoData } from '$lib/seo';
 	import '../app.css';
 
@@ -21,6 +22,54 @@
 	let introSubmitting = false;
 	let isAdminRoute = false;
 	let seo: SeoData = defaultSeo;
+	let liveStats: LiveStatsPayload = { ...EMPTY_LIVE_STATS };
+
+	const hasLiveStatsData = (stats: LiveStatsPayload) =>
+		[
+			stats.steps,
+			stats.distanceKm,
+			stats.activeMinutes,
+			stats.caloriesOut,
+			stats.restingHeartRate,
+			stats.sleepDurationMinutes,
+			stats.sleepScore,
+			stats.heartRateBpm,
+			stats.stepsWeek,
+			stats.floors,
+			stats.lastUpdated,
+			stats.nextRefresh
+		].some((value) => value !== null && value !== undefined);
+
+	const syncLiveStatsFromData = (source: Partial<LiveStatsPayload> | null | undefined) => {
+		liveStats = {
+			...EMPTY_LIVE_STATS,
+			...source
+		};
+	};
+
+	const refreshLiveStats = async () => {
+		try {
+			const response = await fetch('/api/live-stats', {
+				headers: {
+					accept: 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				return;
+			}
+
+			const nextStats = (await response.json()) as LiveStatsPayload;
+			if (hasLiveStatsData(nextStats) || nextStats.errorMessage) {
+				liveStats = {
+					...EMPTY_LIVE_STATS,
+					...nextStats
+				};
+			}
+		} catch {
+			// Keep the server-rendered fallback if the client refresh fails.
+		}
+	};
 
 	const getErrorSeo = (status: number, pathname: string) =>
 		buildSeo({
@@ -81,6 +130,7 @@
 		$page.status >= 400
 			? getErrorSeo($page.status, $page.url.pathname)
 			: (($page.data as { seo?: SeoData })?.seo ?? defaultSeo);
+	$: syncLiveStatsFromData(data);
 
 	onMount(() => {
 		getOrCreateReaderId();
@@ -90,6 +140,7 @@
 		}
 
 		trackVisit(window.location.pathname, document.referrer);
+		void refreshLiveStats();
 
 		const unsubscribe = introModalOpen.subscribe((value) => {
 			if (!value) return;
@@ -179,19 +230,19 @@
 	{/if}
 	{#if !isAdminRoute}
 		<LiveStatsCard
-			steps={data?.steps ?? null}
-			lastUpdated={data?.lastUpdated ?? null}
-			nextRefresh={data?.nextRefresh ?? null}
-			distanceKm={data?.distanceKm ?? null}
-			activeMinutes={data?.activeMinutes ?? null}
-			caloriesOut={data?.caloriesOut ?? null}
-			restingHeartRate={data?.restingHeartRate ?? null}
-			sleepDurationMinutes={data?.sleepDurationMinutes ?? null}
-			sleepScore={data?.sleepScore ?? null}
-			heartRateBpm={data?.heartRateBpm ?? null}
-			stepsWeek={data?.stepsWeek ?? null}
-			floors={data?.floors ?? null}
-			errorMessage={data?.errorMessage ?? null}
+			steps={liveStats.steps}
+			lastUpdated={liveStats.lastUpdated}
+			nextRefresh={liveStats.nextRefresh}
+			distanceKm={liveStats.distanceKm}
+			activeMinutes={liveStats.activeMinutes}
+			caloriesOut={liveStats.caloriesOut}
+			restingHeartRate={liveStats.restingHeartRate}
+			sleepDurationMinutes={liveStats.sleepDurationMinutes}
+			sleepScore={liveStats.sleepScore}
+			heartRateBpm={liveStats.heartRateBpm}
+			stepsWeek={liveStats.stepsWeek}
+			floors={liveStats.floors}
+			errorMessage={liveStats.errorMessage}
 		/>
 	{/if}
 </div>

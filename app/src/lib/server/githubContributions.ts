@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+import path from 'path';
 import { env } from '$env/dynamic/private';
 
 export type ContributionDay = {
@@ -15,14 +17,19 @@ export type ContributionCalendar = {
 	totalContributions: number;
 };
 
-const owner = env.GITHUB_OWNER || env.VITE_GITHUB_OWNER;
-const token = env.GITHUB_TOKEN || env.VITE_GITHUB_TOKEN;
 const endpoint = 'https://api.github.com/graphql';
 const fallbackEndpoint = 'https://github-contributions-api.jogruber.de/v4';
+const CONTRIBUTIONS_CACHE_FILE =
+	process.env.CONTRIBUTIONS_CACHE_FILE || path.resolve('data/github-contributions-cache.json');
+const REQUEST_TIMEOUT_MS = 3000;
 
 const levelColors = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
 
+const getOwner = () => env.GITHUB_OWNER || env.VITE_GITHUB_OWNER;
+const getToken = () => env.GITHUB_TOKEN || env.VITE_GITHUB_TOKEN;
+
 const buildHeaders = () => {
+	const token = getToken();
 	if (!token) return null;
 	return {
 		Authorization: `Bearer ${token}`,
@@ -63,8 +70,65 @@ const buildWeeksFromDays = (days: ContributionDay[]): ContributionWeek[] => {
 
 const fallbackCache = new Map<string, { data: ContributionCalendar; timestamp: number }>();
 const CACHE_DURATION = 1000 * 60 * 30;
+const STALE_CACHE_DURATION = 1000 * 60 * 60 * 24;
+
+type CacheEntry = { data: ContributionCalendar; timestamp: number };
+type ContributionCacheFile = Record<string, CacheEntry>;
+
+const readFileCache = async (): Promise<ContributionCacheFile> => {
+	try {
+		return JSON.parse(await fs.readFile(CONTRIBUTIONS_CACHE_FILE, 'utf8'));
+	} catch {
+		return {};
+	}
+};
+
+const writeFileCacheEntry = async (cacheKey: string, entry: CacheEntry) => {
+	try {
+		const existing = await readFileCache();
+		existing[cacheKey] = entry;
+		await fs.mkdir(path.dirname(CONTRIBUTIONS_CACHE_FILE), { recursive: true });
+		const tmp = `${CONTRIBUTIONS_CACHE_FILE}.tmp`;
+		await fs.writeFile(tmp, JSON.stringify(existing), 'utf8');
+		await fs.rename(tmp, CONTRIBUTIONS_CACHE_FILE);
+	} catch (error) {
+		console.error('Failed to persist contribution cache', error);
+	}
+};
+
+const readStaleCacheEntry = async (cacheKey: string): Promise<ContributionCalendar | null> => {
+	const entry = (await readFileCache())[cacheKey];
+	if (!entry) return null;
+	if (Date.now() - entry.timestamp > STALE_CACHE_DURATION) return null;
+	return entry.data;
+};
+
+const storeCacheEntry = async (
+	cache: Map<string, CacheEntry>,
+	cacheKey: string,
+	data: ContributionCalendar
+) => {
+	const entry = { data, timestamp: Date.now() };
+	cache.set(cacheKey, entry);
+	await writeFileCacheEntry(cacheKey, entry);
+};
+
+const fetchWithTimeout = async (input: string, init?: RequestInit) => {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+	try {
+		return await fetch(input, {
+			...init,
+			signal: controller.signal
+		});
+	} finally {
+		clearTimeout(timeout);
+	}
+};
 
 const fetchFallbackCalendar = async ({ from, to }: { from?: string; to?: string }): Promise<ContributionCalendar | null> => {
+	const owner = getOwner();
 	if (!owner || !from || !to) return null;
 	const cacheKey = `fallback_${from}_${to}`;
 	const cached = fallbackCache.get(cacheKey);
@@ -79,12 +143,16 @@ const fetchFallbackCalendar = async ({ from, to }: { from?: string; to?: string 
 	const endYear = end.getFullYear();
 	const requests = [];
 	for (let year = startYear; year <= endYear; year++) {
-		requests.push(fetch(`${fallbackEndpoint}/${owner}?y=${year}`));
+		requests.push(fetchWithTimeout(`${fallbackEndpoint}/${owner}?y=${year}`));
 	}
 
 	const contributions: ContributionDay[] = [];
-	const responses = await Promise.all(requests);
-	for (const response of responses) {
+	const responses = await Promise.allSettled(requests);
+	for (const result of responses) {
+		if (result.status !== 'fulfilled') {
+			continue;
+		}
+		const response = result.value;
 		if (!response.ok) continue;
 		const json = await response.json();
 		const days = Array.isArray(json.contributions) ? json.contributions : [];
@@ -107,13 +175,15 @@ const fetchFallbackCalendar = async ({ from, to }: { from?: string; to?: string 
 		weeks: buildWeeksFromDays(contributions),
 		totalContributions: total
 	};
-	fallbackCache.set(cacheKey, { data: calendar, timestamp: Date.now() });
+	await storeCacheEntry(fallbackCache, cacheKey, calendar);
 	return calendar;
 };
 
 const graphCache = new Map<string, { data: ContributionCalendar; timestamp: number }>();
 
 const fetchGraphCalendar = async ({ from, to }: { from?: string; to?: string }): Promise<ContributionCalendar | null> => {
+	const owner = getOwner();
+	const token = getToken();
 	if (!owner || !token) return null;
 	const headers = buildHeaders();
 	if (!headers) return null;
@@ -151,22 +221,34 @@ const fetchGraphCalendar = async ({ from, to }: { from?: string; to?: string }):
 		}
 	});
 
-	const response = await fetch(endpoint, { method: 'POST', headers, body });
-	if (!response.ok) {
-		console.error('Failed to fetch contribution calendar', response.status, await response.text());
+	try {
+		const response = await fetchWithTimeout(endpoint, { method: 'POST', headers, body });
+		if (!response.ok) {
+			console.error('Failed to fetch contribution calendar', response.status, await response.text());
+			return null;
+		}
+		const json = await response.json();
+		const calendar = json?.data?.user?.contributionsCollection?.contributionCalendar;
+		const normalized = normalizeCalendar(calendar);
+		if (normalized) {
+			await storeCacheEntry(graphCache, cacheKey, normalized);
+		}
+		return normalized;
+	} catch (error) {
+		console.error('Failed to fetch contribution calendar', error);
 		return null;
 	}
-	const json = await response.json();
-	const calendar = json?.data?.user?.contributionsCollection?.contributionCalendar;
-	const normalized = normalizeCalendar(calendar);
-	if (normalized) {
-		graphCache.set(cacheKey, { data: normalized, timestamp: Date.now() });
-	}
-	return normalized;
 };
 
 export async function fetchContributionCalendar(range: { from?: string; to?: string }): Promise<ContributionCalendar | null> {
+	const graphCacheKey = `graph_${range.from}_${range.to}`;
+	const fallbackCacheKey = `fallback_${range.from}_${range.to}`;
+
 	const graph = await fetchGraphCalendar(range);
 	if (graph) return graph;
-	return fetchFallbackCalendar(range);
+
+	const fallback = await fetchFallbackCalendar(range);
+	if (fallback) return fallback;
+
+	return (await readStaleCacheEntry(graphCacheKey)) || (await readStaleCacheEntry(fallbackCacheKey));
 }
